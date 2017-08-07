@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <ImageButton
+        android:id="@+id/open_navimenu"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@mipmap/ic_meue"
+        android:layout_margin="8dp"
+        android:background="#00ffffff"
+        />
+
+    <EditText
+        android:layout_toRightOf="@+id/open_navimenu"
+        android:id="@+id/et_search_depart"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edit_text_border"
+        android:layout_margin="8dp"
+        android:hint="출발" />
+
+
+    <EditText
+        android:layout_toRightOf="@id/et_search_depart"
+        android:id="@+id/et_search_arrive"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/edit_text_border"
+        android:hint="도착" />
+
+    <ImageButton
+        android:src="@drawable/ic_search_black_24dp"
+        android:layout_toRightOf="@+id/et_search_arrive"
+        android:id="@+id/btn_driver_search"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:background="#00ffffff"
+        />
+
+    <ImageButton
+        android:src="@mipmap/ic_launcher_setting"
+        android:layout_toRightOf="@+id/btn_driver_search"
+        android:id="@+id/btn_driver_search_setting"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:scaleType="centerCrop"
+        android:background="#00ffffff"
+        />
+</RelativeLayout>
+    <ListView
+        android:id="@+id/driver_search_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+
+
+</LinearLayout>

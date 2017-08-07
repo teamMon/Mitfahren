@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    tools:context="com.example.jpar4.mitfahren.activity.LoginActivity">
+    <TextView
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
+        android:id="@+id/tv_logo"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="TaTaTa"
+        android:textSize="70sp"
+        android:gravity="center"
+        />
+  <!--  <TextView
+        android:layout_below="@+id/tv_logo"
+        android:id="@+id/tv_logo2"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="25dp"
+        android:text="미트파렌"
+        android:gravity="right"
+        android:textSize="30sp"
+
+        />-->
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/id_layout"
+        android:layout_below="@+id/tv_logo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="#ffffff"
+        >
+
+        <EditText
+            android:id="@+id/et_input_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:layout_margin="16dp"
+            android:hint="User Id" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/password_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/id_layout"
+        android:textColorHint="#ffffff"
+        >
+
+        <EditText
+            android:id="@+id/et_input_pw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="Password"
+            android:textColor="@android:color/white"
+            android:inputType="textPassword" />
+    </android.support.design.widget.TextInputLayout>
+    <View
+        android:id="@+id/v_line1"
+        android:layout_below="@+id/password_layout"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@color/colorAccent4"
+        />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/v_line1"
+        android:background="@color/colorPrimary"
+        android:onClick="submit"
+        android:text="Login"
+        android:textStyle="bold"
+        android:textColor="@android:color/white" />
+    <View
+        android:id="@+id/v_line2"
+        android:layout_below="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@color/colorAccent4"
+        />
+    <Button
+        android:id="@+id/btn_join"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/v_line2"
+        android:background="@color/colorPrimary"
+        android:onClick="submit"
+        android:text="Join"
+        android:textStyle="bold"
+        android:textColor="@android:color/white" />
+    <View
+        android:layout_below="@+id/btn_join"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@color/colorAccent4"
+        />
+
+</RelativeLayout>

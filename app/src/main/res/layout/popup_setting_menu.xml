@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:orientation="vertical"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    android:background="#FFFFFF"
+    android:layout_centerInParent="true">
+
+    <LinearLayout
+        android:orientation="vertical" android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/textView_search_setting_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="검색설정" />
+        <Spinner
+            android:id="@+id/spinner_search_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/array_driver_search_option"
+            android:spinnerMode="dialog"
+            />
+
+        <TextView
+            android:id="@+id/textView_search_option_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="검색조건" />
+
+        <TextView
+            android:id="@+id/textView_title_gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="성별" />
+
+        <RadioButton
+            android:id="@+id/radioButton_both"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="남, 여" />
+
+        <RadioButton
+            android:id="@+id/radioButton_male"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="남자만" />
+
+        <RadioButton
+            android:id="@+id/radioButton_female"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="여자만" />
+
+    </LinearLayout>
+</RelativeLayout>

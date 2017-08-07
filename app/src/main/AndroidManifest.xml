@@ -5,17 +5,35 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="TaTaTa"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+
+        <!-- 구글 맵 -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDuDP5V5zmcpIo9emE8jfvsamPx_3Nmv2c" />
+
+        <!-- <activity android:name=".MainActivity"> -->
+        <!-- <activity android:name=".activity.LoginActivity"> -->
+        <!-- <activity android:name=".activity.SearchActivity"> -->
+        <!-- <activity android:name=".activity.TestActivity"> -->
+        <activity android:name=".activity.SearchActivity">
+
+            <!-- <activity android:name=".activity.CarpoolPageActivity"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.MainActivity" />
+        <activity android:name=".activity.JoinActivity" />
+        <!-- <activity android:name=".activity.SearchActivity"></activity> -->
+        <!-- <activity android:name=".activity.TestActivity"></activity> -->
+        <activity android:name=".activity.CarpoolPageActivity" />
+        <activity android:name=".activity.UserPageActivity"></activity>
     </application>
 
 </manifest>
