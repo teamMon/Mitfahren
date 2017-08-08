@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -41,11 +42,44 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:hint="User Name" />
+            android:hint="이름" />
     </android.support.design.widget.TextInputLayout>
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/join_id_layout"
+        android:id="@+id/join_age_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="@color/colorPrimary"
         android:layout_below="@+id/join_name_layout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <EditText
+
+            android:id="@+id/join_et_input_age"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="주민등록번호 앞 6자리와 뒤 1자리를 입력해 주세요" />
+    </android.support.design.widget.TextInputLayout>
+    <TextView
+        android:layout_below="@+id/join_age_layout"
+        android:id="@+id/tv_join_noti1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="gravity"
+        android:text=" ※ 이름과 주민등록번호 앞 7자리는 추후 사용자 간의 신분을 확인하는데 이용되므로 신중하게 입력하시기 바랍니다."
+        />
+    <TextView
+        android:layout_below="@+id/tv_join_noti1"
+        android:id="@+id/tv_join_noti2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="gravity"
+        android:text=" ※ 이름과 주민등록번호 앞 7자리는 추후 변경할 수 없음을 미리 알려드립니다."
+        />
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/join_id_layout"
+        android:layout_below="@+id/tv_join_noti2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColorHint="@color/colorPrimary"
@@ -56,7 +90,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:hint="User Email" />
+            android:hint="이메일" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -72,7 +106,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:hint="Password"
+            android:hint="비밀번호"
             android:inputType="textPassword" />
     </android.support.design.widget.TextInputLayout>
     <android.support.design.widget.TextInputLayout
@@ -88,7 +122,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:hint="Password Confirm"
+            android:hint="비밀번호 확인"
             android:inputType="textPassword" />
     </android.support.design.widget.TextInputLayout>
     <Button
@@ -98,8 +132,9 @@
         android:layout_below="@id/join_passwordcheck_layout"
         android:background="@color/colorPrimary"
         android:onClick="onConfirm"
-        android:text="Confirm"
+        android:text="가입완료"
         android:textStyle="bold"
         android:textColor="@android:color/white" />
 
 </RelativeLayout>
+</ScrollView>

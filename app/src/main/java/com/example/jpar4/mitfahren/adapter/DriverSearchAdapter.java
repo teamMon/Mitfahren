@@ -9,10 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.activity.CarpoolPageActivity;
+import com.example.jpar4.mitfahren.activity.UserPageActivity;
 import com.example.jpar4.mitfahren.model.Item_driver_info;
 
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ import java.util.ArrayList;
  * Created by jpar4 on 2017-08-07.
  */
 
-public class DriverSearchAdapter extends BaseAdapter {
+public class DriverSearchAdapter extends BaseAdapter{
     Context context;
     LayoutInflater inflater;
     ArrayList<Item_driver_info> arr_Item_driver_info;
@@ -100,8 +102,15 @@ public class DriverSearchAdapter extends BaseAdapter {
             }
         });
 
+        ImageView iv_driver_pic = (ImageView)convertView.findViewById(R.id.iv_driver_pic);
+        iv_driver_pic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, UserPageActivity.class);
+                context.startActivity(intent);
+            }
+        });
+
         return convertView;
     }
-
-
 }

@@ -1,9 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.jpar4.mitfahren.activity.UserPageActivity">
+    android:layout_height="wrap_content"
+    >
+    <LinearLayout
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
 
-</android.support.constraint.ConstraintLayout>
+                android:layout_centerVertical="true"
+                android:id="@+id/iv_driver_pic"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@mipmap/ic_launcher_round"
+                android:scaleType="centerCrop"/>
+            <TextView
+                android:id="@+id/tv_driver_name"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:textColor="#6200ea"
+                android:text="홍길동"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/iv_driver_pic"
+
+                />
+            <TextView
+                android:id="@+id/tv_driver_email"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="8dp"
+                android:layout_toRightOf="@+id/tv_driver_name"
+                android:layout_alignTop="@+id/tv_driver_name"
+                android:textColor="#6200ea"
+                android:text="gildongHong@naver.com"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:id="@+id/tv_age_label"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@+id/iv_driver_pic"
+                android:layout_below="@+id/tv_driver_name"
+                android:textColor="#6200ea"
+                android:text="나이"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:id="@+id/tv_driver_age"
+                android:layout_alignTop="@+id/tv_age_label"
+                android:layout_toRightOf="@+id/tv_age_label"
+                android:layout_marginLeft="8dp"
+                android:text="27세"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                />
+            <TextView
+                android:id="@+id/tv_gender_label"
+                android:layout_marginLeft="8dp"
+                android:layout_alignTop="@+id/tv_driver_age"
+                android:layout_toRightOf="@+id/tv_driver_age"
+                android:textColor="#6200ea"
+                android:text="성별"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_marginLeft="8dp"
+                android:text="남자"
+                android:id="@+id/tv_driver_gender"
+                android:layout_alignTop="@+id/tv_gender_label"
+                android:layout_toRightOf="@+id/tv_gender_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                />
+            <TextView
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/iv_driver_pic"
+                android:layout_below="@+id/tv_age_label"
+                android:textColor="#6200ea"
+                android:text="운전자 등록 횟수"
+                android:id="@+id/tv_exp_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_alignTop="@+id/tv_exp_label"
+                android:layout_toRightOf="@+id/tv_exp_label"
+                android:layout_marginLeft="8dp"
+                android:text="10회"
+                android:id="@+id/tv_driver_exp_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                />
+            <TextView
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/iv_driver_pic"
+                android:layout_below="@+id/tv_exp_label"
+                android:textColor="#6200ea"
+                android:text="총 탑승인 수"
+                android:id="@+id/tv_driver_total_carry_people_num_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_alignTop="@+id/tv_driver_total_carry_people_num_label"
+                android:layout_toRightOf="@+id/tv_driver_total_carry_people_num_label"
+                android:layout_marginLeft="8dp"
+                android:text="20 명"
+                android:id="@+id/tv_driver_total_carry_people_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/iv_driver_pic"
+                android:layout_below="@+id/tv_driver_total_carry_people_num_label"
+                android:textColor="#6200ea"
+                android:text="총 탑승 횟수"
+                android:id="@+id/tv_user_total_ride_num_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_alignTop="@+id/tv_user_total_ride_num_label"
+                android:layout_toRightOf="@+id/tv_user_total_ride_num_label"
+                android:layout_marginLeft="8dp"
+                android:text="5 회"
+                android:id="@+id/tv_user_total_ride_people_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </RelativeLayout>
+
+        <RatingBar
+            android:layout_marginLeft="8dp"
+            android:id="@+id/user_ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style = "?android:attr/ratingBarStyleSmall"
+            android:numStars = "5"
+            android:rating   = "4"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:background="#abf5aa"
+            android:text="사용자 평가 댓글"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            />
+
+
+    </LinearLayout>
+</ScrollView>
