@@ -1,5 +1,6 @@
 package com.example.jpar4.mitfahren.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -23,6 +25,12 @@ import android.widget.Spinner;
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.adapter.DriverSearchAdapter;
 import com.example.jpar4.mitfahren.model.Item_driver_info;
+import com.example.jpar4.mitfahren.test_activity.DaumTestActivity;
+import com.example.jpar4.mitfahren.test_activity.GoogleMapTestActivity;
+import com.example.jpar4.mitfahren.test_activity.MapTestActivity;
+import com.example.jpar4.mitfahren.test_activity.PlaceAutoActivity;
+import com.example.jpar4.mitfahren.test_activity.TestHttpActivity;
+import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
 
 import java.util.ArrayList;
 
@@ -31,13 +39,31 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
     ListView driver_info_list;
     ArrayList<Item_driver_info> arr_Item_driver_info;
     ImageButton button_driver_search_setting;
-    ImageButton open_navimenu;
+    EditText et_search_depart;
+
+    /*주소받아오기 위한 REQUESTCODE*/
+    private static final int GET_ADDRESS_REQUEST_CODE = 3001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /*setContentView(R.layout.activity_search);*/
         setContentView(R.layout.activity_drawer);
+
+        /*에딧트 텍스트 누르면 주소 검색 액티비티로 넘어갈 수 있게 구성*/
+        et_search_depart = (EditText) findViewById(R.id.et_search_depart);
+        et_search_depart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SearchActivity.this, TestSearchActivity.class);
+                //startActivity(intent);
+
+                startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
+            }
+        });
+         /*에딧트 텍스트 누르면 주소 검색 액티비티로 넘어갈 수 있게 구성*/
+
+
 
         /*네비 드로워*/
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -55,13 +81,7 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         button_driver_search_setting = (ImageButton) findViewById(R.id.btn_driver_search_setting);
         button_driver_search_setting.setOnClickListener(onClickListener);
 
-        open_navimenu = (ImageButton) findViewById(R.id.open_navimenu);
-        open_navimenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-            }
-        });
 
         Spinner spinner = (Spinner)findViewById(R.id.spinner_search_option);
 
@@ -165,7 +185,8 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.nav_feedback) {
 
         } else if (id == R.id.nav_add_driver) {
-
+            Intent intent = new Intent(SearchActivity.this, AddDriverActivity.class);
+            startActivity(intent);
         }else if (id == R.id.nav_see_friend) {
 
         } else if (id == R.id.nav_talk) {
@@ -182,6 +203,32 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         }else if (id == R.id.nav_join) {
             Intent intent = new Intent(SearchActivity.this, JoinActivity.class);
             startActivity(intent);
+        }else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
+            Intent intent = new Intent(SearchActivity.this, MapTestActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.nav_testmap2) {//다음 주소 검색
+            Intent intent = new Intent(SearchActivity.this, TestSearchActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.maptest1) {//다음 맵뷰
+            Intent intent = new Intent(SearchActivity.this, DaumTestActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.maptest2) {//구글 맵placeAPI
+            Intent intent = new Intent(SearchActivity.this, PlaceAutoActivity.class); //자동완성
+            startActivity(intent);
+        }
+        else if (id == R.id.maptest3) {//위도 경도 변환
+            Intent intent = new Intent(SearchActivity.this, GoogleMapTestActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.maptest4) {//http통신연습
+            Intent intent = new Intent(SearchActivity.this, TestHttpActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.maptest5) {
+
         }
 
 
@@ -191,4 +238,15 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         return true;
     }
      /*네비 메뉴*/
+
+     /*출발지 도착지 값 받아오는곳*/
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /*출발지 값 받아오는곳*/
+        if(requestCode==GET_ADDRESS_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+            String result_msg = data.getStringExtra("result_msg");
+            et_search_depart.setText(result_msg);
+        }
+    }
 }

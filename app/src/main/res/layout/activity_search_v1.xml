@@ -19,21 +19,23 @@
 
     </android.support.design.widget.AppBarLayout>
     <!--네비 드로워-->
-    <SearchView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        />
 <RelativeLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:focusable="true"
     android:focusableInTouchMode="true"
     >
-
+    <ImageButton
+        android:id="@+id/open_navimenu"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@mipmap/ic_meue"
+        android:layout_margin="8dp"
+        android:background="#00ffffff"
+        />
 
     <EditText
-
+        android:layout_toRightOf="@+id/open_navimenu"
         android:id="@+id/et_search_depart"
         android:layout_width="100dp"
         android:layout_height="wrap_content"

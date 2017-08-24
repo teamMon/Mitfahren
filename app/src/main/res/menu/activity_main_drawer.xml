@@ -1,9 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="test용">
+        <menu>
+            <item
+                android:id="@+id/nav_testmap1"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="맵현재위치 찍기" />
+            <item
+                android:id="@+id/nav_testmap2"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="다음 주소 검색" />
+            <item
+                android:id="@+id/maptest1"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="다음 맵뷰" />
+            <item
+                android:id="@+id/maptest2"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="구글map place api" />
+            <item
+                android:id="@+id/maptest3"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="위도 경도 변환" />
+            <item
+                android:id="@+id/maptest4"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="Http통신 구글 geocoding" />
+            <item
+                android:id="@+id/maptest5"
+                android:icon="@drawable/ic_face_black_24dp"
+                android:title="test예정" />
+        </menu>
+    </item>
 
     <group android:checkableBehavior="single">
         <item  android:title="Login 후">
             <menu>
+
                 <item
                     android:id="@+id/nav_myinfo"
                     android:icon="@drawable/ic_face_black_24dp"

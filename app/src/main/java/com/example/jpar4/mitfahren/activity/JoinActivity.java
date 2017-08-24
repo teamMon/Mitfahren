@@ -15,6 +15,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -35,7 +37,7 @@ public class JoinActivity extends AppCompatActivity {
 
 
     EditText join_et_input_name;
-    EditText join_et_input_id;
+    EditText join_et_input_age;
     EditText join_et_input_pw;
     EditText join_et_input_pwchk;
     Button join_btn_confirm;
@@ -51,7 +53,7 @@ boolean picOk = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join);
         join_et_input_name = (EditText) findViewById(R.id.join_et_input_name);
-        join_et_input_id = (EditText) findViewById(R.id.join_et_input_id);
+        join_et_input_age = (EditText) findViewById(R.id.join_et_input_age);
         join_et_input_pw = (EditText) findViewById(R.id.join_et_input_pw);
         join_et_input_pwchk = (EditText) findViewById(R.id.join_et_input_pwchk);
         join_btn_confirm = (Button) findViewById(R.id.join_btn_confirm);
@@ -69,15 +71,25 @@ boolean picOk = false;
 
 
         join_btn_confirm.setOnClickListener(new View.OnClickListener() {
+            Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
             @Override
             public void onClick(View v) {
                 if(join_et_input_name.getText().toString().equals("")){//유저네임이 공백이면
-                    Toast.makeText(JoinActivity.this, "User Name을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(JoinActivity.this, "이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+
+                    findViewById(R.id.join_et_input_name).startAnimation(shake);
                     join_et_input_name.requestFocus();
                 }
-                else if(join_et_input_id.getText().toString().equals("") ){
-                    Toast.makeText(JoinActivity.this, "UserID를 입력해주세요.", Toast.LENGTH_SHORT).show();
-                    join_et_input_id.requestFocus();
+                else if(join_et_input_age.getText().toString().equals("") ){
+                    Toast.makeText(JoinActivity.this, "주민등록번호를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                    findViewById(R.id.join_et_input_age).startAnimation(shake);
+                    join_et_input_age.requestFocus();
+
+                }
+                else if(join_et_input_age.getText().toString().length()<7){
+                    Toast.makeText(JoinActivity.this, "조건에 맞게 입력해주시기 바랍니다..", Toast.LENGTH_SHORT).show();
+                    findViewById(R.id.join_et_input_age).startAnimation(shake);
+                    join_et_input_age.requestFocus();
 
                 }
                 else if(join_et_input_pw.getText().toString().equals("")){
