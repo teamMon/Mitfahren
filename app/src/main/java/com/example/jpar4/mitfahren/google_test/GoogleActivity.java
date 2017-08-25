@@ -1,4 +1,4 @@
-package com.example.jpar4.mitfahren.activity;
+package com.example.jpar4.mitfahren.google_test;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -8,14 +8,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
-import com.example.jpar4.mitfahren.model.MapLocaInfo;
 import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,19 +27,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AddDriverActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class GoogleActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    EditText add_driver_from; //출발지
-    EditText add_driver_to; // 도착지
-    Button searchway;// 경로검색버튼
+    EditText add_driver_from;
     TextView mTextMessage;
-    String markername; // 출발지인지 도착지인지 구분할떄 사용
     /* 임시 나중에 response 잘라서 처리해야함*/
     float lat ;
     float lng ;
-    MapLocaInfo startingPoint; // 출발지위치주소정보 저장
-    MapLocaInfo arrivingPoint; // 도착지위치주소정보 저장
 
     /*주소받아오기 위한 REQUESTCODE*/
     private static final int GET_ADDRESS_REQUEST_CODE = 3001;
@@ -49,41 +42,18 @@ public class AddDriverActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_driver);
+        setContentView(R.layout.aatest_google_a);
 
-        add_driver_from = (EditText) findViewById(R.id.add_driver_from); //출발지
-        add_driver_to = (EditText) findViewById(R.id.add_driver_to); // 도착지
-        searchway = (Button) findViewById(R.id.searchway);// 경로검색버튼
+        add_driver_from = (EditText) findViewById(R.id.add_driver_from);
 
         //출발지 에딧 텍스트
         add_driver_from.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                markername="출발지";
-                Intent intent = new Intent(AddDriverActivity.this, TestSearchActivity.class);
+                Intent intent = new Intent(GoogleActivity.this, TestSearchActivity.class);
                 //startActivity(intent);
 
                 startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
-            }
-        });
-
-        //도착지 에딧 텍스트
-        add_driver_to.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                markername="도착지";
-                Intent intent = new Intent(AddDriverActivity.this, TestSearchActivity.class);
-                //startActivity(intent);
-
-                startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
-            }
-        });
-
-        //경로검색버튼
-        searchway.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(AddDriverActivity.this, "출발지 : "+ Float.toString(startingPoint.getLat())+" / "+Float.toString(startingPoint.getLng()) +"\n 도착지 :  "+ Float.toString(arrivingPoint.getLat())+" / "+Float.toString(arrivingPoint.getLng()), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -165,13 +135,7 @@ public class AddDriverActivity extends AppCompatActivity implements OnMapReadyCa
         /*출발지 값 받아오는곳*/
         if(requestCode==GET_ADDRESS_REQUEST_CODE && resultCode == Activity.RESULT_OK){
             String result_msg = data.getStringExtra("result_msg");
-            if(markername.equals("출발지")){
-                add_driver_from.setText(result_msg);
-            }
-            else{//도착지
-                add_driver_to.setText(result_msg);
-            }
-
+            add_driver_from.setText(result_msg);
 
             String juso = result_msg;
             String addr = "http://maps.googleapis.com/maps/api/geocode/json?address="
@@ -197,7 +161,6 @@ public class AddDriverActivity extends AppCompatActivity implements OnMapReadyCa
                /*     String lat = jOb.getString("lat");
                     String lng = jOb.getString("lng");*/
                     /*임시용*/
-
                     lat = Float.parseFloat(jOb.getString("lat"));
                     lng = Float.parseFloat(jOb.getString("lng"));
                     response = lat + " / " + lng;
@@ -214,21 +177,10 @@ public class AddDriverActivity extends AppCompatActivity implements OnMapReadyCa
             mTextMessage.setText(result);
             // marker 표시
             // market 의 위치, 타이틀, 짧은설명 추가 가능.
-            String markerTitle="";
-            if(markername.equals("출발지")){
-                //출발지 이름 표시
-                markerTitle = add_driver_from.getText().toString();
-                startingPoint =  new MapLocaInfo(markername, markerTitle, lat, lng);
-            }
-            else{//도착지
-                markerTitle = add_driver_to.getText().toString();
-                arrivingPoint =  new MapLocaInfo(markername, markerTitle, lat, lng);
-            }
-
             MarkerOptions marker = new MarkerOptions();
             marker .position(new LatLng(lat, lng))
-                    .title(markerTitle)
-                    .snippet(markername);
+                    .title("위치이름")
+                    .snippet("출발지");
             mMap.addMarker(marker).showInfoWindow(); // 마커추가,화면에출력
             mMap.moveCamera(CameraUpdateFactory.newLatLng(
                     new LatLng(lat, lng)
