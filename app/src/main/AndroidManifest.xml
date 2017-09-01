@@ -37,8 +37,10 @@
         <!-- <activity android:name=".activity.LoginActivity"> -->
         <!-- <activity android:name=".activity.SearchActivity"> -->
         <!-- <activity android:name=".activity.TestActivity"> -->
+        <!--         android:name=".activity.SearchActivity"-->
         <activity
-            android:name=".activity.SearchActivity"
+
+            android:name=".tmap_test.NewSearchActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
             <!-- <activity android:name=".activity.UserPageActivity"> -->
@@ -79,7 +81,10 @@
         <activity android:name=".test_activity.GoogleMapTestActivity" />
         <activity android:name=".test_activity.GeocodingAPIActivity" />
         <activity android:name=".test_activity.TestHttpActivity" />
-        <activity android:name=".test_activity.PlaceAutoActivity"></activity>
+        <activity android:name=".test_activity.PlaceAutoActivity" />
+        <activity android:name=".tmap_test.tmap_first_a"></activity>
+        <activity android:name=".tmap_test.NewAddressSearchActivity"></activity>
+
     </application>
 
 </manifest>

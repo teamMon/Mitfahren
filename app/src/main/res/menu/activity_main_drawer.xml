@@ -29,7 +29,7 @@
             <item
                 android:id="@+id/maptest5"
                 android:icon="@drawable/ic_face_black_24dp"
-                android:title="test예정" />
+                android:title="tmaptest" />
         </menu>
     </item>
 

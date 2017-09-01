@@ -5,4 +5,6 @@
     <color name="colorAccent">#40dcff</color>
     <!--<color name="colorAccent">#FF4081</color> 원래 디폴트색 위의 색으로 바꿈-->
     <color name="colorAccent4">#77cecece</color>
+    <color name="colorDeActed">#857C7474</color>
+
 </resources>
