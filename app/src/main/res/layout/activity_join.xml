@@ -133,9 +133,9 @@ android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/join_passwordcheck_layout"
-        android:background="@color/colorPrimary"
         android:onClick="onConfirm"
         android:text="가입완료"
+        android:background="@color/colorPrimary"
         android:textStyle="bold"
         android:textColor="@android:color/white" />
 

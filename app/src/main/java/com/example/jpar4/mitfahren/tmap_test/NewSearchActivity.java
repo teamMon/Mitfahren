@@ -39,7 +39,6 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.activity.AddDriverActivity;
-import com.example.jpar4.mitfahren.activity.JoinActivity;
 import com.example.jpar4.mitfahren.activity.LoginActivity;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
 import com.example.jpar4.mitfahren.model.NewMapLocaInfo;
@@ -49,6 +48,7 @@ import com.example.jpar4.mitfahren.test_activity.MapTestActivity;
 import com.example.jpar4.mitfahren.test_activity.PlaceAutoActivity;
 import com.example.jpar4.mitfahren.test_activity.TestHttpActivity;
 import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
+import com.example.jpar4.mitfahren.test_join.test_join;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -258,7 +258,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
             startActivity(intent);
         }else if (id == R.id.nav_join) {
-            Intent intent = new Intent(NewSearchActivity.this, JoinActivity.class);
+        /*    Intent intent = new Intent(NewSearchActivity.this, JoinActivity.class);*/
+            Intent intent = new Intent(NewSearchActivity.this, test_join.class);
             startActivity(intent);
         }else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
             Intent intent = new Intent(NewSearchActivity.this, MapTestActivity.class);
@@ -284,8 +285,12 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             Intent intent = new Intent(NewSearchActivity.this, TestHttpActivity.class);
             startActivity(intent);
         }
-        else if (id == R.id.maptest5) {//tmaptest
-            Intent intent = new Intent(NewSearchActivity.this, tmap_first_a.class);
+        else if (id == R.id.maptest5) {//tmaptest // 운전자 등록
+            /*티맵테스트*/
+         /*   Intent intent = new Intent(NewSearchActivity.this, tmap_first_a.class);
+            startActivity(intent);*/
+         /*운전자 등록 테스트*/
+            Intent intent = new Intent(NewSearchActivity.this, NewAddDriverActivity.class);
             startActivity(intent);
         }
 

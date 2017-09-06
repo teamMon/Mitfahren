@@ -34,14 +34,15 @@
         android:layout_below="@+id/tv_logo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="#ffffff"
+        android:textColorHint="#556ebf"
         >
 
         <EditText
+            android:inputType="textEmailAddress"
             android:id="@+id/et_input_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
+            android:textColor="#556ebf"
             android:layout_margin="16dp"
             android:hint="이메일" />
     </android.support.design.widget.TextInputLayout>
@@ -51,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/id_layout"
-        android:textColorHint="#ffffff"
+        android:textColorHint="#556ebf"
         >
 
         <EditText
@@ -60,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:hint="비밀번호"
-            android:textColor="@android:color/white"
+            android:textColor="#556ebf"
             android:inputType="textPassword" />
     </android.support.design.widget.TextInputLayout>
     <View

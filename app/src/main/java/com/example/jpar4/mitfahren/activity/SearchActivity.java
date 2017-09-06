@@ -31,6 +31,7 @@ import com.example.jpar4.mitfahren.test_activity.MapTestActivity;
 import com.example.jpar4.mitfahren.test_activity.PlaceAutoActivity;
 import com.example.jpar4.mitfahren.test_activity.TestHttpActivity;
 import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
+import com.example.jpar4.mitfahren.test_join.test_join;
 import com.example.jpar4.mitfahren.tmap_test.tmap_first_a;
 
 import java.util.ArrayList;
@@ -202,7 +203,8 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
             Intent intent = new Intent(SearchActivity.this, LoginActivity.class);
             startActivity(intent);
         }else if (id == R.id.nav_join) {
-            Intent intent = new Intent(SearchActivity.this, JoinActivity.class);
+        /*    Intent intent = new Intent(SearchActivity.this, JoinActivity.class);*/
+            Intent intent = new Intent(SearchActivity.this, test_join.class);
             startActivity(intent);
         }else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
             Intent intent = new Intent(SearchActivity.this, MapTestActivity.class);

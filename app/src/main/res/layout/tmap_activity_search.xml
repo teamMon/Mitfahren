@@ -122,7 +122,11 @@
         android:layout_gravity="bottom|end"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="출발지 지정"/>
+        android:text="출발지 지정"
+        android:background="@color/colorPrimary"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        />
 
     <Button
         android:id="@+id/btn_select_arrive"
@@ -130,7 +134,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        android:text="도착지 지정"/>
+        android:text="도착지 지정"
+        android:background="@color/colorPrimary"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        />
 
 
     <Button
@@ -139,7 +147,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        android:text="운전자 검색"/>
+        android:text="운전자 검색"
+        android:background="@color/colorPrimary"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"/>
     </FrameLayout>
 
 </LinearLayout>
