@@ -4,29 +4,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!--네비 드로워-->
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-    <!--네비 드로워-->
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:text="출발지"
+    android:textSize="15sp"
+    />
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:text="출발지"
-        android:textSize="15sp"
-        />
-    <TextView
+
         android:id="@+id/actv_search_start"
         android:layout_width="match_parent"
         android:layout_height="30dp"
@@ -62,6 +48,7 @@
         android:text="도착지"
         android:textSize="15sp"
         />
+
     <TextView
         android:id="@+id/actv_search_arrive"
         android:layout_width="match_parent"
@@ -76,34 +63,34 @@
         />
 
 
-   <!-- <AutoCompleteTextView
-        android:id="@+id/actv_search_start"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:hint="출발지 검색"
-        android:lines="1"
-        android:textSize="14sp"
-        android:maxLines="1"
-        android:singleLine="true">
-    </AutoCompleteTextView>
-    <AutoCompleteTextView
-        android:id="@+id/actv_search_arrive"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:hint="도착지 검색"
-        android:lines="1"
-        android:textSize="14sp"
-        android:maxLines="1"
-        android:singleLine="true">
-    </AutoCompleteTextView>-->
+    <!-- <AutoCompleteTextView
+         android:id="@+id/actv_search_start"
+         android:layout_width="fill_parent"
+         android:layout_height="50dp"
+         android:layout_alignParentEnd="true"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentRight="true"
+         android:layout_alignParentStart="true"
+         android:hint="출발지 검색"
+         android:lines="1"
+         android:textSize="14sp"
+         android:maxLines="1"
+         android:singleLine="true">
+     </AutoCompleteTextView>
+     <AutoCompleteTextView
+         android:id="@+id/actv_search_arrive"
+         android:layout_width="fill_parent"
+         android:layout_height="50dp"
+         android:layout_alignParentEnd="true"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentRight="true"
+         android:layout_alignParentStart="true"
+         android:hint="도착지 검색"
+         android:lines="1"
+         android:textSize="14sp"
+         android:maxLines="1"
+         android:singleLine="true">
+     </AutoCompleteTextView>-->
 
 
     <FrameLayout
@@ -113,61 +100,62 @@
 
         <fragment
             android:id="@+id/map"
-            class="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
 
-            android:layout_height="match_parent" />
-
+            class="com.google.android.gms.maps.MapFragment" />
         <TextView
             android:id="@+id/tv_helpingText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center"
+            android:textSize="15sp"
+            android:textColor="#ffffff"
             android:background="#dee1c702"
             android:textAlignment="center"
-            android:textColor="#ffffff"
-            android:textSize="15sp" />
-
+            android:layout_gravity="top|center"
+            />
         <ImageView
             android:id="@+id/iv_pin"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginBottom="20dp"
-            android:src="@mipmap/ic_pin" />
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:src="@drawable/pin"/>
 
         <Button
             android:id="@+id/btn_select_start"
+            android:layout_gravity="bottom|end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:background="@color/colorPrimary"
             android:text="출발지 지정"
+            android:background="@color/colorPrimary"
+            android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:textStyle="bold" />
+            />
 
         <Button
             android:id="@+id/btn_select_arrive"
+            android:layout_gravity="bottom|end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:background="@color/colorPrimary"
+            android:visibility="invisible"
             android:text="도착지 지정"
-            android:textColor="@android:color/white"
+            android:background="@color/colorPrimary"
             android:textStyle="bold"
-            android:visibility="invisible" />
+            android:textColor="@android:color/white"
+            />
 
 
         <Button
             android:id="@+id/btn_search_driver"
+            android:layout_gravity="bottom|end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
+            android:visibility="invisible"
+            android:text="등록 완료"
             android:background="@color/colorPrimary"
-            android:text="운전자 검색"
-            android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:visibility="invisible" />
+            android:textColor="@android:color/white"/>
     </FrameLayout>
 
 </LinearLayout>

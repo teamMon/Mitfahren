@@ -7,6 +7,7 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -34,20 +35,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
-import com.example.jpar4.mitfahren.activity.AddDriverActivity;
 import com.example.jpar4.mitfahren.activity.LoginActivity;
+import com.example.jpar4.mitfahren.activity.UserPageActivity;
+import com.example.jpar4.mitfahren.app.Myapp;
+import com.example.jpar4.mitfahren.dialog.ApppracCustomDialog;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
+import com.example.jpar4.mitfahren.model.CameraView;
 import com.example.jpar4.mitfahren.model.NewMapLocaInfo;
-import com.example.jpar4.mitfahren.test_activity.DaumTestActivity;
-import com.example.jpar4.mitfahren.test_activity.GoogleMapTestActivity;
-import com.example.jpar4.mitfahren.test_activity.MapTestActivity;
-import com.example.jpar4.mitfahren.test_activity.PlaceAutoActivity;
-import com.example.jpar4.mitfahren.test_activity.TestHttpActivity;
-import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
 import com.example.jpar4.mitfahren.test_join.test_join;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -62,13 +61,21 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class NewSearchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -85,6 +92,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
     private Button btn_select_start; // 출발지 검색 버튼
     private Button btn_select_arrive; // 도착지 검색 버튼
     private Button btn_search_driver; // 운전자 검색 버튼
+    private ImageView iv_pin;
    // AutoCompleteTextView actv_search_start; // 출발지검색
    // AutoCompleteTextView actv_search_arrive; // 도착지검색
     TextView actv_search_start; // 출발지검색
@@ -96,10 +104,25 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
     Double lng;
     Boolean start_arrive = true; // true : start / false : arrive
     Boolean start_arrive_done = false; // true : 출발지, 도착지 선택 완료
+    /*출발버튼 눌렀는지 않눌렀는지*/
+    Boolean start_btn_push=false;
     NewMapLocaInfo Start_Marker_InFo; // 출발지 정보 가지고 있는 클래스
     NewMapLocaInfo Arrive_Marker_InFo; // 도착지 정보 가지고 있는 클래스
 /*    Boolean once_explain = true; // true : 딱한번 위의 현재 위치를 나타내는 주소 텍스트를 누르면 주소를 검색할 수 있음을 알려줌*/
     /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
+
+    /*맵카메라뷰*/
+    CameraView cameraView;
+
+    /*app객체 (로그인에 사용)*/
+    Myapp app;
+
+    /*--------------------------------------헤더 text name, email--------------------------------------------------------*/
+    TextView nav_header_name;
+    TextView nav_header_email;
+
+    /*----------------------------------------설명 다이얼로그--------------------------------------------------------------------------*/
+    private ApppracCustomDialog mCustomDialog;
 
 
     /*--------------------------------구글맵 내 현재 위치 찍기----------------------------------------*/
@@ -107,6 +130,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
     private GoogleApiClient mGoogleApiClient = null;
     /*구글맵*/
     private GoogleMap mGoogleMap = null;
+    private Polyline line;
+    private boolean isLineOnMap = false;
     /*현재찍는 곳*/
     private Marker currentMarker = null;
     /*출발지 마커*/
@@ -143,6 +168,9 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
         setContentView(R.layout.activity_drawer);
 
+        /*app객체*/
+        app = (Myapp)getApplicationContext();
+
          /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
         btn_select_start = (Button)findViewById(R.id.btn_select_start); // 출발지 버튼
         btn_select_start.setOnClickListener(this);
@@ -157,10 +185,23 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         actv_search_arrive = (TextView) findViewById(R.id.actv_search_arrive);
         actv_search_arrive.setOnClickListener(this);
 
+        iv_pin = (ImageView) findViewById(R.id.iv_pin);
+
         tv_once_explain = (TextView) findViewById(R.id.tv_once_explain);
         tv_helpingText = (TextView) findViewById(R.id.tv_helpingText);
-
         /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
+
+
+        /*메인화면 설명*/
+        if(!app.isLoginOK()){ //로그인 상태가 아닐 때, 메인화면 설명
+            mCustomDialog = new ApppracCustomDialog(this,
+                    "[다이얼로그 제목]", // 제목
+                    "다이얼로그 내용 표시하기", // 내용
+                    leftListener // 왼쪽 버튼 이벤트
+            ); // 오른쪽 버튼 이벤트
+            mCustomDialog.show();
+        }
+
 
          /*--------------------------------구글맵 내 현재 위치 찍기----------------------------------------*/
          /*현재위치 표시하기 위한 구글맵*/
@@ -192,11 +233,47 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        /*메뉴정보를 받아와서 로그인할 때와 로그아웃 상태일때 다른 메뉴가 보이게 해줌*/
+        Menu nev_Menu = navigationView.getMenu();
+
+      /*해더 참고 https://stackoverflow.com/questions/33194594/navigationview-get-find-header-layout*/
+      /*  View nav_Header= navigationView.getHeaderView(R.layout.nav_header_main);*/
+        View nav_Header= navigationView.getHeaderView(0);
+
+            /*--------------------------------------헤더 text name, email--------------------------------------------------------*/
+         nav_header_name = (TextView)nav_Header.findViewById(R.id.nav_header_tv_name);
+         nav_header_email= (TextView)nav_Header.findViewById(R.id.nav_header_tv_email);
+
+        /*로그인일때      nav_login nav_join 숨김*/
+        if(app.isLoginOK()){
+            nev_Menu.findItem(R.id.nav_login).setVisible(false);
+            nev_Menu.findItem(R.id.nav_join).setVisible(false);
+
+            /*해더 네임 이메일 변경*/
+            nav_header_name.setText(app.getUser_name());
+            nav_header_email.setText(app.getUser_email());
+        }else{
+            nev_Menu.findItem(R.id.nav_myinfo).setVisible(false);
+            nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
+            nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
+            nev_Menu.findItem(R.id.nav_logout).setVisible(false);
+        }
+
+        /*로그아웃상태일 때 nav_logout nav_out_mem nav_myinfo nav_add_driver*/
+
         navigationView.setNavigationItemSelectedListener(this);
         /*네비 드로워*/
 
 
     }
+    /*다이얼로그 왼쪽 버튼이벤트*/
+    private View.OnClickListener leftListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            /*Toast.makeText(getApplicationContext(), "왼쪽버튼 클릭",
+                    Toast.LENGTH_SHORT).show();*/
+            mCustomDialog.dismiss();
+        }
+    };
 
     /* ------------------------------------------네비 메뉴------------------------------------------------------------------------------*/
     @Override
@@ -238,20 +315,30 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         int id = item.getItemId();
 
         if (id == R.id.nav_myinfo) {
-            // Handle the camera action
-        } else if (id == R.id.nav_feedback) {
-
-        } else if (id == R.id.nav_add_driver) {
-            Intent intent = new Intent(NewSearchActivity.this, AddDriverActivity.class);
+          /*사용자 평가 샘플페이지*/
+            Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
             startActivity(intent);
-        }else if (id == R.id.nav_see_friend) {
+        } /*else if (id == R.id.nav_feedback) {
+
+        }*/ else if (id == R.id.nav_add_driver) {
+            /*맨처음 만든 운전자 등록 테스트*/
+    /*        Intent intent = new Intent(NewSearchActivity.this, AddDriverActivity.class);
+            startActivity(intent);*/
+
+             /*운전자 등록 테스트*/
+            Intent intent = new Intent(NewSearchActivity.this, NewAddDriverActivity.class);
+            startActivity(intent);
+        }/*else if (id == R.id.nav_see_friend) {
 
         } else if (id == R.id.nav_talk) {
 
         } else if (id == R.id.nav_noti) {
 
-        } else if (id == R.id.nav_logout) {
-
+        }*/ else if (id == R.id.nav_logout) {
+                app.setLoginOK(false);
+            Intent intent = new Intent(NewSearchActivity.this, NewSearchActivity.class);
+            startActivity(intent);
+            //finish();
         }else if (id == R.id.nav_out_mem) {
 
         }else if (id == R.id.nav_login) {
@@ -261,7 +348,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         /*    Intent intent = new Intent(NewSearchActivity.this, JoinActivity.class);*/
             Intent intent = new Intent(NewSearchActivity.this, test_join.class);
             startActivity(intent);
-        }else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
+        }/*else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
             Intent intent = new Intent(NewSearchActivity.this, MapTestActivity.class);
             startActivity(intent);
         }
@@ -284,15 +371,16 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         else if (id == R.id.maptest4) {//http통신연습
             Intent intent = new Intent(NewSearchActivity.this, TestHttpActivity.class);
             startActivity(intent);
-        }
-        else if (id == R.id.maptest5) {//tmaptest // 운전자 등록
+        }*/
+      //  else if (id == R.id.maptest5) {//tmaptest // 운전자 등록
             /*티맵테스트*/
          /*   Intent intent = new Intent(NewSearchActivity.this, tmap_first_a.class);
             startActivity(intent);*/
          /*운전자 등록 테스트*/
-            Intent intent = new Intent(NewSearchActivity.this, NewAddDriverActivity.class);
-            startActivity(intent);
-        }
+     //       Intent intent = new Intent(NewSearchActivity.this, NewAddDriverActivity.class);
+     //       startActivity(intent);
+    //    }
+
 
 
 
@@ -323,6 +411,37 @@ protected void onStart() {
 
                 checkPermissions();
             }
+        }
+        // 경로검색 후라면 카메라 뷰 유지
+        if(isLineOnMap){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraView.getCentertLocation(), cameraView.getProperZoomLevel()));
+        }
+
+        /*로그인 여부 체크*/
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        /*메뉴정보를 받아와서 로그인할 때와 로그아웃 상태일때 다른 메뉴가 보이게 해줌*/
+        Menu nev_Menu = navigationView.getMenu();
+        View nav_Header= navigationView.getHeaderView(0);
+        /*로그인일때      nav_login nav_join 숨김*/
+        if(app.isLoginOK()){
+            nev_Menu.findItem(R.id.nav_login).setVisible(false);
+            nev_Menu.findItem(R.id.nav_join).setVisible(false);
+            nev_Menu.findItem(R.id.nav_myinfo).setVisible(true);
+            nev_Menu.findItem(R.id.nav_out_mem).setVisible(true);
+            nev_Menu.findItem(R.id.nav_add_driver).setVisible(true);
+            nev_Menu.findItem(R.id.nav_logout).setVisible(true);
+
+            ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
+            ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
+
+
+        }else{
+            nev_Menu.findItem(R.id.nav_login).setVisible(true);
+            nev_Menu.findItem(R.id.nav_join).setVisible(true);
+            nev_Menu.findItem(R.id.nav_myinfo).setVisible(false);
+            nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
+            nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
+            nev_Menu.findItem(R.id.nav_logout).setVisible(false);
         }
 
     }
@@ -418,7 +537,10 @@ protected void onStart() {
 
         }
 
-
+        // 경로검색 후라면 카메라 뷰 유지
+        if(isLineOnMap){
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraView.getCentertLocation(), cameraView.getProperZoomLevel()));
+        }
        /* 서울 수도 맵에 마커로 찍기 (연습1)
        LatLng SEOUL = new LatLng(37.56, 126.97);
 
@@ -468,6 +590,10 @@ protected void onStart() {
             mGoogleMap.getUiSettings().setCompassEnabled(true);
             //mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            // 경로검색 후라면 카메라 뷰 유지
+            if(isLineOnMap){
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraView.getCentertLocation(), cameraView.getProperZoomLevel()));
+            }
         }
     }
 
@@ -537,8 +663,13 @@ protected void onStart() {
                     .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             //currentMarker = mGoogleMap.addMarker(markerOptions); //최초마커 지우기
 
-            if(firstCamera){
+            // 경로검색 후라면 카메라 뷰 유지
+            if(isLineOnMap){
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraView.getCentertLocation(), cameraView.getProperZoomLevel()));
+            }
+            else if(firstCamera){
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+                mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 firstCamera=false;
             }
             return;
@@ -571,11 +702,11 @@ protected void onStart() {
             //마커를 원하는 이미지로 변경해줘야함
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(currentLocation);
-            markerOptions.title("출발지");
+          /*  markerOptions.title("출발지");*/
            // markerOptions.snippet(markerSnippet);
             markerOptions.draggable(true);
-            markerOptions.icon(BitmapDescriptorFactory
-                    .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            markerOptions/*.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));*/
+                    .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_start)));
             StartMarker = mGoogleMap.addMarker(markerOptions); //최초마커 지우기
 
 
@@ -607,11 +738,12 @@ protected void onStart() {
             //마커를 원하는 이미지로 변경해줘야함
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(currentLocation);
-            markerOptions.title("도착지");
+           /* markerOptions.title("도착지");*/
             //markerOptions.snippet(markerSnippet);
             markerOptions.draggable(true);
-            markerOptions.icon(BitmapDescriptorFactory
-                    .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            markerOptions
+                    .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_arrive)));
+                    /*.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));*/
             ArriveMarker = mGoogleMap.addMarker(markerOptions); //최초마커 지우기
 
 
@@ -856,6 +988,7 @@ public void onClick(View v) {
     String address_name;
     switch (v.getId()){
         case R.id.btn_select_start: //출발지 지정 버튼
+            start_btn_push = true; //출발지 지정 버튼
             start_arrive_done= false; // 출발지 도착지 지정 완료 true로 바꿔줌
 
             mLatitude=mGoogleMap.getCameraPosition().target.latitude+"";
@@ -886,6 +1019,7 @@ public void onClick(View v) {
             btn_select_arrive.setVisibility(View.GONE);
             btn_select_start.setVisibility(View.GONE);
             btn_search_driver.setVisibility(View.VISIBLE);
+            iv_pin.setVisibility(View.GONE);
 
             mLatitude=mGoogleMap.getCameraPosition().target.latitude+"";
             mLongitude=mGoogleMap.getCameraPosition().target.longitude+"";
@@ -908,14 +1042,24 @@ public void onClick(View v) {
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel));
             Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
 
-            /*경로 보여주기(해야됨)*/
+            /*경로 보여준 후 카메라 뷰 유지를 위해 저장해놓음*/
+            cameraView = new CameraView();
+            cameraView.setCentertLocation(currentLocation);
+            cameraView.setProperZoomLevel(properZoomLevel);
 
+            /*경로 보여주기(해야됨)*/
+            GetPathJson getJsonPath = new GetPathJson();
+            getJsonPath.execute(""+Start_Marker_InFo.getLat(), ""+Start_Marker_InFo.getLng(), ""+Arrive_Marker_InFo.getLat(), ""+Arrive_Marker_InFo.getLng());
 
 
 
             break;
 
         case R.id.actv_search_start:
+            if(isLineOnMap){
+                line.remove();
+            }
+            start_btn_push = false; // 출발지 텍스트뷰 누르면 다시 누를수있는 상태이므로 false화
             start_arrive = true; // 출발지 텍스트뷰 누르면 true로
             start_arrive_done = false;
 
@@ -923,6 +1067,7 @@ public void onClick(View v) {
             btn_select_arrive.setVisibility(View.GONE); //
             btn_search_driver.setVisibility(View.GONE);
             tv_once_explain.setVisibility(View.GONE); // 한번 누르면 사라지게 함.
+            iv_pin.setVisibility(View.VISIBLE);
 
             actv_search_start.setTextColor(Color.parseColor("#000000"));
             actv_search_arrive.setTextColor(Color.parseColor("#857C7474"));
@@ -933,12 +1078,18 @@ public void onClick(View v) {
             break;
 
         case R.id.actv_search_arrive:
+            if(isLineOnMap){
+                line.remove();
+            }
+
             start_arrive = false; // 도착지 텍스트뷰 누르면 false로
             start_arrive_done = false;
             btn_select_start.setVisibility(View.GONE); //출발지 지정을 눌렀을 때, 출발지 지정 버튼이 사라지고
             btn_search_driver.setVisibility(View.GONE);
             btn_select_arrive.setVisibility(View.VISIBLE); //도착지 지정 버튼이 나오게 함 -> 도착지 검색 텍스트 뷰를 눌렀을 때에도 똑같이 적용함
             tv_once_explain.setVisibility(View.GONE); // 한번 누르면 사라지게 함.
+            iv_pin.setVisibility(View.VISIBLE);
+
             actv_search_start.setTextColor(Color.parseColor("#857C7474"));
             actv_search_arrive.setTextColor(Color.parseColor("#d4e6213b"));
 
@@ -947,10 +1098,15 @@ public void onClick(View v) {
             address_name = getCurrentAddress2(mLatitude,mLongitude);
 
             /*------------------------------------------------------------------------그냥 텍스트뷰를 클릭했을 때에도 출발지 마커를 찍어 줘야 함------------------------------------------------------------------------*/
-            /*마커찍기*/
-            setStartLocation(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+            /*출발지 지정버튼을 안눌르고 넘어갔을 떄만 지정해주기*/
+            if(!start_btn_push){
+                start_btn_push=true;
+                 /*마커찍기*/
+                setStartLocation(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
             /*데이터 클래스에 값 저장*/
-            Start_Marker_InFo = new NewMapLocaInfo("출발지", address_name, Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+                Start_Marker_InFo = new NewMapLocaInfo("출발지", address_name, Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+            }
+
       /*------------------------------------------------------------------------그냥 텍스트뷰를 클릭했을 때에도 출발지 마커를 찍어 줘야 함------------------------------------------------------------------------*/
 
             intent = new Intent(NewSearchActivity.this, NewAddressSearchActivity.class);
@@ -958,7 +1114,17 @@ public void onClick(View v) {
             intent.putExtra("start_arrive", start_arrive);
             startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
             break;
+
+        case R.id.btn_search_driver:
+           // String aa = "출발지 좌표 : " + Start_Marker_InFo.getLat() +", "+ Start_Marker_InFo.getLng() + "\n 도착지 좌표 : " +  Arrive_Marker_InFo.getLat()+", "+ Arrive_Marker_InFo.getLng();
+         //   Log.e("ddd", aa);
+
+            //Toast.makeText(this, aa, Toast.LENGTH_SHORT).show();
+
+            break;
     }
+
+
 }
 /*줌줌줌++++++++++++++++++++++++++++++++++Calculate distance between two locations+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 public float getDistanceInMeter(double startLat, double startLong, double endLat, double endLong) {
@@ -1179,7 +1345,7 @@ public float getZoomForMetersWide(double desiredMeters) {
                 else if(arr_length>6) {
                     actv_search_start.setText(arr_address[arr_length-4]+" "+arr_address[arr_length-3]+" "+arr_address[arr_length-2]+" "+arr_address[arr_length-1]);
                 }
-                else  actv_search_arrive.setText(address_name);
+                else  actv_search_start.setText(address_name);
                 btn_select_start.setVisibility(View.VISIBLE);
             }else{// 도착지 검색일 때
                 if(arr_length<6 && arr_length>4)    actv_search_arrive.setText(arr_address[arr_length-3]+" "+arr_address[arr_length-2]+" "+arr_address[arr_length-1]);
@@ -1191,10 +1357,158 @@ public float getZoomForMetersWide(double desiredMeters) {
             tv_helpingText.setText(address_name);
 
         }
-
-
-
-
     }
     /*-------------------------------------------OnCameraIdleListener---------------------------------------------------------------------------------------*/
+
+   /*-----------------------------------------GetPathJson---------------------------------------------------------------------------------------------------*/
+   public class GetPathJson extends AsyncTask<String, Void, String> {
+       // 자동차 안내 tmap
+       String startLat;
+       String startLng;
+       String endLat;
+       String endLng;
+
+
+       @Override
+       protected String doInBackground(String... params) {
+            /*시작 위도, 경도, 도착 위도, 경도*/
+           startLat = params[0];
+           startLng = params[1];
+           endLat = params[2];
+           endLng = params[3];
+           String result="";
+
+           OkHttpClient client = new OkHttpClient();
+           Request request = new Request.Builder()
+                   .url("https://apis.skplanetx.com/tmap/routes?version=1&appKey=eb2b21b5-65d8-3686-9664-1442352bab42&startX=" + startLng + "&startY=" + startLat + "&endX=" + endLng + "&endY=" + endLat + "&reqCoordType=WGS84GEO&resCoordType=WGS84GEO")
+                   .build(); // 이 url에 좌표를 전송하여 json구조를 전송받는다. 구글의 좌표(위도, 경도)와 다음의 좌표 (경도, 위도) 순서가 다르다
+           try {
+               Response response = client.newCall(request).execute();
+               result = response.body().string();
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           return result;
+
+       }
+
+       @Override
+       protected void onPreExecute() {
+           super.onPreExecute();
+       }
+
+       @Override
+       protected void onPostExecute(String result) {
+           Log.e("ddd[GetPathJson]출도json", result);
+           // 결과값을 파싱해주는 스레드에 넘김
+            ParsePathJson aParsePathJson = new ParsePathJson();
+            aParsePathJson.execute(result);
+       }
+   }
+
+  /*-----------------------------------------GetPathJson---------------------------------------------------------------------------------------------------*/
+
+
+    /*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
+    public class ParsePathJson extends AsyncTask<String, Integer, ArrayList<LatLng>> {
+        // Parsing the data in non-ui thread
+
+        int totalDistance;
+        ArrayList<com.google.android.gms.maps.model.LatLng> mapPoints; //LatLng 변수
+
+        @Override
+        protected ArrayList<com.google.android.gms.maps.model.LatLng> doInBackground(String... jsonData) {
+            try {
+                JSONObject jsonObject = new JSONObject(jsonData[0]); //통제이슨을 받아옴
+                JSONArray features = jsonObject.getJSONArray("features"); // json 이름 형상 정보 입니다. (geojson 표준 규격) //키값 : Type과 features중 features가져옴
+
+                mapPoints = new ArrayList<>(); //지도에 찍을 맵 좌표값을 저장할 어레이리스트를 만듬
+
+                for (int i = 0; i < features.length(); i++) { // 블로그 참고 하였다.
+                    JSONObject test2 = features.getJSONObject(i);
+                    if (i == 0) {
+                        JSONObject properties = test2.getJSONObject("properties"); // 프로퍼티에는 전체 거리 전체 시간 택시요금 네비안내 다음에올길이름등 정보가 들어있다.
+                        totalDistance += properties.getInt("totalDistance"); // 경로 총 길이(단위: m)입니다. - pointType=S 일때 응답되는 정보입니다.
+
+                    }
+
+                    JSONObject geometry = test2.getJSONObject("geometry");
+                    JSONArray coordinates = geometry.getJSONArray("coordinates"); //좌표 정보입니다.
+                    String geoType = geometry.getString("type"); // 구간의 정보입니다.
+
+                    if (geoType.equals("Point")) { // 꼭지점에 해당하는 Point 객체
+                        double lonJson = coordinates.getDouble(0);
+                        double latJson = coordinates.getDouble(1);
+
+//                        Log.d("TAG", "-");
+//                        Log.d("TAG", lonJson + "," + latJson + "\n");
+                        com.google.android.gms.maps.model.LatLng point = new com.google.android.gms.maps.model.LatLng(latJson, lonJson);
+                        mapPoints.add(point);
+
+                    }
+
+                    if (geoType.equals("LineString")) { // 선에 해당하는 LineString 객체
+                        for (int j = 0; j < coordinates.length(); j++) {
+                            JSONArray JLinePoint = coordinates.getJSONArray(j);
+                            double lonJson = JLinePoint.getDouble(0);
+                            double latJson = JLinePoint.getDouble(1);
+
+//                            Log.d("TAG", "-");
+//                            Log.d("TAG", lonJson + "," + latJson + "\n");
+                            com.google.android.gms.maps.model.LatLng point = new com.google.android.gms.maps.model.LatLng(latJson, lonJson);
+                            mapPoints.add(point);
+
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return mapPoints;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(ArrayList<com.google.android.gms.maps.model.LatLng> result) {
+            PolylineOptions lineOptions = null;
+            lineOptions = new PolylineOptions();
+
+            for (int i = 0; i < result.size(); i++) {
+                com.google.android.gms.maps.model.LatLng point = result.get(i);
+
+                LatLng position = new LatLng(point.latitude, point.longitude);
+
+//                Log.e("position", position + "");
+//                points.add(position);
+//                Log.e("points", points + "");
+
+/*                // 출발지 마커
+                if (i == result.size() - 1) {
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(position);
+                    markerOptions.title("출발지");
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    marker = mGoogleMap.addMarker(markerOptions);
+
+
+                    // 출발지로 맵이동
+                    CameraPosition cp = new CameraPosition.Builder().target((position)).zoom(15).build();
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cp));
+                }*/
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.add(position);
+                lineOptions.width(20);
+              //  lineOptions.color(Color.argb(164,57,17,64)); //rgba(57, 17, 64, 0.62) // 보라색
+                lineOptions.color(Color.argb(170,0,89,44));
+            }
+
+            // 폴리라인을 그려준다.
+            line = mGoogleMap.addPolyline(lineOptions);
+            // 처음 맵이 그려질 때는 line변수가 없기 때문에 line변수가 있는지 없는 지 구별해줄 조건이 필요했음
+            isLineOnMap = true;
+        }
+    }
+/*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
+
 }

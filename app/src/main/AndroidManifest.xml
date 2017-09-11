@@ -7,14 +7,17 @@
     <!-- 다음맵api 추가할때 추가함 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="TaTaTa"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".app.Myapp"
+        >
 
         <!-- 구글 맵 -->
         <meta-data
@@ -40,8 +43,10 @@
         <!-- android:name=".activity.SearchActivity" -->
         <activity
             android:name=".tmap_test.NewSearchActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTask"
+            >
+<!--android:launchMode="singleTask" -> 플레그 사용하기 위해 바꿈.-->
             <!-- <activity android:name=".activity.UserPageActivity"> -->
             <!-- <activity android:name=".activity.CarpoolPageActivity"> -->
 
@@ -84,7 +89,8 @@
         <activity android:name=".tmap_test.tmap_first_a" />
         <activity android:name=".tmap_test.NewAddressSearchActivity" />
         <activity android:name=".test_join.test_join" />
-        <activity android:name=".tmap_test.NewAddDriverActivity"></activity>
+        <activity android:name=".tmap_test.NewAddDriverActivity" />
+        <activity android:name=".tmap_test.NewAddDriverActivity2"></activity>
     </application>
 
 </manifest>

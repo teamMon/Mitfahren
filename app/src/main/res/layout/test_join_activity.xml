@@ -41,12 +41,12 @@
             android:layout_marginLeft="16dp"
             >
 
+     <!--       android:textColor="#a4391140"-->
             <TextView
                 android:id="@+id/tv_name_noti"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#ff0000"
-
                 />
             <EditText
 
@@ -67,6 +67,12 @@
             android:layout_marginRight="16dp"
             android:layout_marginLeft="16dp"
             >
+            <TextView
+                android:id="@+id/tv_age_noti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ff0000"
+                />
 
             <EditText
                 android:inputType="number"
@@ -114,7 +120,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#ff0000"
-
                 />
             <EditText
                 android:inputType="textEmailAddress"

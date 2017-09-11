@@ -3,11 +3,15 @@ package com.example.jpar4.mitfahren.tmap_test;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import com.example.jpar4.mitfahren.R;
@@ -30,6 +34,8 @@ public class NewAddDriverActivity extends AppCompatActivity {
     int hour, min;
     /*시간 날짜*/
 
+    Spinner add_driver_spin_people_num;
+    Button add_driver_btn_next;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,9 +55,29 @@ public class NewAddDriverActivity extends AppCompatActivity {
         showDate();
         showTimePickerDialog();
 
-
       /*  final BranchDownloader d = new BranchDownloader(this, url, dp, t, area, search);
         d.execute();*/
+
+        /*성별*/
+        add_driver_spin_people_num = (Spinner)findViewById(R.id.add_driver_spin_people_num);
+        ArrayAdapter peopleAdapter = ArrayAdapter.createFromResource(this, R.array.add_driver_poeple, android.R.layout.simple_spinner_item);
+        peopleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        add_driver_spin_people_num.setAdapter(peopleAdapter);
+
+        /*다음 버튼*/
+        add_driver_btn_next = (Button)findViewById(R.id.add_driver_btn_next);
+        add_driver_btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(NewAddDriverActivity.this, NewAddDriverActivity2.class);
+                intent.putExtra("date", btnpick.getText().toString());
+                intent.putExtra("time", timepick.getText().toString());
+                intent.putExtra("pNum", add_driver_spin_people_num.getSelectedItem().toString());
+                startActivity(intent);
+            }
+        });
+
+
     }
 
     public void showTimePickerDialog() {

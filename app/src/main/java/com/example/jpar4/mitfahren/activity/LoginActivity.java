@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
+import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.test_join.test_join;
 import com.example.jpar4.mitfahren.tmap_test.NewSearchActivity;
 
@@ -32,10 +33,16 @@ public class LoginActivity extends AppCompatActivity {
     Button btn_login;
     Button btn_join;
 
+    Myapp app; // app객체
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        /*App객체에 아이디 저장 로그인 성공시*/
+        app = (Myapp)getApplicationContext();
+
 
         tv_logo = (TextView) findViewById(R.id.tv_logo);
         et_input_id = (EditText) findViewById(R.id.et_input_id); // 이메일
@@ -81,9 +88,27 @@ public class LoginActivity extends AppCompatActivity {
 
             progressDialog.dismiss();
 
-            /*Toast.makeText(LoginActivity.this, result, Toast.LENGTH_SHORT).show();*/
-            if(result.equals("o")){//로그인성공
+          //  Toast.makeText(LoginActivity.this, result, Toast.LENGTH_SHORT).show();
+            String[] arr_result = result.split("#");
+            for(int i=0;i<arr_result.length;i++){
+                Log.e("result check", arr_result[i]);
+            }
+
+            if((arr_result[arr_result.length-1]).equals("o")){//로그인성공 // 성공시 마지막은 항상 "o"
+                /*로그인 성공했을 때*/
+            /*-------------------------------------------사용자 정보 세팅----------------------------------------------------------------*/
+                app.setUser_email(arr_result[0]);
+                app.setUser_name(arr_result[1]);
+                app.setUser_age(arr_result[2]);
+                app.setUser_sex(arr_result[3]);
+                app.setUser_drive_num(arr_result[4]);
+                app.setUser_ride_num(arr_result[5]);
+                app.setLoginOK(true);
+            /*-------------------------------------------사용자 정보 세팅----------------------------------------------------------------*/
+
+
                 Intent intent = new Intent(LoginActivity.this,  NewSearchActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
             }else{

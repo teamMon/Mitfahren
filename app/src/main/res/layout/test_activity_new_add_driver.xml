@@ -83,7 +83,19 @@ tools:context="com.example.jpar4.mitfahren.tmap_test.NewAddDriverActivity"
         android:text="탑승 가능 인원 : "
         android:textSize="20sp" />
 
-    <EditText
+    <Spinner
+        android:layout_marginLeft="13dp"
+        android:layout_marginStart="13dp"
+        android:id="@+id/add_driver_spin_people_num"
+        android:layout_alignTop="@+id/textView17"
+        android:layout_toRightOf="@+id/textView17"
+        android:layout_toEndOf="@+id/textView17"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:gravity="right"></Spinner>
+
+<!--    <EditText
         android:id="@+id/add_driver_people_num"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -95,7 +107,7 @@ tools:context="com.example.jpar4.mitfahren.tmap_test.NewAddDriverActivity"
         android:layout_alignBaseline="@+id/textView17"
         android:layout_alignBottom="@+id/textView17"
         android:layout_toRightOf="@+id/textView17"
-        android:layout_toEndOf="@+id/textView17" />
+        android:layout_toEndOf="@+id/textView17" />-->
 
 <!--    <android.support.design.widget.TextInputLayout
         android:id="@+id/add_driver_people_num_label"
@@ -114,7 +126,7 @@ tools:context="com.example.jpar4.mitfahren.tmap_test.NewAddDriverActivity"
     <Button
 
         android:layout_alignParentBottom="true"
-        android:id="@+id/join_btn_confirm"
+        android:id="@+id/add_driver_btn_next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 

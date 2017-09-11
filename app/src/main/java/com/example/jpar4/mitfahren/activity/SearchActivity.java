@@ -25,14 +25,8 @@ import android.widget.Spinner;
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.adapter.DriverSearchAdapter;
 import com.example.jpar4.mitfahren.model.Item_driver_info;
-import com.example.jpar4.mitfahren.test_activity.DaumTestActivity;
-import com.example.jpar4.mitfahren.test_activity.GoogleMapTestActivity;
-import com.example.jpar4.mitfahren.test_activity.MapTestActivity;
-import com.example.jpar4.mitfahren.test_activity.PlaceAutoActivity;
-import com.example.jpar4.mitfahren.test_activity.TestHttpActivity;
 import com.example.jpar4.mitfahren.test_activity.TestSearchActivity;
 import com.example.jpar4.mitfahren.test_join.test_join;
-import com.example.jpar4.mitfahren.tmap_test.tmap_first_a;
 
 import java.util.ArrayList;
 
@@ -184,18 +178,18 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
 
         if (id == R.id.nav_myinfo) {
             // Handle the camera action
-        } else if (id == R.id.nav_feedback) {
+        } /*else if (id == R.id.nav_feedback) {
 
-        } else if (id == R.id.nav_add_driver) {
+        }*/ else if (id == R.id.nav_add_driver) {
             Intent intent = new Intent(SearchActivity.this, AddDriverActivity.class);
             startActivity(intent);
-        }else if (id == R.id.nav_see_friend) {
+        }/*else if (id == R.id.nav_see_friend) {
 
         } else if (id == R.id.nav_talk) {
 
         } else if (id == R.id.nav_noti) {
 
-        } else if (id == R.id.nav_logout) {
+        }*/ else if (id == R.id.nav_logout) {
 
         }else if (id == R.id.nav_out_mem) {
 
@@ -206,7 +200,7 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         /*    Intent intent = new Intent(SearchActivity.this, JoinActivity.class);*/
             Intent intent = new Intent(SearchActivity.this, test_join.class);
             startActivity(intent);
-        }else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
+        }/*else if (id == R.id.nav_testmap1) {//맵현재위치 찍기
             Intent intent = new Intent(SearchActivity.this, MapTestActivity.class);
             startActivity(intent);
         }
@@ -233,7 +227,7 @@ public class SearchActivity extends AppCompatActivity implements NavigationView.
         else if (id == R.id.maptest5) {//tmaptest
             Intent intent = new Intent(SearchActivity.this, tmap_first_a.class);
             startActivity(intent);
-        }
+        }*/
 
 
 
