@@ -16,4 +16,15 @@
 
     <!--<string name="kakao_app_key">ec105a215dc45dd0661f79a7a4d81f87</string>-->
     <string name="kakao_app_key">6f504f9b73ad280372b2aff0036b6f32</string>
+
+    <!--이미지-->
+    <string name="string_title_upload_progressbar_">업로드 중입니다. 잠시만 기다려 주세요.</string>
+    <string name="string_upload_success">파일업로드 성공</string>
+    <string name="string_upload_fail">파일업로드 실패</string>
+    <string name="string_internet_connection_warning">Internet Connection not Available</string>
+    <string name="string_message_to_attach_file">카메라를 눌러 프로필 사진을 등록해 주세요.</string>
+    <string name="string_choose_image">Select Image to Upload</string>
+    <string name="string_unable_to_pick_image">Unable to Pickup Image</string>
+    <string name="string_unable_to_load_image">Unable to Load Image</string>
+    <!--이미지-->
 </resources>

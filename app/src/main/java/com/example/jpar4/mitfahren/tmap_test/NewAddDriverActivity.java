@@ -13,6 +13,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 
@@ -69,11 +70,18 @@ public class NewAddDriverActivity extends AppCompatActivity {
         add_driver_btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(NewAddDriverActivity.this, NewAddDriverActivity2.class);
-                intent.putExtra("date", btnpick.getText().toString());
-                intent.putExtra("time", timepick.getText().toString());
-                intent.putExtra("pNum", add_driver_spin_people_num.getSelectedItem().toString());
-                startActivity(intent);
+                if(btnpick.getText().toString().equals("")){// 날짜가 없으면
+                    Toast.makeText(NewAddDriverActivity.this, "날짜를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                }else if(timepick.getText().toString().equals("")){
+                    Toast.makeText(NewAddDriverActivity.this, "시간을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Intent intent = new Intent(NewAddDriverActivity.this, NewAddDriverActivity2.class);
+                    intent.putExtra("date", btnpick.getText().toString());
+                    intent.putExtra("time", timepick.getText().toString());
+                    intent.putExtra("pNum", add_driver_spin_people_num.getSelectedItem().toString());
+                    startActivity(intent);
+                }
             }
         });
 

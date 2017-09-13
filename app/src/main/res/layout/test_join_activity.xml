@@ -9,7 +9,9 @@
         android:layout_height="match_parent"
         android:paddingRight="16dp"
         android:paddingLeft="16dp"
-        tools:context="com.example.jpar4.mitfahren.test_join.test_join">
+        tools:context="com.example.jpar4.mitfahren.test_join.test_join"
+        android:id="@+id/parentView"
+        >
 
         <ImageView
             android:id="@+id/join_iv_person"

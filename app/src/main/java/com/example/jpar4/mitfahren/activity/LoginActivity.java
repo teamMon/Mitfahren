@@ -103,6 +103,7 @@ public class LoginActivity extends AppCompatActivity {
                 app.setUser_sex(arr_result[3]);
                 app.setUser_drive_num(arr_result[4]);
                 app.setUser_ride_num(arr_result[5]);
+                app.setUser_photo(arr_result[6]);
                 app.setLoginOK(true);
             /*-------------------------------------------사용자 정보 세팅----------------------------------------------------------------*/
 

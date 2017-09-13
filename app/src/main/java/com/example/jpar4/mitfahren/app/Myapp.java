@@ -13,6 +13,7 @@ public class Myapp extends Application {
     private String user_sex;
     private String user_drive_num;
     private String user_ride_num;
+    private String user_photo;
     private boolean loginOK;
 
     public String getUser_email() {
@@ -69,5 +70,13 @@ public class Myapp extends Application {
 
     public void setLoginOK(boolean loginOK) {
         this.loginOK = loginOK;
+    }
+
+    public String getUser_photo() {
+        return user_photo;
+    }
+
+    public void setUser_photo(String user_photo) {
+        this.user_photo = user_photo;
     }
 }

@@ -2,8 +2,10 @@ package com.example.jpar4.mitfahren.test_join;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +34,12 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.activity.LoginActivity;
+import com.example.jpar4.mitfahren.func.ImageUploader;
+import com.example.jpar4.mitfahren.func.InternetConnection;
 import com.example.jpar4.mitfahren.func.MRRoundedImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,6 +55,17 @@ import java.util.regex.Pattern;
 
 public class test_join extends AppCompatActivity{
     private static String TAG = "test_join.java";
+
+    /**
+     * Context Variables
+     */
+    Context mContext;
+    /**
+     * Image path to send
+     */
+    String imagePath;
+    String foloer_name;
+
     final int PICK_FROM_ALBUM = 2001;
     final int AFTER_FROM_ALBUM = 2002;
 /*    join_et_input_name
@@ -70,7 +89,7 @@ public class test_join extends AppCompatActivity{
     /*프로필 이미지 등록*/
 
 
-    Boolean EMAIL_OK = false, PW_OK= false, PWCHK_OK= false, NAME_OK= false, AGE_OK= false, SEX_OK= false;//이메일 형식에 맞을때 True;EMAIL_OK,PW_OK,PWCHK_OK
+    Boolean EMAIL_OK = false, PW_OK= false, PWCHK_OK= false, NAME_OK= false, AGE_OK= false, SEX_OK= false,PIC_OK=false;//이메일 형식에 맞을때 True;EMAIL_OK,PW_OK,PWCHK_OK
 
 
 
@@ -81,6 +100,7 @@ public class test_join extends AppCompatActivity{
         ab.setTitle("회원 가입");
 
         setContentView(R.layout.test_join_activity);
+        mContext = getApplicationContext();
 
 
         /*프로필 사진 등록*/
@@ -114,6 +134,7 @@ public class test_join extends AppCompatActivity{
 
         /*버튼*/
         join_btn_confirm = (Button) findViewById(R.id.join_btn_confirm);
+        /*--------------------------------------------------------------버튼 온클릭 ------------------------------------------------------------------------------------------*/
         join_btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,7 +148,7 @@ public class test_join extends AppCompatActivity{
                 }else{
                     AGE_OK=true;
                 }*/
-                if(NAME_OK && EMAIL_OK && PW_OK && PWCHK_OK && AGE_OK){ //이메일 패스워드 패스워트 확인 통과해야지 인서트문 날림
+                if(NAME_OK && EMAIL_OK && PW_OK && PWCHK_OK && AGE_OK && PIC_OK){ //이메일 패스워드 패스워트 확인 통과해야지 인서트문 날림
                  /*이메일, 이름, 비밀번호, 비밀번호확인, 나이, 성별 값 가져옴*/
                     String user_email = join_et_input_id.getText().toString();
                     String user_name = join_et_input_name.getText().toString();
@@ -137,7 +158,21 @@ public class test_join extends AppCompatActivity{
                     String user_sex = join_spn_sex.getSelectedItem().toString();
                     //String user_photo = join_et_input_name.getText().toString();
 
-                /*데이터 php로 전송*/
+
+                /*파일 업로드*/
+                    //if(!TextUtils.isEmpty(imagePath) ){
+                        if (InternetConnection.checkConnection(mContext)) {
+                            foloer_name = user_email.substring(0, user_email.lastIndexOf(".") ) + user_email.substring(user_email.lastIndexOf(".") + 1);
+                            UploadAsync upload_task = new UploadAsync();
+                            upload_task.execute();
+                        } else {
+                            Snackbar.make(findViewById(R.id.parentView), R.string.string_internet_connection_warning, Snackbar.LENGTH_INDEFINITE).show();
+                        }
+                   // }else {
+                    //    Snackbar.make(findViewById(R.id.parentView), R.string.string_message_to_attach_file, Snackbar.LENGTH_INDEFINITE).show();
+                  //  }
+
+                    /*데이터 php로 전송*/
                     InsertData task = new InsertData();
                     task.execute(user_email,user_name,user_pwd,user_age,user_sex);
 
@@ -169,6 +204,9 @@ public class test_join extends AppCompatActivity{
                     }else if(!PWCHK_OK){
                         join_et_input_pwchk.requestFocus();
                         Toast.makeText(test_join.this, "패스워드 확인을 바르게 입력해 주세요.", Toast.LENGTH_SHORT).show();
+                    }else if(!PIC_OK){
+                        Snackbar.make(findViewById(R.id.parentView), R.string.string_message_to_attach_file, Snackbar.LENGTH_LONG).show();
+                        //Snackbar.LENGTH_INDEFINITE하면 안없어짐.
                     }
                 }
 
@@ -353,16 +391,16 @@ public class test_join extends AppCompatActivity{
                 String user_pwchk = ((EditText)findViewById(R.id.join_et_input_pwchk)).getText().toString();
                 String user_pw = ((EditText)findViewById(R.id.join_et_input_pw)).getText().toString();
                 TextView tv_pwchk_noti =(TextView)findViewById(R.id.tv_pwchk_noti);
-                if(!Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,20}$", user_pw))
+                if(!Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,20}$", user_pwchk))
                 {
-                    if(user_pw.length()==0){
+                    if(user_pwchk.length()==0){
                         tv_pwchk_noti.setText("");
                        /* tv_pwchk_noti.setBackgroundColor(Color.WHITE);*/
                         tv_pwchk_noti.setBackgroundColor(Color.argb(0,0,0,0));
                         tv_pwchk_noti.setTextColor(Color.RED);
                         PWCHK_OK=false;
                     }
-                    else if(user_pw.length()<8){// 길이가 짧을 때
+                    else if(user_pwchk.length()<8){// 길이가 짧을 때
                         tv_pwchk_noti.setText("비밀번호는 8~20자리로 입력해 주세요.");
 
                         tv_pwchk_noti.setBackgroundColor(Color.argb(0,0,0,0));
@@ -437,7 +475,49 @@ public class test_join extends AppCompatActivity{
             }
         });
     }
+    /*이미지 올리는 쓰레드*/
+    class UploadAsync extends  AsyncTask<Void, Integer, Boolean>{
+            ProgressDialog progressDialog;
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(test_join.this);
+            progressDialog.setMessage(getString(R.string.string_title_upload_progressbar_));
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (progressDialog != null)
+                progressDialog.dismiss();
+
+            if (aBoolean)
+                Toast.makeText(getApplicationContext(), R.string.string_upload_success, Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(getApplicationContext(), R.string.string_upload_fail, Toast.LENGTH_LONG).show();
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                JSONObject jsonObject = ImageUploader.uploadImage(roundimage_bitmap, imagePath, foloer_name);
+                if (jsonObject != null)
+                    return jsonObject.getString("result").equals("success");
+
+            } catch (JSONException e) {
+                Log.i("TAG", "Error : " + e.getLocalizedMessage());
+            }
+            return false;
+        }
+    }
 
 
 
@@ -461,6 +541,7 @@ public class test_join extends AppCompatActivity{
             progressDialog.dismiss();
             //mTextViewResult.setText(result);
             Toast.makeText(test_join.this, result, Toast.LENGTH_SHORT).show();
+
             /*로그인 액티비티로 이동*/
             Intent intent = new Intent(test_join.this, LoginActivity.class);
             startActivity(intent);
@@ -479,10 +560,11 @@ public class test_join extends AppCompatActivity{
             String user_pwd = (String)params[2];
             String user_age = (String)params[3];
             String user_sex = (String)params[4];
+            String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
 
             String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/join_insert.php";
-            String postParameters = "user_email=" + user_email + "&user_name=" + user_name + "&user_pwd=" + user_pwd + "&user_age=" + user_age + "&user_sex=" + user_sex;
-
+            String postParameters = "user_email=" + user_email + "&user_name=" + user_name + "&user_pwd=" + user_pwd + "&user_age=" + user_age + "&user_sex=" + user_sex + "&user_photo=" + user_photo;
+            Log.e("ddd", user_photo);
 
             try {
 
@@ -713,6 +795,25 @@ public class test_join extends AppCompatActivity{
                 Intent intent = new Intent("com.android.camera.action.CROP");
                 intent.setDataAndType(mImageCaptureUri, "image/*");
 
+                /*추가추가*/
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                Cursor cursor = getContentResolver().query(mImageCaptureUri, filePathColumn, null, null, null);
+
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    imagePath = cursor.getString(columnIndex);
+
+            /*        Picasso.with(mContext).load(new File(imagePath))
+                            .transform(PicassoTransformations.resizeTransformation)
+                            .into(imageView);*/
+                    cursor.close();
+
+                }
+
+                /*추가추가*/
                 intent.putExtra("outputX", 200);
                 intent.putExtra("outputY", 200);
                 intent.putExtra("aspectX", 1);
@@ -752,6 +853,7 @@ public class test_join extends AppCompatActivity{
                     ImageView image = (ImageView) findViewById(R.id.join_iv_person);
                     roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(photo, 1024);
                     image.setImageBitmap(roundimage_bitmap);
+                    PIC_OK=true;
                     //saveBitmaptoJpeg(image_bitmap2, "imagefolder","123");
 
                 }

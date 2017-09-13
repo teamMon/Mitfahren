@@ -63,6 +63,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -118,8 +119,10 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
     Myapp app;
 
     /*--------------------------------------헤더 text name, email--------------------------------------------------------*/
+    ImageView nav_header_profile_img;
     TextView nav_header_name;
     TextView nav_header_email;
+
 
     /*----------------------------------------설명 다이얼로그--------------------------------------------------------------------------*/
     private ApppracCustomDialog mCustomDialog;
@@ -243,6 +246,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             /*--------------------------------------헤더 text name, email--------------------------------------------------------*/
          nav_header_name = (TextView)nav_Header.findViewById(R.id.nav_header_tv_name);
          nav_header_email= (TextView)nav_Header.findViewById(R.id.nav_header_tv_email);
+        nav_header_profile_img = (ImageView)nav_Header.findViewById(R.id.nav_header_profile_img);
+
 
         /*로그인일때      nav_login nav_join 숨김*/
         if(app.isLoginOK()){
@@ -252,6 +257,11 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             /*해더 네임 이메일 변경*/
             nav_header_name.setText(app.getUser_name());
             nav_header_email.setText(app.getUser_email());
+
+            /*헤더 이미지 변경*/
+            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //nav_header_profile_img
+
         }else{
             nev_Menu.findItem(R.id.nav_myinfo).setVisible(false);
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
@@ -433,6 +443,9 @@ protected void onStart() {
 
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
+             /*헤더 이미지 변경*/
+            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //nav_header_profile_img
 
 
         }else{
