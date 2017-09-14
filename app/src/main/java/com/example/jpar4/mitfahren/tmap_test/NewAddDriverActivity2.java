@@ -4,9 +4,11 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Address;
@@ -28,10 +30,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
+import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
 import com.example.jpar4.mitfahren.model.NewMapLocaInfo;
 import com.google.android.gms.common.ConnectionResult;
@@ -47,13 +51,27 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class NewAddDriverActivity2 extends AppCompatActivity implements
@@ -65,11 +83,16 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
         GoogleMap.OnCameraMoveListener,
         GoogleMap.OnCameraIdleListener
 {
+    /*app객체 (로그인에 정보 이용에사용)*/
+    Myapp app;
+    /*app객체 (로그인에 정보 이용에 사용)*/
+
     /*좌표 핀셋찍기에 사용  private String mLatitude,mLongitude;*/
     private String mLatitude,mLongitude;
     private Button btn_select_start; // 출발지 검색 버튼
     private Button btn_select_arrive; // 도착지 검색 버튼
-    private Button btn_search_driver; // 운전자 검색 버튼
+    private Button btn_add_driver_complete; //등록완료 버튼
+    private ImageView iv_pin;
     // AutoCompleteTextView actv_search_start; // 출발지검색
     // AutoCompleteTextView actv_search_arrive; // 도착지검색
     TextView actv_search_start; // 출발지검색
@@ -81,10 +104,22 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
     Double lng;
     Boolean start_arrive = true; // true : start / false : arrive
     Boolean start_arrive_done = false; // true : 출발지, 도착지 선택 완료
+    /*출발버튼 눌렀는지 않눌렀는지*/
+    Boolean start_btn_push=false;
+
     NewMapLocaInfo Start_Marker_InFo; // 출발지 정보 가지고 있는 클래스
     NewMapLocaInfo Arrive_Marker_InFo; // 도착지 정보 가지고 있는 클래스
 /*    Boolean once_explain = true; // true : 딱한번 위의 현재 위치를 나타내는 주소 텍스트를 누르면 주소를 검색할 수 있음을 알려줌*/
     /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
+
+    /*디비 전송값 */
+    String start_d;
+    String start_t;
+    String start_p;
+    String user_car_photo;
+    Bitmap roundimage_bitmap;/*디비전송값은아니지만 인텐트로 날라오는 비트맵*/
+    /*디비 전송값 */
+
 
 
     /*--------------------------------구글맵 내 현재 위치 찍기----------------------------------------*/
@@ -92,6 +127,9 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient = null;
     /*구글맵*/
     private GoogleMap mGoogleMap = null;
+    /*구글맵 Line과 라인여부 추가*/
+    private Polyline line;
+    private boolean isLineOnMap = false;
     /*현재찍는 곳*/
     private Marker currentMarker = null;
     /*출발지 마커*/
@@ -129,20 +167,25 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
 
 
         setContentView(R.layout.test_activity_new_add_driver2);
+                 /*app객체*/
+        app = (Myapp)getApplicationContext();
+
 
          /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
         btn_select_start = (Button)findViewById(R.id.btn_select_start); // 출발지 버튼
         btn_select_start.setOnClickListener(this);
         btn_select_arrive = (Button)findViewById(R.id.btn_select_arrive); //도착지 버튼 -> 누를때 마커가 찍히게 하기
         btn_select_arrive.setOnClickListener(this);
-        btn_search_driver = (Button)findViewById(R.id.btn_search_driver); //운전자 검색 버튼 -> 눌렀을 때, 운전자 리스트 뷰 나오게 하기
-        btn_search_driver.setOnClickListener(this);
+        btn_add_driver_complete = (Button)findViewById(R.id.btn_add_driver_complete); //운전자 검색 버튼 -> 눌렀을 때, 운전자 리스트 뷰 나오게 하기
+        btn_add_driver_complete.setOnClickListener(this);
 
         actv_search_start = (TextView) findViewById(R.id.actv_search_start);
         actv_search_start.setOnClickListener(this);
 
         actv_search_arrive = (TextView) findViewById(R.id.actv_search_arrive);
         actv_search_arrive.setOnClickListener(this);
+
+        iv_pin = (ImageView) findViewById(R.id.iv_pin);
 
         tv_once_explain = (TextView) findViewById(R.id.tv_once_explain);
         tv_helpingText = (TextView) findViewById(R.id.tv_helpingText);
@@ -170,9 +213,11 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
         
         /* ****************************************인텐트 받기******************************************************** */
         Intent intent = getIntent();
-        String start_d = intent.getStringExtra("date");
-        String start_t = intent.getStringExtra("time");
-        String start_p = intent.getStringExtra("pNum");
+         start_d = intent.getStringExtra("date");
+         start_t = intent.getStringExtra("time");
+         start_p = intent.getStringExtra("pNum");
+         user_car_photo = intent.getStringExtra("user_car_photo");
+      //  roundimage_bitmap = (Bitmap)intent.getParcelableExtra("roundimage_bitmap");
 
         Toast.makeText(mActivity, start_d+" "+start_t+" "+start_p, Toast.LENGTH_SHORT).show();
 
@@ -742,6 +787,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
         String address_name;
         switch (v.getId()){
             case R.id.btn_select_start: //출발지 지정 버튼
+                start_btn_push = true; //출발지 지정 버튼
                 start_arrive_done= false; // 출발지 도착지 지정 완료 true로 바꿔줌
 
                 mLatitude=mGoogleMap.getCameraPosition().target.latitude+"";
@@ -750,7 +796,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
        /*        Toast.makeText(NewSearchActivity.this, "Latitude:"+mLatitude +"\n Longitude:"+mLongitude+"\n address: "+ address_name,Toast.LENGTH_LONG).show();*/
                 btn_select_start.setVisibility(View.GONE); //출발지 지정을 눌렀을 때, 출발지 지정 버튼이 사라지고
                 btn_select_arrive.setVisibility(View.VISIBLE); //도착지 지정 버튼이 나오게 함 -> 도착지 검색 텍스트 뷰를 눌렀을 때에도 똑같이 적용함
-                btn_search_driver.setVisibility(View.GONE);
+                btn_add_driver_complete.setVisibility(View.GONE);
                 tv_once_explain.setVisibility(View.GONE); // 한번 누르면 사라지게 함.
                 actv_search_start.setTextColor(Color.parseColor("#857C7474"));
                 actv_search_arrive.setTextColor(Color.parseColor("#d4e6213b"));
@@ -771,7 +817,8 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
             /*도착지 출발지 지정버튼 없얘고 운전자 검색 버튼 나오게 하기*/
                 btn_select_arrive.setVisibility(View.GONE);
                 btn_select_start.setVisibility(View.GONE);
-                btn_search_driver.setVisibility(View.VISIBLE);
+                btn_add_driver_complete.setVisibility(View.VISIBLE);
+                iv_pin.setVisibility(View.GONE);
 
                 mLatitude=mGoogleMap.getCameraPosition().target.latitude+"";
                 mLongitude=mGoogleMap.getCameraPosition().target.longitude+"";
@@ -795,6 +842,8 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
 
             /*경로 보여주기(해야됨)*/
+                GetPathJson getJsonPath = new GetPathJson();
+                getJsonPath.execute(""+Start_Marker_InFo.getLat(), ""+Start_Marker_InFo.getLng(), ""+Arrive_Marker_InFo.getLat(), ""+Arrive_Marker_InFo.getLng());
 
 
 
@@ -802,13 +851,19 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 break;
 
             case R.id.actv_search_start:
+                if(isLineOnMap){
+                    line.remove();
+                    isLineOnMap=false;
+                }
+                start_btn_push = false; // 출발지 텍스트뷰 누르면 다시 누를수있는 상태이므로 false화
                 start_arrive = true; // 출발지 텍스트뷰 누르면 true로
                 start_arrive_done = false;
 
                 btn_select_start.setVisibility(View.VISIBLE); //
                 btn_select_arrive.setVisibility(View.GONE); //
-                btn_search_driver.setVisibility(View.GONE);
+                btn_add_driver_complete.setVisibility(View.GONE);
                 tv_once_explain.setVisibility(View.GONE); // 한번 누르면 사라지게 함.
+                iv_pin.setVisibility(View.VISIBLE);
 
                 actv_search_start.setTextColor(Color.parseColor("#000000"));
                 actv_search_arrive.setTextColor(Color.parseColor("#857C7474"));
@@ -819,12 +874,19 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 break;
 
             case R.id.actv_search_arrive:
+                if(isLineOnMap){
+                    line.remove();
+                    isLineOnMap=false;
+                }
+
                 start_arrive = false; // 도착지 텍스트뷰 누르면 false로
                 start_arrive_done = false;
                 btn_select_start.setVisibility(View.GONE); //출발지 지정을 눌렀을 때, 출발지 지정 버튼이 사라지고
-                btn_search_driver.setVisibility(View.GONE);
+                btn_add_driver_complete.setVisibility(View.GONE);
                 btn_select_arrive.setVisibility(View.VISIBLE); //도착지 지정 버튼이 나오게 함 -> 도착지 검색 텍스트 뷰를 눌렀을 때에도 똑같이 적용함
                 tv_once_explain.setVisibility(View.GONE); // 한번 누르면 사라지게 함.
+                iv_pin.setVisibility(View.VISIBLE);
+
                 actv_search_start.setTextColor(Color.parseColor("#857C7474"));
                 actv_search_arrive.setTextColor(Color.parseColor("#d4e6213b"));
 
@@ -832,11 +894,16 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 mLongitude=mGoogleMap.getCameraPosition().target.longitude+"";
                 address_name = getCurrentAddress2(mLatitude,mLongitude);
 
-            /*------------------------------------------------------------------------그냥 텍스트뷰를 클릭했을 때에도 출발지 마커를 찍어 줘야 함------------------------------------------------------------------------*/
-        /*    *//*마커찍기*//*
-                setStartLocation(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
-            *//*데이터 클래스에 값 저장*//*
-                Start_Marker_InFo = new NewMapLocaInfo("출발지", address_name, Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));*/
+        /*------------------------------------------------------------------------그냥 텍스트뷰를 클릭했을 때에도 출발지 마커를 찍어 줘야 함------------------------------------------------------------------------*/
+            /*출발지 지정버튼을 안눌르고 넘어갔을 떄만 지정해주기*/
+                if(!start_btn_push){
+                    start_btn_push=true;
+                 /*마커찍기*/
+                    setStartLocation(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+            /*데이터 클래스에 값 저장*/
+                    Start_Marker_InFo = new NewMapLocaInfo("출발지", address_name, Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+                }
+
       /*------------------------------------------------------------------------그냥 텍스트뷰를 클릭했을 때에도 출발지 마커를 찍어 줘야 함------------------------------------------------------------------------*/
 
                 intent = new Intent(NewAddDriverActivity2.this, NewAddressSearchActivity.class);
@@ -844,8 +911,143 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 intent.putExtra("start_arrive", start_arrive);
                 startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
                 break;
+    /*------------------------------------------------------------------------등록 완료 버튼------------------------------------------------------------------------*/
+            case R.id.btn_add_driver_complete:
+                 String aa = "출발지 좌표 : " + Start_Marker_InFo.getLat() +", "+ Start_Marker_InFo.getLng() + "\n 도착지 좌표 : " +  Arrive_Marker_InFo.getLat()+", "+ Arrive_Marker_InFo.getLng()
+                         +"출발날짜 :" + start_d + " 출발시간 : "  + start_t + " 추가인원 : " + start_p + " 자동차 사진 : " + user_car_photo + " 이메일" + app.getUser_email() ;
+                   Log.e("my ddd", aa);
+
+                //Toast.makeText(this, aa, Toast.LENGTH_SHORT).show();
+
+                // }else {
+                //    Snackbar.make(findViewById(R.id.parentView), R.string.string_message_to_attach_file, Snackbar.LENGTH_INDEFINITE).show();
+                //  }
+/*이미지 서버에 올리는 건 앞에서 했음.*/
+                    /*데이터 php로 전송*/
+              InsertData task = new InsertData();
+                task.execute(app.getUser_email(),start_d,start_t,start_p,Start_Marker_InFo.getLat().toString(),Start_Marker_InFo.getLng().toString(),Arrive_Marker_InFo.getLat().toString(),Arrive_Marker_InFo.getLng().toString(),user_car_photo);
+
+                break;
         }
     }
+    /*운전자테이블에 운전자정보 넣는 스레드*/
+    class InsertData extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(NewAddDriverActivity2.this,
+                    "Please Wait", null, true, true);
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+            //mTextViewResult.setText(result);
+            Toast.makeText(NewAddDriverActivity2.this, result, Toast.LENGTH_SHORT).show();
+
+            /*로그인 액티비티로 이동*/
+            Intent intent = new Intent(NewAddDriverActivity2.this, NewDriverInfoActivity.class);
+            startActivity(intent);
+            finish();
+
+            Log.d(TAG, "POST response  - " + result);
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+            String user_email = (String)params[0];
+            String user_start_date = (String)params[1];
+            String user_start_time = (String)params[2];
+            String user_with_poeple = (String)params[3];
+            String user_start_lat = (String)params[4];
+            String user_start_lng = (String)params[5];
+            String user_arrive_lat = (String)params[6];
+            String user_arrive_lng = (String)params[7];
+            String user_car_photo = (String)params[8];
+          //  String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
+
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/add_driver_insert.php";
+            String postParameters =
+                    "user_email=" + user_email
+                    + "&user_start_date=" + user_start_date
+                    + "&user_start_time=" + user_start_time
+                    + "&user_with_poeple=" + user_with_poeple
+                    + "&user_start_lat=" + user_start_lat
+                    + "&user_start_lng=" + user_start_lng
+                    + "&user_arrive_lat=" + user_arrive_lat
+                    + "&user_arrive_lng=" + user_arrive_lng
+                    + "&user_car_photo=" + user_car_photo;
+
+            //Log.e("ddd", user_photo);
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                //httpURLConnection.setRequestProperty("content-type", "application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "InsertData: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+
     /*줌줌줌++++++++++++++++++++++++++++++++++Calculate distance between two locations+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     public float getDistanceInMeter(double startLat, double startLong, double endLat, double endLong) {
         Location sourceLoc = new Location("");
@@ -1083,4 +1285,154 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
 
     }
     /*-------------------------------------------OnCameraIdleListener---------------------------------------------------------------------------------------*/
+       /*-----------------------------------------GetPathJson---------------------------------------------------------------------------------------------------*/
+    public class GetPathJson extends AsyncTask<String, Void, String> {
+        // 자동차 안내 tmap
+        String startLat;
+        String startLng;
+        String endLat;
+        String endLng;
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            /*시작 위도, 경도, 도착 위도, 경도*/
+            startLat = params[0];
+            startLng = params[1];
+            endLat = params[2];
+            endLng = params[3];
+            String result="";
+
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url("https://apis.skplanetx.com/tmap/routes?version=1&appKey=eb2b21b5-65d8-3686-9664-1442352bab42&startX=" + startLng + "&startY=" + startLat + "&endX=" + endLng + "&endY=" + endLat + "&reqCoordType=WGS84GEO&resCoordType=WGS84GEO")
+                    .build(); // 이 url에 좌표를 전송하여 json구조를 전송받는다. 구글의 좌표(위도, 경도)와 다음의 좌표 (경도, 위도) 순서가 다르다
+            try {
+                Response response = client.newCall(request).execute();
+                result = response.body().string();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return result;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.e("ddd[GetPathJson]출도json", result);
+            // 결과값을 파싱해주는 스레드에 넘김
+            ParsePathJson aParsePathJson = new ParsePathJson();
+            aParsePathJson.execute(result);
+        }
+    }
+
+  /*-----------------------------------------GetPathJson---------------------------------------------------------------------------------------------------*/
+
+
+    /*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
+    public class ParsePathJson extends AsyncTask<String, Integer, ArrayList<LatLng>> {
+        // Parsing the data in non-ui thread
+
+        int totalDistance;
+        ArrayList<com.google.android.gms.maps.model.LatLng> mapPoints; //LatLng 변수
+
+        @Override
+        protected ArrayList<com.google.android.gms.maps.model.LatLng> doInBackground(String... jsonData) {
+            try {
+                JSONObject jsonObject = new JSONObject(jsonData[0]); //통제이슨을 받아옴
+                JSONArray features = jsonObject.getJSONArray("features"); // json 이름 형상 정보 입니다. (geojson 표준 규격) //키값 : Type과 features중 features가져옴
+
+                mapPoints = new ArrayList<>(); //지도에 찍을 맵 좌표값을 저장할 어레이리스트를 만듬
+
+                for (int i = 0; i < features.length(); i++) { // 블로그 참고 하였다.
+                    JSONObject test2 = features.getJSONObject(i);
+                    if (i == 0) {
+                        JSONObject properties = test2.getJSONObject("properties"); // 프로퍼티에는 전체 거리 전체 시간 택시요금 네비안내 다음에올길이름등 정보가 들어있다.
+                        totalDistance += properties.getInt("totalDistance"); // 경로 총 길이(단위: m)입니다. - pointType=S 일때 응답되는 정보입니다.
+
+                    }
+
+                    JSONObject geometry = test2.getJSONObject("geometry");
+                    JSONArray coordinates = geometry.getJSONArray("coordinates"); //좌표 정보입니다.
+                    String geoType = geometry.getString("type"); // 구간의 정보입니다.
+
+                    if (geoType.equals("Point")) { // 꼭지점에 해당하는 Point 객체
+                        double lonJson = coordinates.getDouble(0);
+                        double latJson = coordinates.getDouble(1);
+
+//                        Log.d("TAG", "-");
+//                        Log.d("TAG", lonJson + "," + latJson + "\n");
+                        com.google.android.gms.maps.model.LatLng point = new com.google.android.gms.maps.model.LatLng(latJson, lonJson);
+                        mapPoints.add(point);
+
+                    }
+
+                    if (geoType.equals("LineString")) { // 선에 해당하는 LineString 객체
+                        for (int j = 0; j < coordinates.length(); j++) {
+                            JSONArray JLinePoint = coordinates.getJSONArray(j);
+                            double lonJson = JLinePoint.getDouble(0);
+                            double latJson = JLinePoint.getDouble(1);
+
+//                            Log.d("TAG", "-");
+//                            Log.d("TAG", lonJson + "," + latJson + "\n");
+                            com.google.android.gms.maps.model.LatLng point = new com.google.android.gms.maps.model.LatLng(latJson, lonJson);
+                            mapPoints.add(point);
+
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return mapPoints;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(ArrayList<com.google.android.gms.maps.model.LatLng> result) {
+            PolylineOptions lineOptions = null;
+            lineOptions = new PolylineOptions();
+
+            for (int i = 0; i < result.size(); i++) {
+                com.google.android.gms.maps.model.LatLng point = result.get(i);
+
+                LatLng position = new LatLng(point.latitude, point.longitude);
+
+//                Log.e("position", position + "");
+//                points.add(position);
+//                Log.e("points", points + "");
+
+/*                // 출발지 마커
+                if (i == result.size() - 1) {
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(position);
+                    markerOptions.title("출발지");
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    marker = mGoogleMap.addMarker(markerOptions);
+
+
+                    // 출발지로 맵이동
+                    CameraPosition cp = new CameraPosition.Builder().target((position)).zoom(15).build();
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cp));
+                }*/
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.add(position);
+                lineOptions.width(20);
+                //  lineOptions.color(Color.argb(164,57,17,64)); //rgba(57, 17, 64, 0.62) // 보라색
+                lineOptions.color(Color.argb(170,0,89,44));
+            }
+
+            // 폴리라인을 그려준다.
+            line = mGoogleMap.addPolyline(lineOptions);
+            // 처음 맵이 그려질 때는 line변수가 없기 때문에 line변수가 있는지 없는 지 구별해줄 조건이 필요했음
+            isLineOnMap = true;
+        }
+    }
+/*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
 }

@@ -40,7 +40,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
-import com.example.jpar4.mitfahren.activity.LoginActivity;
 import com.example.jpar4.mitfahren.activity.UserPageActivity;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.dialog.ApppracCustomDialog;
@@ -352,7 +351,9 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         }else if (id == R.id.nav_out_mem) {
 
         }else if (id == R.id.nav_login) {
-            Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
+        /*    Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
+            startActivity(intent);*/
+            Intent intent = new Intent(NewSearchActivity.this, NewDriverInfoActivity.class);
             startActivity(intent);
         }else if (id == R.id.nav_join) {
         /*    Intent intent = new Intent(NewSearchActivity.this, JoinActivity.class);*/
@@ -1071,6 +1072,7 @@ public void onClick(View v) {
         case R.id.actv_search_start:
             if(isLineOnMap){
                 line.remove();
+                isLineOnMap=false;
             }
             start_btn_push = false; // 출발지 텍스트뷰 누르면 다시 누를수있는 상태이므로 false화
             start_arrive = true; // 출발지 텍스트뷰 누르면 true로
@@ -1093,6 +1095,7 @@ public void onClick(View v) {
         case R.id.actv_search_arrive:
             if(isLineOnMap){
                 line.remove();
+                isLineOnMap=false;
             }
 
             start_arrive = false; // 도착지 텍스트뷰 누르면 false로
