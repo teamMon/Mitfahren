@@ -93,7 +93,8 @@
         <activity android:name=".tmap_test.NewAddDriverActivity" />
         <activity android:name=".tmap_test.NewAddDriverActivity2" />
         <activity android:name=".tmap_test.NewDriverInfoActivity" />
-        <activity android:name=".tmap_test.NewUserPageActivity"></activity>
+        <activity android:name=".tmap_test.NewUserPageActivity" />
+        <activity android:name=".tmap_test.NewCarpoolList"></activity>
     </application>
 
 </manifest>
