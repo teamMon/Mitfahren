@@ -40,7 +40,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
-import com.example.jpar4.mitfahren.activity.UserPageActivity;
+import com.example.jpar4.mitfahren.activity.LoginActivity;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.dialog.ApppracCustomDialog;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
@@ -169,7 +169,6 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
 
         setContentView(R.layout.activity_drawer);
-
         /*app객체*/
         app = (Myapp)getApplicationContext();
 
@@ -262,6 +261,16 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             //nav_header_profile_img
 
         }else{
+             /*해더 네임 이메일 변경*/
+            nav_header_name.setText("손님1");
+            nav_header_email.setText("customer1@gmail.com");
+
+            /*헤더 이미지 변경*/
+             nav_header_profile_img.setImageResource(R.mipmap.ic_person);
+//            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //nav_header_profile_img
+
+
             nev_Menu.findItem(R.id.nav_myinfo).setVisible(false);
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
@@ -325,8 +334,10 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
         if (id == R.id.nav_myinfo) {
           /*사용자 평가 샘플페이지*/
-            Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
+            Intent intent = new Intent(NewSearchActivity.this, NewUserPageActivity.class);
             startActivity(intent);
+            /*Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
+            startActivity(intent);*/
         } /*else if (id == R.id.nav_feedback) {
 
         }*/ else if (id == R.id.nav_add_driver) {
@@ -351,10 +362,10 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         }else if (id == R.id.nav_out_mem) {
 
         }else if (id == R.id.nav_login) {
-        /*    Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
-            startActivity(intent);*/
-            Intent intent = new Intent(NewSearchActivity.this, NewDriverInfoActivity.class);
+            Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
             startActivity(intent);
+            /*Intent intent = new Intent(NewSearchActivity.this, NewDriverInfoActivity.class);
+            startActivity(intent);*/
         }else if (id == R.id.nav_join) {
         /*    Intent intent = new Intent(NewSearchActivity.this, JoinActivity.class);*/
             Intent intent = new Intent(NewSearchActivity.this, test_join.class);
@@ -450,6 +461,14 @@ protected void onStart() {
 
 
         }else{
+                  /*해더 네임 이메일 변경*/
+            nav_header_name.setText("손님1");
+            nav_header_email.setText("customer1@gmail.com");
+
+            /*헤더 이미지 변경*/
+            nav_header_profile_img.setImageResource(R.mipmap.ic_person);
+
+
             nev_Menu.findItem(R.id.nav_login).setVisible(true);
             nev_Menu.findItem(R.id.nav_join).setVisible(true);
             nev_Menu.findItem(R.id.nav_myinfo).setVisible(false);

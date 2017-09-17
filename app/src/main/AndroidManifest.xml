@@ -92,7 +92,8 @@
         <activity android:name=".test_join.test_join" />
         <activity android:name=".tmap_test.NewAddDriverActivity" />
         <activity android:name=".tmap_test.NewAddDriverActivity2" />
-        <activity android:name=".tmap_test.NewDriverInfoActivity"></activity>
+        <activity android:name=".tmap_test.NewDriverInfoActivity" />
+        <activity android:name=".tmap_test.NewUserPageActivity"></activity>
     </application>
 
 </manifest>

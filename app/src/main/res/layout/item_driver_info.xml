@@ -52,71 +52,71 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         />
+
     <LinearLayout
-        android:padding="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        >
+        android:padding="8dp">
+
         <TextView
-            android:textColor="#6200ea"
-            android:text="출발지"
             android:id="@+id/tv_depart_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:text="출발지"
+            android:textColor="#6200ea" />
+
         <TextView
-            android:layout_marginLeft="8dp"
-            android:text="인천"
             android:id="@+id/tv_driver_from"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            />
+            android:text="인천" />
+
         <TextView
-            android:textColor="#6200ea"
-            android:text="도착지"
             android:id="@+id/tv_arrival_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:text="도착지"
+            android:textColor="#6200ea" />
+
         <TextView
-            android:layout_marginLeft="8dp"
-            android:text="강남"
             android:id="@+id/tv_driver_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            />
+            android:text="강남" />
+
         <TextView
-            android:textColor="#6200ea"
-            android:text="출발시간"
             android:id="@+id/tv_depart_time_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:text="출발시간"
+            android:textColor="#6200ea" />
+
         <TextView
-            android:layout_marginLeft="8dp"
-            android:text="9:00 AM"
             android:id="@+id/tv_depart_time_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            />
+            android:text="9:00 AM" />
+
         <TextView
-            android:textColor="#6200ea"
-            android:text="동승인원"
             android:id="@+id/tv_people_num_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:text="동승인원"
+            android:textColor="#6200ea" />
+
         <TextView
-            android:layout_marginLeft="8dp"
-            android:text="0 명"
             android:id="@+id/tv_driver_carry_people_num_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:layout_marginLeft="8dp"
+            android:text="0 명" />
     </LinearLayout>
 
 </LinearLayout>

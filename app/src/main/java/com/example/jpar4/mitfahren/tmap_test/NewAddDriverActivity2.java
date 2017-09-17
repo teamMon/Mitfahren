@@ -924,9 +924,15 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 //  }
 /*이미지 서버에 올리는 건 앞에서 했음.*/
                     /*데이터 php로 전송*/
-              InsertData task = new InsertData();
+                InsertData task = new InsertData();
                 task.execute(app.getUser_email(),start_d,start_t,start_p,Start_Marker_InFo.getLat().toString(),Start_Marker_InFo.getLng().toString(),Arrive_Marker_InFo.getLat().toString(),Arrive_Marker_InFo.getLng().toString(),user_car_photo);
 
+                /*여기서는 액티비티 안띄움*/
+                /*데이터 전송후 이메일을 인텐트로 전달하는 것과 함께 카풀 페이지 보여줌*/
+               // intent = new Intent(NewAddDriverActivity2.this, NewDriverInfoActivity.class);
+              //  intent.putExtra("user_email", app.getUser_email());  // 필요 없을 듯. 왜나하면 반드시 로그인후 운전자를 등록할 수 있기 때문에, 이 경우 항상 로그인되어있는 상태임 따라서 이메일 아이디를 알 수 있음
+
+            //   startActivity(intent);
                 break;
         }
     }
@@ -949,12 +955,30 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
 
             progressDialog.dismiss();
             //mTextViewResult.setText(result);
-            Toast.makeText(NewAddDriverActivity2.this, result, Toast.LENGTH_SHORT).show();
 
-            /*로그인 액티비티로 이동*/
-            Intent intent = new Intent(NewAddDriverActivity2.this, NewDriverInfoActivity.class);
-            startActivity(intent);
-            finish();
+            String[] arr_result = result.split("#");
+            for (int i = 0; i < arr_result.length; i++) {
+                Log.e("result check", arr_result[i]);
+            }
+            String OX_msg = arr_result[0];
+            String OX = arr_result[1];
+
+            Toast.makeText(NewAddDriverActivity2.this, OX_msg, Toast.LENGTH_LONG).show();
+
+            if(OX.equals("o")){
+                /*로그인 액티비티로 이동*/
+             /*데이터 전송후 이메일을 인텐트로 전달하는 것과 함께 카풀 페이지 보여줌*/
+                Intent intent = new Intent(NewAddDriverActivity2.this, NewDriverInfoActivity.class);
+                intent.putExtra("user_start_date", start_d);
+
+                //  intent.putExtra("user_email", app.getUser_email());  // 필요 없을 듯. 왜나하면 반드시 로그인후 운전자를 등록할 수 있기 때문에, 이 경우 항상 로그인되어있는 상태임 따라서 이메일 아이디를 알 수 있음
+                startActivity(intent);
+                finish();
+            }else{// x일경우
+                finish();
+
+            }
+
 
             Log.d(TAG, "POST response  - " + result);
         }

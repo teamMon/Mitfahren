@@ -41,11 +41,19 @@ import com.example.jpar4.mitfahren.func.MRRoundedImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class NewAddDriverActivity extends AppCompatActivity {
+    private static final String TAG = "NewAddDriverActivity";
     /*app객체 (로그인에 정보 이용에사용)*/
     Myapp app;
     /*app객체 (로그인에 정보 이용에 사용)*/
@@ -141,33 +149,198 @@ public class NewAddDriverActivity extends AppCompatActivity {
                     Toast.makeText(NewAddDriverActivity.this, "시간을 입력해주세요.", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    Intent intent = new Intent(NewAddDriverActivity.this, NewAddDriverActivity2.class);
-                    intent.putExtra("date", btnpick.getText().toString());
-                    intent.putExtra("time", timepick.getText().toString());
-                    intent.putExtra("pNum", add_driver_spin_people_num.getSelectedItem().toString());
-                    /*자동차 파일 위치 만들기*/
-                    foloer_name = app.getUser_email().substring(0, app.getUser_email().lastIndexOf(".") ) + app.getUser_email().substring(app.getUser_email().lastIndexOf(".") + 1);//폴더명 이미지 저장되어 있는
-                    user_car_photo = foloer_name+"/car_"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/car_" + 파일명+ 확장자
-                    Log.e("my ddd",user_car_photo);
-                    intent.putExtra("user_car_photo", user_car_photo);
-                    /*자동차 파일 위치 만들기*/
-                       /*파일 업로드*/
 
-                    if (InternetConnection.checkConnection(mContext)) {
-                        UploadAsync upload_task = new UploadAsync();
-                        upload_task.execute();
-                    } else {
-                        Snackbar.make(findViewById(R.id.parentView), R.string.string_internet_connection_warning, Snackbar.LENGTH_INDEFINITE).show();
+                    /*날짜 변환*/
+                    String text_String = btnpick.getText().toString();
+                    SimpleDateFormat old_date_format = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat new_date_format = new SimpleDateFormat("yyyyMMdd");
+                    String new_date="";
+                    try{
+                        Date old_date = old_date_format.parse(text_String);
+                        new_date = new_date_format.format(old_date);
+
+                    }catch(ParseException e){
+                        e.printStackTrace();
                     }
-                   // intent.putExtra("roundimage_bitmap", roundimage_bitmap); 쓰바 100kb넘으면 안되는 제약 있어서 그냥 그전에 올리기로함. 왜냐면 대부분 100kb이하지만 넘을수도 있기때문 근대 또 그냥은 안전달되는것 같고 바이트어레이로 바꿔서 전달해야되는 귀찮 그냥 여기서 올려야 겠음
+                     /*날짜 변환*/
 
-                    startActivity(intent);
+                     /*검사하기*/
+                    InspectData inspect_task = new InspectData();
+                    inspect_task.execute(app.getUser_email(), text_String);
+
                 }
             }
         });
 
         /*------------------------------------------------------------------------------------------다음 버튼------------------------------------------------------------------------------------------*/
     }
+    /*-----------------------------------------------------------------------------------------시간, 날짜검사------------------------------------------------------------------------------------------*/
+        /*운전자테이블에 운전자정보 넣기전 검사 테스트스레드*/
+    class InspectData extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(NewAddDriverActivity.this,
+                    "Please Wait", null, true, true);
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+            //mTextViewResult.setText(result);
+
+            String[] arr_result = result.split("#");
+            for (int i = 0; i < arr_result.length; i++) {
+                Log.e("result check", arr_result[i]);
+            }
+            String OX_msg = arr_result[0];
+            String OX = arr_result[1];
+
+            Toast.makeText(NewAddDriverActivity.this, OX_msg, Toast.LENGTH_LONG).show();
+
+            if(OX.equals("o")){
+                Intent intent = new Intent(NewAddDriverActivity.this, NewAddDriverActivity2.class);
+
+                /*날짜 변환*/
+                String text_String = btnpick.getText().toString();
+                SimpleDateFormat old_date_format = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat new_date_format = new SimpleDateFormat("yyyyMMdd");
+                String new_date="";
+                try{
+                    Date old_date = old_date_format.parse(text_String);
+                    new_date = new_date_format.format(old_date);
+
+                }catch(ParseException e){
+                    e.printStackTrace();
+                }
+             /*날짜 변환*/
+
+                intent.putExtra("date", text_String);
+                intent.putExtra("time", timepick.getText().toString());
+                intent.putExtra("pNum", add_driver_spin_people_num.getSelectedItem().toString());
+                    /*자동차 파일 위치 만들기*/
+                foloer_name = app.getUser_email().substring(0, app.getUser_email().lastIndexOf(".") ) + app.getUser_email().substring(app.getUser_email().lastIndexOf(".") + 1);//폴더명 이미지 저장되어 있는
+                user_car_photo = foloer_name+"/car_"+new_date+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/car_" + 파일명+ 확장자
+                Log.e("my ddd",user_car_photo);
+                intent.putExtra("user_car_photo", user_car_photo);
+                    /*자동차 파일 위치 만들기*/
+                       /*파일 업로드*/
+
+                if (InternetConnection.checkConnection(mContext)) {
+                    UploadAsync upload_task = new UploadAsync();
+                    upload_task.execute();
+                } else {
+                    Snackbar.make(findViewById(R.id.parentView), R.string.string_internet_connection_warning, Snackbar.LENGTH_INDEFINITE).show();
+                }
+                // intent.putExtra("roundimage_bitmap", roundimage_bitmap); 쓰바 100kb넘으면 안되는 제약 있어서 그냥 그전에 올리기로함. 왜냐면 대부분 100kb이하지만 넘을수도 있기때문 근대 또 그냥은 안전달되는것 같고 바이트어레이로 바꿔서 전달해야되는 귀찮 그냥 여기서 올려야 겠음
+
+                startActivity(intent);
+
+            }else{// x일경우
+
+
+            }
+
+
+            Log.d(TAG, "POST response  - " + result);
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+            String user_email = (String)params[0];
+            String user_start_date = (String)params[1];
+           /* String user_start_time = (String)params[2];
+            String user_with_poeple = (String)params[3];
+            String user_start_lat = (String)params[4];
+            String user_start_lng = (String)params[5];
+            String user_arrive_lat = (String)params[6];
+            String user_arrive_lng = (String)params[7];
+            String user_car_photo = (String)params[8];*/
+            //  String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
+
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/add_driver_insert_inspect.php";
+            String postParameters =
+                    "user_email=" + user_email
+                            + "&user_start_date=" + user_start_date;
+                          /*  + "&user_start_time=" + user_start_time
+                            + "&user_with_poeple=" + user_with_poeple
+                            + "&user_start_lat=" + user_start_lat
+                            + "&user_start_lng=" + user_start_lng
+                            + "&user_arrive_lat=" + user_arrive_lat
+                            + "&user_arrive_lng=" + user_arrive_lng
+                            + "&user_car_photo=" + user_car_photo;*/
+
+            //Log.e("ddd", user_photo);
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                //httpURLConnection.setRequestProperty("content-type", "application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "InsertData: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+    /*-----------------------------------------------------------------------------------------시간, 날짜검사------------------------------------------------------------------------------------------*/
+
     /*------------------------------------------------------------------------------------------시간, 날짜------------------------------------------------------------------------------------------*/
     public void showTimePickerDialog() {
         timepick = (EditText) findViewById(R.id.time);

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +80,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     /*화면 View 객체 세팅*/
     ImageView iv_driver_info_pic;
     TextView tv_driver_info_date, tv_driver_info_time, tv_driver_info_people, tv_driver_info_start, tv_driver_info_arrive;
+    Button btn_driver_info_confirm, iv_driver_info_see_user_info;
     /*화면 View 객체 세팅*/
 
     /*--------------------------------구글맵 내 현재 위치 찍기----------------------------------------*/
@@ -102,7 +105,12 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         android.support.v7.app.ActionBar ab = getSupportActionBar();
         ab.setTitle("카풀 정보");
         setContentView(R.layout.new_driver_info_activity);
+        /*app객체*/
+        app = (Myapp)getApplicationContext();
         mContext = getApplicationContext();
+
+        Intent intent = getIntent();
+       String  user_start_date = intent.getStringExtra("user_start_date");
 
         iv_driver_info_pic = (ImageView) findViewById(R.id.iv_driver_info_pic);
         tv_driver_info_date = (TextView) findViewById(R.id.tv_driver_info_date);
@@ -111,9 +119,24 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         tv_driver_info_start = (TextView) findViewById(R.id.tv_driver_info_start);
         tv_driver_info_arrive = (TextView) findViewById(R.id.tv_driver_info_arrive);
 
+        iv_driver_info_see_user_info = (Button)findViewById(R.id.iv_driver_info_see_user_info); //운전자 정보 보기
+        iv_driver_info_see_user_info.setOnClickListener(this);
 
-        GetDriverInfo task = new GetDriverInfo();
-        task.execute("qlql@qlql.com");
+        btn_driver_info_confirm = (Button)findViewById(R.id.btn_driver_info_confirm); //운전자 등록 후 확인
+        btn_driver_info_confirm.setOnClickListener(this);
+
+       /*
+        * 1. 인텐트로 이메일을 전달받아 넘겨줄것.
+        *
+        */
+       if(app.isLoginOK()){
+           GetDriverInfo task = new GetDriverInfo();
+           //task.execute("qlql@qlql.com");
+           task.execute(app.getUser_email(), user_start_date);
+       }else{// 운전자 검색을 통해 운전자 아이디를 전달 받는 경우, 이메일을 전달받는 경우 이를 운전자 정보 페이지에도 전달할 수 있도록 구현해야 함.
+
+       }
+
 
 
 
@@ -227,9 +250,10 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String user_email = (String)params[0];
+            String user_start_date = (String)params[1];
 
             String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/get_driver_info.php";
-            String postParameters = "user_email=" + user_email;
+            String postParameters = "user_email=" + user_email + "&user_start_date=" + user_start_date;
 
 
             try {
@@ -293,7 +317,26 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
+        Intent intent;
+        switch (v.getId()) {
+            case R.id.iv_driver_info_see_user_info: //사용자 정보보기
+                intent = new Intent(NewDriverInfoActivity.this, NewUserPageActivity.class);
+                if(app.isLoginOK()){ // 로그인 되어 있을 때
+                    intent.putExtra("user_email", app.getUser_email());
+                }else{
+                    //intent.putExtra("user_email", 전달받은이메일); // 전달받은 이메일을 넘겨주도록함
+                }
 
+                startActivity(intent);
+
+                break;
+            case R.id.btn_driver_info_confirm: // 확인버튼을 누르면 다시 메인페이지로 이동할 수 있도록 함.
+                intent = new Intent(NewDriverInfoActivity.this,  NewSearchActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+                break;
+        }
     }
 
     @Override
