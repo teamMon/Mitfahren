@@ -14,7 +14,16 @@ public class Myapp extends Application {
     private String user_drive_num;
     private String user_ride_num;
     private String user_photo;
+    private String whr_r_u_from="start";
     private boolean loginOK;
+
+    public String getWhr_r_u_from() {
+        return whr_r_u_from;
+    }
+
+    public void setWhr_r_u_from(String whr_r_u_from) {
+        this.whr_r_u_from = whr_r_u_from;
+    }
 
     public String getUser_email() {
         return user_email;

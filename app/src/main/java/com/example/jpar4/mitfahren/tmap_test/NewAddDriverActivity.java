@@ -42,6 +42,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -522,15 +524,22 @@ public class NewAddDriverActivity extends AppCompatActivity {
                 intent.putExtra("aspectY", 1);
                 intent.putExtra("scale", true);
                 intent.putExtra("return-data", true);
-                startActivityForResult(intent, AFTER_FROM_ALBUM);
 
-       /*         try {
+
+                //startActivityForResult(intent, AFTER_FROM_ALBUM);
+
+                try {
                     //이미지 데이터를 비트맵으로 받아온다.
-                    Bitmap image_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-                    ImageView image = (ImageView) findViewById(R.id.join_iv_person);
-                    Bitmap image_bitmap2 = MRRoundedImageView.getCroppedBitmap(image_bitmap, 1024);
-                    image.setImageBitmap(image_bitmap2);
-
+               /*     Bitmap image_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                    roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(image_bitmap, 1024);
+                    image.setImageBitmap(roundimage_bitmap);
+                    PIC_OK=true;*/
+                    roundimage_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                    //Bitmap image_bitmap2 = MRRoundedImageView.getCroppedBitmap(roundimage_bitmap, 1024);
+                    image.setImageBitmap(roundimage_bitmap);
+                    PIC_OK=true;
 
                 } catch (FileNotFoundException e) {
                     // TODO Auto-generated catch block
@@ -540,7 +549,7 @@ public class NewAddDriverActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }*/
+                }
                 break;
             }
             case AFTER_FROM_ALBUM :

@@ -218,6 +218,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
 
 
+
+
         /*메인화면 설명*/
         if(!app.isLoginOK()){ //로그인 상태가 아닐 때, 메인화면 설명
             mCustomDialog = new ApppracCustomDialog(this,
@@ -270,7 +272,14 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
          nav_header_name = (TextView)nav_Header.findViewById(R.id.nav_header_tv_name);
          nav_header_email= (TextView)nav_Header.findViewById(R.id.nav_header_tv_email);
         nav_header_profile_img = (ImageView)nav_Header.findViewById(R.id.nav_header_profile_img);
+        /*등록한거 맵에 찍어주기 ㅅㅂ 안되...*/
+        Intent aa = getIntent();
+        String Whr_r_u_from = aa.getStringExtra("Whr_r_u_from");
 
+        if(Whr_r_u_from!=null && Whr_r_u_from.equals("ADD_Driver2")) {
+            Log.e("ddd wrufrom oncre", Whr_r_u_from);
+                     /*운전자 정보 가져옴*/
+        }
 
         /*로그인일때      nav_login nav_join 숨김*/
         if(app.isLoginOK()){
@@ -368,9 +377,10 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             startActivity(intent);
             /*Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
             startActivity(intent);*/
-        } /*else if (id == R.id.nav_feedback) {
+            /*등록한 카풀 정보가 있을 때만 나오게 하기*/
+        } else if (id == R.id.nav_mycarpool) {
 
-        }*/ else if (id == R.id.nav_add_driver) {
+        } else if (id == R.id.nav_add_driver) {
             /*맨처음 만든 운전자 등록 테스트*/
     /*        Intent intent = new Intent(NewSearchActivity.this, AddDriverActivity.class);
             startActivity(intent);*/
@@ -452,6 +462,23 @@ protected void onStart() {
     @Override
     protected void onResume() {
         super.onResume();
+
+        /*등록한거 맵에 찍어주기 이거 잘 안됨 슈벌탱*/
+        Intent aa = getIntent();
+        String Whr_r_u_from = aa.getStringExtra("Whr_r_u_from");
+
+        if(Whr_r_u_from!=null && Whr_r_u_from.equals("ADD_Driver2")){
+            Log.e("ddd wrufrom", Whr_r_u_from);
+                     /*운전자 정보 가져옴*/
+
+        }
+        if(app.getWhr_r_u_from().equals("ADD_Driver2")){
+            GetDriverInfo task = new GetDriverInfo();
+            task.execute();
+            app.setWhr_r_u_from("start");
+        }
+
+
         firstCamera = true;
         if (mGoogleApiClient!=null)
             mGoogleApiClient.connect();
@@ -1337,8 +1364,47 @@ public float getZoomForMetersWide(double desiredMeters) {
 
             @Override
             public boolean onClusterItemClick(Item_New_Driver_Info item_new_driver_info) {
-                Toast.makeText(mContext, "길게 누르시면 더 자세한 정보를 볼 수 있습니다.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext, "길게 누르시면 더 자세한 정보를 볼 수 있습니다.", Toast.LENGTH_SHORT).show();
+/*                Intent intent = new Intent(this,  NewDriverInfoActivity.class);
+
+                Item_New_Driver_Info aa = new Item_New_Driver_Info(item_new_driver_info);
+                intent.putExtra("data", aa); // 이건 되는데 ?
+                //intent.putExtra("data", item_new_driver_info); // 이건 안된다? 뭐지??
+                Log.e("ddd driver_info", item_new_driver_info.getUser_email().toString());
+                Log.e("ddd driver_info", item_new_driver_info.getUser_start_date().toString());
+
+
+                startActivity(intent);*/
+                Item_New_Driver_Info aa = new Item_New_Driver_Info(item_new_driver_info);
+                DialogSimple(aa);
                 return false;
+            }
+/*------------------------------------------------------------------------------자동차 이미지 선택했을 때 카풀정보 볼지 않볼지 결정하는 다이얼로그------------------------------------------------------------------------------------------------------------------------------------------------------*/
+            private void DialogSimple(Item_New_Driver_Info item_new_driver_info){
+                final Intent intent = new Intent(this,  NewDriverInfoActivity.class);
+                intent.putExtra("data", item_new_driver_info);
+                AlertDialog.Builder alt_bld = new AlertDialog.Builder(this);
+                alt_bld.setMessage("해당 카풀 정보를 보시겠습니까?").setCancelable(
+                        false).setNegativeButton("예",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Action for 'NO' Button
+                                startActivity(intent);
+
+                            }
+                        }).setPositiveButton("아니오",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Action for 'Yes' Button'
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = alt_bld.create();
+                // Title for AlertDialog
+                //alert.setTitle("Title");
+                // Icon for AlertDialog
+                //alert.setIcon(R.drawable.icon);
+                alert.show();
             }
 
             /*---------------------------------------------------------------------------------클러스터 아이템 온클릭--------------------------------------------------------------------------------------------------------------------*/
@@ -1633,11 +1699,18 @@ public float getZoomForMetersWide(double desiredMeters) {
                     progressDialog.dismiss();
             /*result로 JsonArray를 받아와서 Json으로 하나씪 분리해서 값을 뽑아야됨*/
                     try{
+                        /*추가했을 때 다 지우고 다시 실행*/
+                       // if(app.getWhr_r_u_from().equals("ADD_Driver2")){
+                            mClusterManager.clearItems();
+                     //   }
+
+
                         //JSONObject obj = new JSONObject(result);
                         JSONArray arr = new JSONArray(result);
                        // ArrayList<Item_New_Driver_Info> itemList = new ArrayList<>();
                         for (int i = 0; i < arr.length(); i++)
                         {
+
                             Item_New_Driver_Info item = new Item_New_Driver_Info();
 
                             item.setUser_email(arr.getJSONObject(i).getString("user_email"));

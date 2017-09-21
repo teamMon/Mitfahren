@@ -969,6 +969,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 /*로그인 액티비티로 이동*/
              /*데이터 전송후 이메일을 인텐트로 전달하는 것과 함께 카풀 페이지 보여줌*/
                 Intent intent = new Intent(NewAddDriverActivity2.this, NewDriverInfoActivity.class);
+                intent.putExtra("Whr_r_u_from", "ADD_Driver2");
                 intent.putExtra("user_start_date", start_d);
 
                 //  intent.putExtra("user_email", app.getUser_email());  // 필요 없을 듯. 왜나하면 반드시 로그인후 운전자를 등록할 수 있기 때문에, 이 경우 항상 로그인되어있는 상태임 따라서 이메일 아이디를 알 수 있음

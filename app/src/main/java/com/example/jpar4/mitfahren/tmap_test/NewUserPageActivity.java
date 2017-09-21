@@ -92,6 +92,9 @@ public class NewUserPageActivity extends AppCompatActivity implements View.OnCli
 
         btn_user_info_pic_edit = (Button)findViewById(R.id.btn_user_info_pic_edit); //프로필 사진 변경
         btn_user_info_pic_edit.setOnClickListener(this);
+        /*사용자와 등록한 사람정보가 같을 때만 보여줌*/
+
+
         /*만약 app이메일 정보와 전달받은 이메일이 다를 경우 버튼이 안보이게 구현해야됨----------------------------------------------------------------------------------------------!!!*/
 
         btn_user_info_confirm = (Button)findViewById(R.id.btn_user_info_confirm); //확인
@@ -179,6 +182,16 @@ public class NewUserPageActivity extends AppCompatActivity implements View.OnCli
             tv_user_info_total_rider.setText(user_drive_num + " 회");
             tv_user_info_total_riding.setText(user_ride_num + " 회");
             Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + user_photo).into(iv_user_info_pic);
+
+                /*사용자와 등록한 사람정보가 같을 때만 사용자 변경버튼 보여줌*/
+                if(!app.isLoginOK()){
+                    btn_user_info_pic_edit.setVisibility(View.GONE);
+                }
+                else if(app.getUser_email().equals(user_email)){
+                    btn_user_info_pic_edit.setVisibility(View.VISIBLE);
+                }else{
+                    btn_user_info_pic_edit.setVisibility(View.GONE);
+                }
 
 
         /*    ImageView iv_user_info_pic;

@@ -98,7 +98,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     //디폴트 위치, Seoul
     private static final LatLng DEFAULT_LOCATION = new LatLng(37.56, 126.97);
     private AppCompatActivity mActivity;
-
+    String Whr_r_u_from;
 
 
     @Override
@@ -114,6 +114,13 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         /*에드드라이버2에서 날라올때*/
         String  user_start_date = intent.getStringExtra("user_start_date");
+
+/*ADD Driver2에서 올때만 값을 넣어줌 */
+        Whr_r_u_from = intent.getStringExtra("Whr_r_u_from");
+        if(Whr_r_u_from!=null){
+            Log.e("ddd 1", Whr_r_u_from);
+        }
+
         /*리스트뷰에서 날라올때*/
         item_new_driver_info  = (Item_New_Driver_Info) intent.getSerializableExtra("data");
 
@@ -146,7 +153,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
            if(item_new_driver_info==null){ // 등록후 확인페이지면 null
                GetDriverInfo task = new GetDriverInfo();
                //task.execute("qlql@qlql.com");
-               Log.e("ddd ", app.getUser_email()+","+item_new_driver_info.getUser_start_date());
+//               Log.e("ddd ", app.getUser_email()+","+item_new_driver_info.getUser_start_date());
                task.execute(app.getUser_email(), user_start_date);
            }
        /*    else if(!app.getUser_email().equals(item_new_driver_info.getUser_email())){
@@ -383,6 +390,11 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
                 break;
             case R.id.btn_driver_info_confirm: // 확인버튼을 누르면 다시 메인페이지로 이동할 수 있도록 함.
                 intent = new Intent(NewDriverInfoActivity.this,  NewSearchActivity.class);
+                if(Whr_r_u_from!=null && Whr_r_u_from.equals("ADD_Driver2")){
+                    intent.putExtra("Whr_r_u_from", "ADD_Driver2");
+                    Log.e("ddd 2", Whr_r_u_from);
+                    app.setWhr_r_u_from("ADD_Driver2"); // 인텐트 전송이 잘 안먹혀서 그냥 어플객체 이용
+                }
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();

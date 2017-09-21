@@ -40,14 +40,15 @@
                     android:id="@+id/nav_myinfo"
                     android:icon="@drawable/ic_face_black_24dp"
                     android:title="나의 정보 보기" />
-               <!-- <item
-                    android:id="@+id/nav_feedback"
-                    android:icon="@drawable/ic_feedback_page_black_24dp"
-                    android:title="나의 평가 페이지" />-->
+
                 <item
                     android:id="@+id/nav_add_driver"
                     android:icon="@drawable/ic_drive_eta_black_24dp"
                     android:title="운전자로 등록하기" />
+             <item
+                        android:id="@+id/nav_mycarpool"
+                        android:icon="@drawable/ic_feedback_page_black_24dp"
+                        android:title="나의 카풀 정보" />
               <!--  <item
                     android:id="@+id/nav_see_friend"
                     android:icon="@drawable/ic_friendgroup_black_24dp"
