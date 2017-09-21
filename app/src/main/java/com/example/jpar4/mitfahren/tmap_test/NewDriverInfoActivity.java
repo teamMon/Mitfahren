@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
+import com.example.jpar4.mitfahren.model.Item_New_Driver_Info;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -80,7 +81,8 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     /*화면 View 객체 세팅*/
     ImageView iv_driver_info_pic;
     TextView tv_driver_info_date, tv_driver_info_time, tv_driver_info_people, tv_driver_info_start, tv_driver_info_arrive;
-    Button btn_driver_info_confirm, iv_driver_info_see_user_info;
+    Button btn_driver_info_confirm, iv_driver_info_see_user_info, btn_see_apply_list, btn_carpool_apply;
+    Item_New_Driver_Info item_new_driver_info;
     /*화면 View 객체 세팅*/
 
     /*--------------------------------구글맵 내 현재 위치 찍기----------------------------------------*/
@@ -110,7 +112,11 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         mContext = getApplicationContext();
 
         Intent intent = getIntent();
-       String  user_start_date = intent.getStringExtra("user_start_date");
+        /*에드드라이버2에서 날라올때*/
+        String  user_start_date = intent.getStringExtra("user_start_date");
+        /*리스트뷰에서 날라올때*/
+        item_new_driver_info  = (Item_New_Driver_Info) intent.getSerializableExtra("data");
+
 
         iv_driver_info_pic = (ImageView) findViewById(R.id.iv_driver_info_pic);
         tv_driver_info_date = (TextView) findViewById(R.id.tv_driver_info_date);
@@ -125,16 +131,50 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         btn_driver_info_confirm = (Button)findViewById(R.id.btn_driver_info_confirm); //운전자 등록 후 확인
         btn_driver_info_confirm.setOnClickListener(this);
 
+        btn_see_apply_list = (Button)findViewById(R.id.btn_see_apply_list); //신청자 목록 보기
+        btn_see_apply_list.setOnClickListener(this);
+
+        btn_carpool_apply = (Button)findViewById(R.id.btn_carpool_apply); //카풀 신청하기
+        btn_carpool_apply.setOnClickListener(this);
+
+
        /*
         * 1. 인텐트로 이메일을 전달받아 넘겨줄것.
         *
         */
-       if(app.isLoginOK()){
+       if(app.isLoginOK()){// 로그인이고 앱 아이디와
+           if(item_new_driver_info==null){ // 등록후 확인페이지면 null
+               GetDriverInfo task = new GetDriverInfo();
+               //task.execute("qlql@qlql.com");
+               Log.e("ddd ", app.getUser_email()+","+item_new_driver_info.getUser_start_date());
+               task.execute(app.getUser_email(), user_start_date);
+           }
+       /*    else if(!app.getUser_email().equals(item_new_driver_info.getUser_email())){
+               GetDriverInfo task = new GetDriverInfo();
+               //task.execute("qlql@qlql.com");\
+               Log.e("ddd 2", item_new_driver_info.getUser_email()+","+item_new_driver_info.getUser_start_date());
+               task.execute(item_new_driver_info.getUser_email(), item_new_driver_info.getUser_start_date());
+           }*/else{//검색페이지에서 온거면 not null
+
+               if(!app.getUser_email().equals(item_new_driver_info.getUser_email())){// 다르면 카풀 신청하기 나오고
+                   btn_driver_info_confirm.setVisibility(View.GONE);
+                   btn_carpool_apply.setVisibility(View.VISIBLE);
+               }else{// 같으면 신청 목록 보기 나오고
+                   btn_driver_info_confirm.setVisibility(View.GONE);
+                   btn_see_apply_list.setVisibility(View.VISIBLE);
+               }
+               GetDriverInfo task = new GetDriverInfo();
+               //task.execute("qlql@qlql.com");\
+               Log.e("ddd 2", item_new_driver_info.getUser_email()+","+item_new_driver_info.getUser_start_date());
+               task.execute(item_new_driver_info.getUser_email(), item_new_driver_info.getUser_start_date());
+           }
+
+       }else{// 운전자 검색을 통해 운전자 아이디를 전달 받는 경우, 이메일을 전달받는 경우 이를 운전자 정보 페이지에도 전달할 수 있도록 구현해야 함.
            GetDriverInfo task = new GetDriverInfo();
            //task.execute("qlql@qlql.com");
-           task.execute(app.getUser_email(), user_start_date);
-       }else{// 운전자 검색을 통해 운전자 아이디를 전달 받는 경우, 이메일을 전달받는 경우 이를 운전자 정보 페이지에도 전달할 수 있도록 구현해야 함.
-
+           Log.e("ddd 3", item_new_driver_info.getUser_email()+","+item_new_driver_info.getUser_start_date());
+           task.execute(item_new_driver_info.getUser_email(), item_new_driver_info.getUser_start_date());
+           Toast.makeText(app, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
        }
 
 
@@ -177,6 +217,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
             progressDialog.dismiss();
 
             //  Toast.makeText(LoginActivity.this, result, Toast.LENGTH_SHORT).show();
+
             String[] arr_result = result.split("#");
             for(int i=0;i<arr_result.length;i++){
                 Log.e("result check", arr_result[i]);
@@ -322,10 +363,20 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
             case R.id.iv_driver_info_see_user_info: //사용자 정보보기
                 intent = new Intent(NewDriverInfoActivity.this, NewUserPageActivity.class);
                 if(app.isLoginOK()){ // 로그인 되어 있을 때
-                    intent.putExtra("user_email", app.getUser_email());
-                }else{
-                    //intent.putExtra("user_email", 전달받은이메일); // 전달받은 이메일을 넘겨주도록함
+                    if(item_new_driver_info==null){ // 등록후 확인페이지면 null
+                        intent.putExtra("user_email", app.getUser_email());
+                    }else {
+                        if(!app.getUser_email().equals(item_new_driver_info.getUser_email())){// 다르면 카풀 신청하기 나오고
+                            intent.putExtra("user_email", item_new_driver_info.getUser_email());
+                        }else{// 같으면 신청 목록 보기 나오고
+                            intent.putExtra("user_email", item_new_driver_info.getUser_email());
+                        }
+                    }
+               }
+                else{
+                    intent.putExtra("user_email", item_new_driver_info.getUser_email());
                 }
+
 
                 startActivity(intent);
 

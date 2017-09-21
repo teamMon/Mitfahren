@@ -23,7 +23,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 >
                 <ImageView
@@ -32,7 +32,15 @@
                     android:layout_gravity="center_vertical|center_horizontal"
                     android:src="@mipmap/ic_launcher_round"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="120dp" />
+                <Button
+                    android:id="@+id/btn_user_info_pic_edit"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/button_type02"
+                    android:textSize="15sp"
+                    android:text="프로필 사진 변경"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp" />
 
 
             </LinearLayout>
@@ -199,6 +207,20 @@
             android:background="@color/colorAccent4"
             />
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="240dp">
+            <Button
+                android:id="@+id/btn_user_info_confirm"
+                android:layout_gravity="bottom|end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:text="확인"
+                android:background="@color/colorPrimary"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"/>
+        </FrameLayout>
 
 
 
@@ -215,4 +237,5 @@
 
 
     </LinearLayout>
+
 </ScrollView>

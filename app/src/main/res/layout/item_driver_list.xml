@@ -31,7 +31,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginBottom="50dp"
                 />
-            <ImageView
+<!--            <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:alpha="0.3"
@@ -43,7 +43,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginBottom="50dp"
                 android:alpha="0.3"
-                android:src="@drawable/profile_img_topshadow"/>
+                android:src="@drawable/profile_img_topshadow"/>-->
 
 <!--
             <ImageView
@@ -119,7 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:text="출발지"
-                    android:textSize="15sp"
+                    android:textSize="10sp"
                     />
                 <TextView
                     android:id="@+id/tv_driver_list_start"
@@ -128,8 +128,10 @@
                     android:lines="1"
                     android:textSize="16sp"
                     android:maxLines="1"
+
+                    android:ellipsize="marquee"
                     android:singleLine="true"
-                    android:textColor="@color/bg_tab_text_color"
+                    android:textColor="#000000"
                     android:gravity="center"
 
                     />
@@ -144,7 +146,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:text="도착지"
-                    android:textSize="15sp"
+                    android:textSize="10sp"
                     />
 
                 <TextView
@@ -154,8 +156,9 @@
                     android:lines="1"
                     android:textSize="16sp"
                     android:maxLines="1"
+                    android:ellipsize="marquee"
                     android:singleLine="true"
-                    android:textColor="@color/bg_tab_text_color"
+                    android:textColor="#000000"
                     android:gravity="center"
                     />
                 <View
@@ -195,12 +198,12 @@
                     android:layout_gravity="center|center_horizontal"
                     android:layout_marginBottom="12dp"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="10dp"
                     android:textStyle="bold"
-                    android:layout_weight="1"
+
                     android:paddingBottom="4dp"
                     android:drawablePadding="6dp"
-                    android:text="탑승 가능 인원:"
+                    android:text="탑승 가능 인원: "
                     android:textColor="@color/purple"
                     android:textSize="14sp" />
                 <TextView
@@ -209,9 +212,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center|center_horizontal"
                     android:layout_marginBottom="12dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="10dp"
                     android:textStyle="bold"
-                    android:layout_weight="1"
+
                     android:paddingBottom="4dp"
                     android:drawablePadding="6dp"
                     android:text="1 명"
@@ -222,15 +225,15 @@
 
                 <Button
 
-                    android:id="@+id/btn_pay"
+                    android:id="@+id/btn_driver_info_carpool_apply"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="80dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_weight="1"
+                    android:layout_marginTop="5dp"
+
                     android:alpha="1"
                     android:background="@drawable/blue_border_button"
                     android:clickable="false"
@@ -239,7 +242,7 @@
                     android:textStyle="bold" />
 
                 <Button
-                    android:id="@+id/btn_book"
+                    android:id="@+id/btn_driver_info_carpool_info"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="75dp"
                     android:layout_height="40dp"
@@ -247,8 +250,8 @@
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_weight="1"
+                    android:layout_marginTop="5dp"
+
                     android:background="@drawable/blue_rounded_corners_bg"
                     android:text="카풀 정보"
                     android:textColor="@color/white"

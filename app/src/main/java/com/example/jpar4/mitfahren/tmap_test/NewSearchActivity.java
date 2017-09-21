@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -45,6 +47,7 @@ import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.dialog.ApppracCustomDialog;
 import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
 import com.example.jpar4.mitfahren.model.CameraView;
+import com.example.jpar4.mitfahren.model.Item_New_Driver_Info;
 import com.example.jpar4.mitfahren.model.NewMapLocaInfo;
 import com.example.jpar4.mitfahren.test_join.test_join;
 import com.google.android.gms.common.ConnectionResult;
@@ -62,14 +65,26 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+import com.google.maps.android.ui.IconGenerator;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -85,7 +100,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         LocationListener,
         View.OnClickListener,
         GoogleMap.OnCameraMoveListener,
-        GoogleMap.OnCameraIdleListener
+        GoogleMap.OnCameraIdleListener,
+        ClusterManager.OnClusterItemClickListener<Item_New_Driver_Info>
         {
     /*좌표 핀셋찍기에 사용  private String mLatitude,mLongitude;*/
     private String mLatitude,mLongitude;
@@ -116,6 +132,13 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
     /*app객체 (로그인에 사용)*/
     Myapp app;
+    /**
+     * Context Variables
+     */
+    Context mContext;
+
+    /*클러스터 메니져*/
+    ClusterManager<Item_New_Driver_Info> mClusterManager;
 
     /*--------------------------------------헤더 text name, email--------------------------------------------------------*/
     ImageView nav_header_profile_img;
@@ -171,6 +194,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         setContentView(R.layout.activity_drawer);
         /*app객체*/
         app = (Myapp)getApplicationContext();
+
+        mContext = getApplicationContext();
 
          /*좌표 핀셋찍기에 사용  mLatitude, mLongitude, showposition*/
         btn_select_start = (Button)findViewById(R.id.btn_select_start); // 출발지 버튼
@@ -257,8 +282,13 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nav_header_email.setText(app.getUser_email());
 
             /*헤더 이미지 변경*/
+           // Picasso.with(getActivity()).cache.clear();
+            Picasso.with(this).invalidate("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
             Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+        //    Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
             //nav_header_profile_img
+
+            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
 
         }else{
              /*해더 네임 이메일 변경*/
@@ -362,6 +392,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         }else if (id == R.id.nav_out_mem) {
 
         }else if (id == R.id.nav_login) {
+
             Intent intent = new Intent(NewSearchActivity.this, LoginActivity.class);
             startActivity(intent);
             /*Intent intent = new Intent(NewSearchActivity.this, NewDriverInfoActivity.class);
@@ -456,9 +487,14 @@ protected void onStart() {
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
              /*헤더 이미지 변경*/
+            //Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //nav_header_profile_img
+            Picasso.with(this).invalidate("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
             Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //    Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
             //nav_header_profile_img
 
+            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
 
         }else{
                   /*해더 네임 이메일 변경*/
@@ -521,6 +557,7 @@ protected void onStart() {
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady");
         mGoogleMap = googleMap;
+
         mGoogleMap.setOnCameraIdleListener(this);
         mGoogleMap.setOnCameraMoveListener(this);
 
@@ -533,6 +570,25 @@ protected void onStart() {
         mGoogleMap.getUiSettings().setCompassEnabled(true);
         //mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
+        //클러스터 매니저를 생성
+        mClusterManager = new ClusterManager<>(this, mGoogleMap);
+        mGoogleMap.setOnMarkerClickListener(mClusterManager);
+        mClusterManager.setOnClusterItemClickListener(this);
+        /*mClusterManager.setRenderer(new DriverInfoRenderer());*/
+        mGoogleMap.setOnCameraChangeListener(mClusterManager);
+
+        /*마커 찍고 클러스터 ㄱㄱ*/
+  /*      for(int i=0; i<10; i++){
+            double lat = 37.532600 + (i / 200d);
+            double lng = 127.024612 + (i / 200d);
+            mClusterManager.addItem(new Item_New_Driver_Info(new LatLng(lat, lng), "House"+i));
+        }*/
+         /*운전자 정보 가져옴*/
+        GetDriverInfo task = new GetDriverInfo();
+        task.execute();
+
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //API 23 이상이면 런타임 퍼미션 처리 필요
@@ -1155,6 +1211,8 @@ public void onClick(View v) {
          //   Log.e("ddd", aa);
 
             //Toast.makeText(this, aa, Toast.LENGTH_SHORT).show();
+            intent = new Intent(NewSearchActivity.this, TestLIstView.class);
+            startActivity(intent);
 
             break;
     }
@@ -1274,8 +1332,17 @@ public float getZoomForMetersWide(double desiredMeters) {
             new HttpReqTask().execute("", "", addr);
         }
     }
+/*---------------------------------------------------------------------------------클러스터 아이템 온클릭--------------------------------------------------------------------------------------------------------------------*/
 
-    /*-------------------------------------------주소->좌표---------------------------------------------------------------------------------------*/
+
+            @Override
+            public boolean onClusterItemClick(Item_New_Driver_Info item_new_driver_info) {
+                Toast.makeText(mContext, "길게 누르시면 더 자세한 정보를 볼 수 있습니다.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            /*---------------------------------------------------------------------------------클러스터 아이템 온클릭--------------------------------------------------------------------------------------------------------------------*/
+            /*-------------------------------------------주소->좌표---------------------------------------------------------------------------------------*/
             private class HttpReqTask extends AsyncTask<String,String,String> {
                 @Override
                 protected String doInBackground(String... arg) {
@@ -1545,5 +1612,188 @@ public float getZoomForMetersWide(double desiredMeters) {
         }
     }
 /*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------디비에서 운전자 정보를 가져옮-----------------------------------------------------------------------*/
 
+            class GetDriverInfo extends AsyncTask<String, Void, String> {
+                ProgressDialog progressDialog;
+
+                @Override
+                protected void onPreExecute() {
+                    super.onPreExecute();
+
+                    progressDialog = ProgressDialog.show(NewSearchActivity.this,
+                            "잠시만 기다려 주세요.", null, true, true);
+                }
+
+
+                @Override
+                protected void onPostExecute(String result) {
+                    super.onPostExecute(result);
+
+                    progressDialog.dismiss();
+            /*result로 JsonArray를 받아와서 Json으로 하나씪 분리해서 값을 뽑아야됨*/
+                    try{
+                        //JSONObject obj = new JSONObject(result);
+                        JSONArray arr = new JSONArray(result);
+                       // ArrayList<Item_New_Driver_Info> itemList = new ArrayList<>();
+                        for (int i = 0; i < arr.length(); i++)
+                        {
+                            Item_New_Driver_Info item = new Item_New_Driver_Info();
+
+                            item.setUser_email(arr.getJSONObject(i).getString("user_email"));
+                            item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
+                            item.setUser_start_time(arr.getJSONObject(i).getString("user_start_time"));
+                            item.setUser_with_poeple(arr.getJSONObject(i).getString("user_with_poeple"));
+                            item.setUser_start_lat(arr.getJSONObject(i).getString("user_start_lat"));
+                            item.setUser_start_lng(arr.getJSONObject(i).getString("user_start_lng"));
+                            item.setUser_arrive_lat(arr.getJSONObject(i).getString("user_arrive_lat"));
+                            item.setUser_arrive_lng(arr.getJSONObject(i).getString("user_arrive_lng"));
+                            item.setUser_car_photo(arr.getJSONObject(i).getString("user_car_photo"));
+                            item.setUser_having_rider(arr.getJSONObject(i).getString("user_having_rider"));
+                            item.setUser_carpool_complete(arr.getJSONObject(i).getString("user_carpool_complete"));
+
+                            item.setUser_start(getCurrentAddress2(arr.getJSONObject(i).getString("user_start_lat"),arr.getJSONObject(i).getString("user_start_lng")));
+                            item.setUser_arrive(getCurrentAddress2(arr.getJSONObject(i).getString("user_arrive_lat"),arr.getJSONObject(i).getString("user_arrive_lng")));
+
+                            // itemList.add(item);
+                            //adapter.addItem(item);
+
+                            //JSONObject obj = new JSONObject(arr.get(i).toString());
+                            //  Log.e("json"+i, arr.get(i).toString());
+                            Log.e("ddd json"+i, arr.getJSONObject(i).toString());
+                            Log.e("ddd user_email", arr.getJSONObject(i).getString("user_email")) ;
+
+                            mClusterManager.setRenderer(new DriverInfoRenderer(getApplicationContext(), mGoogleMap, mClusterManager));
+
+                            mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start()));
+
+                        /*    MarkerOptions markerOptions = new MarkerOptions();
+                            markerOptions.position(item.getLocation());
+                            markerOptions.title("도착지");
+                            markerOptions.snippet(item.getAddress());
+                           // markerOptions.draggable(true);
+                            markerOptions
+                                    .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_arrive)));
+                            mClusterManager.onMarkerClick(mGoogleMap.addMarker(markerOptions));*/
+
+                          //  mClusterManager.
+
+                        }
+                        Log.e("ddd",arr.get(0).toString());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    //  Toast.makeText(LoginActivity.this, result, Toast.LENGTH_SHORT).show();
+/*            String[] arr_result = result.split("#");
+            for (int i = 0; i < arr_result.length; i++) {
+               Log.e("result check", arr_result[i]);
+            }*/
+
+                    // Log.e("ddd",result);
+
+                }
+
+
+                @Override
+                protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+                    //  String user_email = (String) params[0];
+
+                    String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/testgetalldriverinfo.php";
+                    ///  String postParameters = "user_email=" + user_email;
+
+
+                    try {
+
+                        URL url = new URL(serverURL);
+                        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                        httpURLConnection.setReadTimeout(5000);
+                        httpURLConnection.setConnectTimeout(5000);
+                        httpURLConnection.setRequestMethod("POST");
+                        //httpURLConnection.setRequestProperty("content-type", "application/json");
+                        httpURLConnection.setDoInput(true);
+                        httpURLConnection.connect();
+
+
+                        OutputStream outputStream = httpURLConnection.getOutputStream();
+                        // outputStream.write(postParameters.getBytes("UTF-8"));
+                        outputStream.flush();
+                        outputStream.close();
+
+
+                        int responseStatusCode = httpURLConnection.getResponseCode();
+                        Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                        InputStream inputStream;
+                        if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                            inputStream = httpURLConnection.getInputStream();
+                        } else {
+                            inputStream = httpURLConnection.getErrorStream();
+                        }
+
+
+                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                        StringBuilder sb = new StringBuilder();
+                        String line = null;
+
+                        while ((line = bufferedReader.readLine()) != null) {
+                            sb.append(line);
+                        }
+
+
+                        bufferedReader.close();
+
+
+                        return sb.toString();
+
+
+                    } catch (Exception e) {
+
+                        Log.d(TAG, "EmailCheck: Error ", e);
+
+                        return new String("Error: " + e.getMessage());
+                    }
+
+                }
+            }
+            /*---------------------------------------------클러스터링 렌더링------------------------------------------------------------------------------*/
+            private class DriverInfoRenderer extends DefaultClusterRenderer<Item_New_Driver_Info> {
+                private final IconGenerator mIconGenerator = new IconGenerator(getApplicationContext());
+                private final IconGenerator mClusterIconGenerator = new IconGenerator(getApplicationContext());
+
+                public DriverInfoRenderer(Context context, GoogleMap map, ClusterManager<Item_New_Driver_Info> clusterManager) {
+                    super(context, map, clusterManager);
+                    //clusterManager.getMarkerManager().getInfoWindow()
+                }
+
+                @Override
+                protected void onBeforeClusterItemRendered(Item_New_Driver_Info item, MarkerOptions markerOptions) {
+                    super.onBeforeClusterItemRendered(item, markerOptions);
+                    markerOptions.title("출발 시간");
+                    SimpleDateFormat old_time_format = new SimpleDateFormat("hh:mm:ss");
+                    SimpleDateFormat new_time_format = new SimpleDateFormat("aa hh:mm ");
+                    String new_time="";
+                    try{
+                        Date start_time = old_time_format.parse(item.getUser_start_time());
+                        new_time = new_time_format.format(start_time);
+
+                    }catch(ParseException e){
+                        e.printStackTrace();
+                    }
+                    markerOptions.snippet(new_time);
+                    // markerOptions.draggable(true);
+                    markerOptions
+                            .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.cartop)));
+                   // mClusterManager.onMarkerClick(mGoogleMap.addMarker(markerOptions));
+                }
+
+
+            }
+  /*---------------------------------------------------------------------------------------------------------------------------*/
 }
