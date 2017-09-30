@@ -10,7 +10,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
+    <!--카풀인포에 서비스 바인딩후 오류생겨서 아래 퍼미션 추가함 이거 추가하고 되긴하는데 없어도 되긴함? ㅋㅋㅋ 뭐지.. ㅅㅂ 근데 뭔가 오류 엄청남-->
+ <!--   <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" android:protectionLevel="signature"/>-->
     <application
         android:name=".app.Myapp"
         android:allowBackup="true"
@@ -95,7 +96,9 @@
         <activity android:name=".tmap_test.NewDriverInfoActivity" />
         <activity android:name=".tmap_test.NewUserPageActivity" />
         <activity android:name=".tmap_test.NewCarpoolList" />
-        <activity android:name=".tmap_test.TestLIstView"></activity>
+        <activity android:name=".tmap_test.TestLIstView"/>
+        <activity android:name=".tmap_test.CarpoolInfoActivity"/>
+        <service android:name=".service.MyService"/>
     </application>
 
 </manifest>

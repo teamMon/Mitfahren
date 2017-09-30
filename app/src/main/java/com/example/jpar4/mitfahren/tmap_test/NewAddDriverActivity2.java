@@ -914,7 +914,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
     /*------------------------------------------------------------------------등록 완료 버튼------------------------------------------------------------------------*/
             case R.id.btn_add_driver_complete:
                  String aa = "출발지 좌표 : " + Start_Marker_InFo.getLat() +", "+ Start_Marker_InFo.getLng() + "\n 도착지 좌표 : " +  Arrive_Marker_InFo.getLat()+", "+ Arrive_Marker_InFo.getLng()
-                         +"출발날짜 :" + start_d + " 출발시간 : "  + start_t + " 추가인원 : " + start_p + " 자동차 사진 : " + user_car_photo + " 이메일" + app.getUser_email() ;
+                         +"출발날짜 :" + start_d + " 출발시간 : "  + start_t + " 추가인원 : " + start_p + " 자동차 사진 : " + user_car_photo + " 이메일" + app.getUser_email() + app.getUser_sex();
                    Log.e("my ddd", aa);
 
                 //Toast.makeText(this, aa, Toast.LENGTH_SHORT).show();
@@ -925,7 +925,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
 /*이미지 서버에 올리는 건 앞에서 했음.*/
                     /*데이터 php로 전송*/
                 InsertData task = new InsertData();
-                task.execute(app.getUser_email(),start_d,start_t,start_p,Start_Marker_InFo.getLat().toString(),Start_Marker_InFo.getLng().toString(),Arrive_Marker_InFo.getLat().toString(),Arrive_Marker_InFo.getLng().toString(),user_car_photo);
+                task.execute(app.getUser_email(),start_d,start_t,start_p,Start_Marker_InFo.getLat().toString(),Start_Marker_InFo.getLng().toString(),Arrive_Marker_InFo.getLat().toString(),Arrive_Marker_InFo.getLng().toString(),user_car_photo, app.getUser_sex());
 
                 /*여기서는 액티비티 안띄움*/
                 /*데이터 전송후 이메일을 인텐트로 전달하는 것과 함께 카풀 페이지 보여줌*/
@@ -998,6 +998,10 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
             String user_arrive_lat = (String)params[6];
             String user_arrive_lng = (String)params[7];
             String user_car_photo = (String)params[8];
+            String user_sex2 = (String)params[9];
+            String user_sex =(String)app.getUser_sex();
+            Log.e("ddd user_sex", user_sex);
+            Log.e("ddd ", user_sex2);
           //  String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
 
             String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/add_driver_insert.php";
@@ -1010,7 +1014,8 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                     + "&user_start_lng=" + user_start_lng
                     + "&user_arrive_lat=" + user_arrive_lat
                     + "&user_arrive_lng=" + user_arrive_lng
-                    + "&user_car_photo=" + user_car_photo;
+                    + "&user_car_photo=" + user_car_photo
+                    + "&user_sex=" + user_sex;
 
             //Log.e("ddd", user_photo);
 

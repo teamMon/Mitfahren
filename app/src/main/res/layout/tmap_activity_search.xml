@@ -167,8 +167,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
+            android:text="카풀 정보 검색"
             android:background="@color/colorPrimary"
-            android:text="운전자 검색"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             android:visibility="invisible" />

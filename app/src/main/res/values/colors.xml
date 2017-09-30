@@ -48,4 +48,10 @@
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
 
+    <!--<color name="carpool_searching">#ebe1d201</color>-->
+    <color name="carpool_searching">#00b1c7</color>
+    <color name="carpool_searchdone">#eb006fff</color>
+    <color name="carpool_complete">#eb07df16</color>
+    <color name="carpool_cancel">#ebdf072f</color>
+
 </resources>

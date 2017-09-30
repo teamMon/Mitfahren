@@ -3,8 +3,10 @@ package com.example.jpar4.mitfahren.tmap_test;
 import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -14,6 +16,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +31,7 @@ import android.widget.Toast;
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.model.Item_New_Driver_Info;
+import com.example.jpar4.mitfahren.service.MyService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -77,6 +81,10 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
      * Context Variables
      */
     Context mContext;
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    MyService mService; //서비스객체
+    boolean mBound;
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
     /*화면 View 객체 세팅*/
     ImageView iv_driver_info_pic;
@@ -110,6 +118,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         /*app객체*/
         app = (Myapp)getApplicationContext();
         mContext = getApplicationContext();
+
 
         Intent intent = getIntent();
         /*에드드라이버2에서 날라올때*/
@@ -362,7 +371,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
         }
     }
-
+/*-----------------------------------------------------------------------------------------------버튼------------------------------------------------------------------------------------------------------------------*/
     @Override
     public void onClick(View v) {
         Intent intent;
@@ -395,9 +404,30 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
                     Log.e("ddd 2", Whr_r_u_from);
                     app.setWhr_r_u_from("ADD_Driver2"); // 인텐트 전송이 잘 안먹혀서 그냥 어플객체 이용
                 }
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+               /* intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);*/
                 finish();
+                break;
+
+            case R.id.btn_carpool_apply: // 카풀신청버튼
+                if(mBound) {
+                    if (app.isLoginOK()) { // 로그인 일때만 신청 메시지 보내기
+                        JSONObject sendMsgObj = new JSONObject();
+                        try {
+                            sendMsgObj.put("kindOfmsg", "1"); //    kindOfmsg : 1 = carpool_applying
+                            sendMsgObj.put("sender", app.getUser_email()); // sender : 보내는 사람
+                            sendMsgObj.put("receiver", item_new_driver_info.getUser_email()); // receiver : 받는 사람
+                            mService.sendMsg(sendMsgObj.toString());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        //Toast.makeText(context, app.getUser_email()+", "+item_new_driver_info.getUser_email(), Toast.LENGTH_SHORT).show();
+                        //service.sendMsg("aaa"); // 보낼 메시지
+                    } else {
+                        Toast.makeText(mContext, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
+                    }
+                }
                 break;
         }
     }
@@ -803,4 +833,35 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
         }
     }
 /*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
+/*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+private ServiceConnection mConnection = new ServiceConnection() {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        MyService.LocalBinder binder = (MyService.LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        mBound = false;
+    }
+};
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, MyService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mBound){
+            unbindService(mConnection);
+            mBound=false;
+        }
+    }
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 }

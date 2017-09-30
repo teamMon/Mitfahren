@@ -1,9 +1,16 @@
 package com.example.jpar4.mitfahren.activity;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -14,7 +21,9 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
-import com.example.jpar4.mitfahren.test_join.test_join;
+import com.example.jpar4.mitfahren.network.ClientBackground;
+import com.example.jpar4.mitfahren.network.NetworkTask;
+import com.example.jpar4.mitfahren.service.MyService;
 import com.example.jpar4.mitfahren.tmap_test.NewSearchActivity;
 
 import java.io.BufferedReader;
@@ -23,6 +32,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -34,6 +45,13 @@ public class LoginActivity extends AppCompatActivity {
     Button btn_join;
 
     Myapp app; // app객체
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    MyService mService; //서비스객체
+    boolean mBound;
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*채팅용*/
+    NetworkTask networkTask;
+    ClientBackground client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +70,53 @@ public class LoginActivity extends AppCompatActivity {
 
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) {//로그인
                 LoginCheck task = new LoginCheck();
                 task.execute(et_input_id.getText().toString(),et_input_pw.getText().toString());
 
 
-         /*       Intent intent = new Intent(LoginActivity.this,  MainActivity.class);
-                startActivity(intent);*/
+         /*연습*/
+            /*    networkTask = new NetworkTask(et_input_id.getText().toString(), getApplicationContext());
+               networkTask.execute();*/
+              /*  client= new ClientBackground(et_input_id.getText().toString());
+               client.start();*/
+
+
+
             }
         });
 
         btn_join.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this,  test_join.class);
-                startActivity(intent);
+            public void onClick(View v) {//회원가입
+  /*              Intent intent = new Intent(LoginActivity.this,  test_join.class);
+                startActivity(intent);*/
+          /*연습*/
+
+                NotificationManager notificationManager= (NotificationManager)LoginActivity.this.getSystemService(LoginActivity.this.NOTIFICATION_SERVICE);
+                Intent intent1 = new Intent(LoginActivity.this.getApplicationContext(),LoginActivity.class); //인텐트 생성.
+                Notification.Builder builder = new Notification.Builder(getApplicationContext());
+                //intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP| Intent.FLAG_ACTIVITY_CLEAR_TOP);//현재 액티비티를 최상으로 올리고, 최상의 액티비티를 제외한 모든 액티비티를없앤다.
+
+                PendingIntent pendingNotificationIntent = PendingIntent.getActivity( LoginActivity.this,0, intent1, FLAG_UPDATE_CURRENT);
+                //PendingIntent는 일회용 인텐트 같은 개념입니다.
+              /*  FLAG_UPDATE_CURRENT - > 만일 이미 생성된 PendingIntent가 존재 한다면, 해당 Intent의 내용을 변경함.
+                  FLAG_CANCEL_CURRENT - .이전에 생성한 PendingIntent를 취소하고 새롭게 하나 만든다.
+                  FLAG_NO_CREATE -> 현재 생성된 PendingIntent를 반환합니다.
+                  FLAG_ONE_SHOT - >이 플래그를 사용해 생성된 PendingIntent는 단 한번밖에 사용할 수 없습니다*/
+
+                builder.setSmallIcon(R.drawable.searching).setTicker("HETT").setWhen(System.currentTimeMillis())
+                        .setNumber(1).setContentTitle("푸쉬 제목").setContentText("푸쉬내용")
+                        .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true).setOngoing(true);
+                //해당 부분은 API 4.1버전부터 작동합니다.
+                //setSmallIcon - > 작은 아이콘 이미지
+                //setTicker - > 알람이 출력될 때 상단에 나오는 문구.
+                //setWhen -> 알림 출력 시간.
+                //setContentTitle-> 알림 제목
+                //setConentText->푸쉬내용
+
+                notificationManager.notify(1, builder.build()); // Notification send
+          /*연습*/
             }
         });
     }
@@ -106,8 +156,15 @@ public class LoginActivity extends AppCompatActivity {
                 app.setUser_photo(arr_result[6]);
                 app.setLoginOK(true);
             /*-------------------------------------------사용자 정보 세팅----------------------------------------------------------------*/
-
-
+/*---------------------------------------------------------------로그인시 tcp통신 연결----------------------------------------------------------------------------------*/
+                if(mBound) {
+                  /*테스트용*/
+               /*  String numberStr = String.valueOf(mService.showTheNumber());
+                  Toast.makeText(app, numberStr, Toast.LENGTH_SHORT).show();*/
+               /*TCP연결해보기*/
+                    mService.setConnectionTCP(et_input_id.getText().toString());
+                }
+/*---------------------------------------------------------------로그인시 tcp통신 연결----------------------------------------------------------------------------------*/
                 Intent intent = new Intent(LoginActivity.this,  NewSearchActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -189,4 +246,36 @@ public class LoginActivity extends AppCompatActivity {
 
         }
     }
+/*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyService.LocalBinder binder = (MyService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBound = false;
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, MyService.class);
+        //startService(intent);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mBound){
+            unbindService(mConnection);
+            mBound=false;
+        }
+    }
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 }

@@ -17,4 +17,21 @@
         <item >3</item>
         <item >4</item>
     </string-array>
+<!--범위옵션-->
+    <string-array name="option_distance">
+        <item >지정 출발지로부터 카풀 출발지까지</item>
+        <item >지정 도착지로부터 카풀 도착지까지</item>
+
+    </string-array>
+<!--성별옵션-->
+    <string-array name="option_sex">
+        <item >남, 여 모두</item>
+        <item >남자만</item>
+        <item >여자만</item>
+    </string-array>
+<!--정렬-->
+    <string-array name="option_howtoshow">
+        <item >빠른 날짜순</item>
+        <item >가까운 거리순</item>
+    </string-array>
 </resources>

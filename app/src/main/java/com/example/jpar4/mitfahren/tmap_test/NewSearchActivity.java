@@ -5,9 +5,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -19,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,6 +52,7 @@ import com.example.jpar4.mitfahren.func.HttpAssoci_Func;
 import com.example.jpar4.mitfahren.model.CameraView;
 import com.example.jpar4.mitfahren.model.Item_New_Driver_Info;
 import com.example.jpar4.mitfahren.model.NewMapLocaInfo;
+import com.example.jpar4.mitfahren.service.MyService;
 import com.example.jpar4.mitfahren.test_join.test_join;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -92,6 +96,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static com.example.jpar4.mitfahren.R.id.nav_mycarpool;
+
 
 public class NewSearchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback,
@@ -103,6 +109,10 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         GoogleMap.OnCameraIdleListener,
         ClusterManager.OnClusterItemClickListener<Item_New_Driver_Info>
         {
+            /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+            MyService mService; //서비스객체
+            boolean mBound;
+            /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     /*좌표 핀셋찍기에 사용  private String mLatitude,mLongitude;*/
     private String mLatitude,mLongitude;
     private Button btn_select_start; // 출발지 검색 버튼
@@ -314,6 +324,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
+          //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 
         /*로그아웃상태일 때 nav_logout nav_out_mem nav_myinfo nav_add_driver*/
@@ -374,12 +385,14 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         if (id == R.id.nav_myinfo) {
           /*사용자 평가 샘플페이지*/
             Intent intent = new Intent(NewSearchActivity.this, NewUserPageActivity.class);
+            intent.putExtra("user_email",app.getUser_email());
             startActivity(intent);
             /*Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
             startActivity(intent);*/
             /*등록한 카풀 정보가 있을 때만 나오게 하기*/
         } else if (id == R.id.nav_mycarpool) {
-
+            Intent intent = new Intent(NewSearchActivity.this, CarpoolInfoActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_add_driver) {
             /*맨처음 만든 운전자 등록 테스트*/
     /*        Intent intent = new Intent(NewSearchActivity.this, AddDriverActivity.class);
@@ -454,10 +467,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 /* ------------------------------------------네비 메뉴------------------------------------------------------------------------------*/
 
 /*-------------------------------------------맵에 내 현재 위치 찍기---------------------------------------------------------------------------------------*/
-@Override
-protected void onStart() {
-    super.onStart();
-}
+
 
     @Override
     protected void onResume() {
@@ -510,6 +520,7 @@ protected void onStart() {
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(true);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(true);
             nev_Menu.findItem(R.id.nav_logout).setVisible(true);
+            nev_Menu.findItem(nav_mycarpool).setVisible(true);
 
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
@@ -538,16 +549,9 @@ protected void onStart() {
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
+          //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 
-    }
-
-    @Override
-    protected void onStop() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-        super.onStop();
     }
 
     @Override
@@ -1233,12 +1237,15 @@ public void onClick(View v) {
             startActivityForResult(intent, GET_ADDRESS_REQUEST_CODE); //
             break;
 
+        /* 씨발운전자버튼*/
         case R.id.btn_search_driver:
            // String aa = "출발지 좌표 : " + Start_Marker_InFo.getLat() +", "+ Start_Marker_InFo.getLng() + "\n 도착지 좌표 : " +  Arrive_Marker_InFo.getLat()+", "+ Arrive_Marker_InFo.getLng();
+            String startArrivePoint =""+Start_Marker_InFo.getLat()+"#"+Start_Marker_InFo.getLng()+"#"+Arrive_Marker_InFo.getLat()+"#"+Arrive_Marker_InFo.getLng();
          //   Log.e("ddd", aa);
 
             //Toast.makeText(this, aa, Toast.LENGTH_SHORT).show();
             intent = new Intent(NewSearchActivity.this, TestLIstView.class);
+            intent.putExtra("startArrivePoint", startArrivePoint);
             startActivity(intent);
 
             break;
@@ -1869,4 +1876,40 @@ public float getZoomForMetersWide(double desiredMeters) {
 
             }
   /*---------------------------------------------------------------------------------------------------------------------------*/
+  /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+  private ServiceConnection mConnection = new ServiceConnection() {
+      @Override
+      public void onServiceConnected(ComponentName name, IBinder service) {
+          MyService.LocalBinder binder = (MyService.LocalBinder) service;
+          mService = binder.getService();
+          mBound = true;
+      }
+
+      @Override
+      public void onServiceDisconnected(ComponentName name) {
+          mBound = false;
+      }
+  };
+
+            @Override
+            protected void onStart() {
+                super.onStart();
+                Intent intent = new Intent(this, MyService.class);
+                startService(intent);
+                //bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            }
+
+            @Override
+            protected void onStop() {
+                super.onStop();
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                    mGoogleApiClient.disconnect();
+                }
+                if(mBound){
+                    unbindService(mConnection);
+                    mBound=false;
+                }
+
+            }
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 }

@@ -25,9 +25,41 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
     String user_arrive;
     LatLng location;
     String address;
+    String distance_option;
+    String distance_meters;
+    String user_sex;
+
+    public String getUser_sex() {
+        return user_sex;
+    }
+
+    public void setUser_sex(String user_sex) {
+        this.user_sex = user_sex;
+    }
+
+    public String getDistance_option() {
+        return distance_option;
+    }
+
+    public void setDistance_option(String distance_option) {
+        this.distance_option = distance_option;
+    }
+
+    public String getDistance_meters() {
+        return distance_meters;
+    }
+
+    public void setDistance_meters(String distance_meters) {
+        this.distance_meters = distance_meters;
+    }
 
     public Item_New_Driver_Info(){
 
+    }
+
+    public Item_New_Driver_Info(String a, String b){//테스트용
+this.user_start = a;
+        this.user_arrive=b;
     }
 
     public Item_New_Driver_Info(Item_New_Driver_Info item){

@@ -8,7 +8,7 @@
     <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_view_notifications"
         android:layout_width="wrap_content"
-        android:layout_height="200dp"
+        android:layout_height="230dp"
         android:layout_gravity="top|left|center_horizontal|right"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
@@ -22,6 +22,64 @@
             android:layout_height="match_parent"
             android:background="@color/white"
             android:orientation="vertical">
+            <FrameLayout
+                android:id="@+id/item_driver_list_top"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="@color/gomalan_bule_bg"
+                >
+                <TextView
+                    android:id="@+id/tv_item_driver_list_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+                    android:textStyle="bold"
+                    android:layout_marginLeft="16dp"
+                    android:paddingBottom="4dp"
+                    android:drawablePadding="6dp"
+                    android:text="2017. 08. 20."
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_driver_list_people"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|end"
+                    android:textStyle="bold"
+                    android:layout_marginRight="16dp"
+                    android:paddingBottom="4dp"
+                    android:drawablePadding="6dp"
+                    android:text="인원 : 0 / 4"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+
+            </FrameLayout>
+            <FrameLayout
+                android:layout_marginTop="30dp"
+                android:id="@+id/item_driver_list_top2"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+
+                >
+            <!--    android:background="@drawable/blue_border_button"-->
+
+                <TextView
+                    android:id="@+id/tv_distanceinM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|end"
+                    android:textStyle="bold"
+                    android:layout_marginRight="16dp"
+
+                    android:drawablePadding="6dp"
+                    android:text="출발지로 부터 거리 : "
+                    android:textColor="@color/gomalan_bule_bg"
+                    android:textSize="14sp" />
+
+
+            </FrameLayout>
 
             <ImageView
                 android:id="@+id/iv_driver_info_main"
@@ -29,6 +87,7 @@
                 android:scaleType="fitXY"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="60dp"
                 android:layout_marginBottom="50dp"
                 />
 <!--            <ImageView
@@ -99,15 +158,15 @@
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="bold" />-->
-
+ <!--           android:layout_marginBottom="35dp"-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left|top"
-                android:layout_marginBottom="35dp"
+
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="70dp"
                 android:orientation="vertical">
                 <View
                     android:layout_width="match_parent"
@@ -189,9 +248,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_gravity="bottom"
+                android:weightSum="2"
                 android:orientation="horizontal">
 
-                <TextView
+               <!-- <TextView
                     android:id="@+id/tv_offers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -220,8 +280,22 @@
                     android:text="1 명"
                     android:textColor="@color/purple"
                     android:textSize="14sp"
-                    />
-
+                    />-->
+<!--                <TextView
+                    android:id="@+id/tv_distanceInM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="15dp"
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:paddingBottom="4dp"
+                    android:drawablePadding="6dp"
+                    android:text="거리 : 100m"
+                    android:textColor="@color/purple"
+                    android:textSize="14sp" />-->
 
                 <Button
 
@@ -233,7 +307,7 @@
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="10dp"
-
+                    android:layout_weight="1"
                     android:alpha="1"
                     android:background="@drawable/blue_border_button"
                     android:clickable="false"
@@ -249,9 +323,9 @@
                     android:layout_gravity="center"
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginRight="8dp"
                     android:layout_marginTop="10dp"
-
+android:layout_weight="1"
                     android:background="@drawable/blue_rounded_corners_bg"
                     android:text="카풀 정보"
                     android:textColor="@color/white"
