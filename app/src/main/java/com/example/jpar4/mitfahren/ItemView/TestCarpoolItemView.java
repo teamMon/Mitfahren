@@ -101,12 +101,27 @@ public class TestCarpoolItemView extends LinearLayout implements View.OnClickLis
         Intent intent;
         switch (v.getId()) {
             case R.id.btn_driver_info_carpool_apply: //카풀신청
+                Log.e("ddd ddd", item_new_driver_info.getDriver_info_id());
+                Log.e("ddd ddd", item_new_driver_info.getRider_start_lat());
+
                 if(app.isLoginOK()){ // 로그인 일때만 신청 메시지 보내기
                     JSONObject sendMsgObj = new JSONObject();
                     try{
+                        /*
+                        * 보내는 정보
+                        * 1. 메시지 타입 2. 보내는 사람 이메일 3. 받는 사람 이메일 4. 등록된 카풀정보의 아이디(유일값) 5. 탑승자 출발 도착 좌표
+                        *
+                        *
+                        * */
                         sendMsgObj.put("kindOfmsg", "1"); //    kindOfmsg : 1 = carpool_applying
+                        sendMsgObj.put("carpool_id", item_new_driver_info.getDriver_info_id()); // 등록된 카풀정보의 아이디(유일값)
                         sendMsgObj.put("sender", app.getUser_email()); // sender : 보내는 사람
                         sendMsgObj.put("receiver", item_new_driver_info.getUser_email()); // receiver : 받는 사람
+                        sendMsgObj.put("rider_start_lat", item_new_driver_info.getRider_start_lat()); // 탑승자 출발 도착 좌표
+                        sendMsgObj.put("rider_start_lng", item_new_driver_info.getRider_start_lng()); // 탑승자 출발 도착 좌표
+                        sendMsgObj.put("rider_arrive_lat", item_new_driver_info.getRider_arrive_lat()); // 탑승자 출발 도착 좌표
+                        sendMsgObj.put("rider_arrive_lng", item_new_driver_info.getRider_arrive_lng()); // 탑승자 출발 도착 좌표
+
                         service.sendMsg(sendMsgObj.toString());
                     }catch (Exception e){
                         e.printStackTrace();

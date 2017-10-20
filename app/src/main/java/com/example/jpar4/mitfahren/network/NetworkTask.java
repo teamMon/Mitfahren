@@ -7,9 +7,10 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.jpar4.mitfahren.R;
-import com.example.jpar4.mitfahren.activity.LoginActivity;
 import com.example.jpar4.mitfahren.service.MyService;
+import com.example.jpar4.mitfahren.tmap_test.NewNotiActivity;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
@@ -75,8 +76,8 @@ public class NetworkTask extends Thread {
                         JSONObject jsonObj = new JSONObject(msg);
                         Log.e("ddd", jsonObj.get("kindOfmsg").toString()+jsonObj.get("receiver").toString()+jsonObj.get("sender").toString());
                         if(jsonObj.get("kindOfmsg").equals("1")){ //1번은 카풀신청
-                            Log.e("ddd", jsonObj.get("sender").toString()+"님이 카풀을 신청하셨습니다.");
-                            sencNotification(jsonObj.get("sender").toString());//노티피케이션---------------------------------------
+                            Log.e("ddd 노티알람", jsonObj.get("sender").toString()+"님이 카풀을 신청하셨습니다.");
+                            sencNotification(msg);//노티피케이션---------------------------------------jsonObj.get("sender").toString()
                         }
 
                     }else {// json형식 아닐때
@@ -124,10 +125,11 @@ public class NetworkTask extends Thread {
         }
     }
 
-    public void sencNotification(String sender){
+    public void sencNotification(String msg){
          /*-----------------------------------------------------노티피케이션---------------------------------------------------------------------------------------------------------------------------------------*/
         NotificationManager notificationManager= (NotificationManager)service.getSystemService(service.NOTIFICATION_SERVICE);
-        Intent intent1 = new Intent(service.getApplicationContext(),LoginActivity.class); //인텐트 생성.
+        Intent intent1 = new Intent(service.getApplicationContext(),NewNotiActivity.class); //인텐트 생성.
+        intent1.putExtra("msg", msg);
 
 
 
@@ -140,6 +142,15 @@ public class NetworkTask extends Thread {
                         FLAG_CANCEL_CURRENT - .이전에 생성한 PendingIntent를 취소하고 새롭게 하나 만든다.
                         FLAG_NO_CREATE -> 현재 생성된 PendingIntent를 반환합니다.
                 FLAG_ONE_SHOT - >이 플래그를 사용해 생성된 PendingIntent는 단 한번밖에 사용할 수 없습니다*/
+
+        JSONObject jsonObj = null;
+        String sender = null;
+        try {
+            jsonObj = new JSONObject(msg);
+            sender = jsonObj.get("sender").toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         builder.setSmallIcon(R.drawable.searching).setTicker("알림").setWhen(System.currentTimeMillis())
                 .setNumber(1).setContentTitle("카풀신청").setContentText( sender+"님이 카풀을 신청하셨습니다.")

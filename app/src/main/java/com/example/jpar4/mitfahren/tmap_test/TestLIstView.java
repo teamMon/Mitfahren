@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.ItemView.TestCarpoolItemView;
@@ -54,7 +55,7 @@ import java.util.Locale;
 
 
 
-
+/*운전자 검색결과 화면*/
 public class TestLIstView extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "TestListView";
     ListView listView;
@@ -77,6 +78,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
     ImageButton btn_search_option;
     Button btn_search;
     EditText et_option_distance; // 검색옵션 거리
+    TextView tv_no_output;//검색결과 없습니다.
 
     boolean BTN_UP_DOWN = true;
     /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -91,6 +93,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test_activity_test_list_view);
 
+        tv_no_output = (TextView)findViewById(R.id.tv_no_output);
         et_option_distance = (EditText)findViewById(R.id.et_option_distance);
         et_option_distance.setText("10000");
 
@@ -310,6 +313,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
                 adapter.applySearchOptionDistance(option_distance, option_distance_meters);
                 adapter.applySexOption(option_sex);
                 adapter.applyHowToShow(option_howtoshow);
+                adapter.checkNoneOfItem();
 
                 adapter.notifyDataSetChanged();
                 break;
@@ -484,9 +488,15 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
                     Collections.sort(items, meterASC) ;
                 }
                 adapter.notifyDataSetChanged() ;
-
             }
 
+            public void checkNoneOfItem(){
+                if(items.size()==0){
+                    tv_no_output.setVisibility(View.VISIBLE);
+                }else{
+                    tv_no_output.setVisibility(View.GONE);
+                }
+            }
         }
 
     /*-----------------------------------------------------------------------디비에서 운전자 정보를 가져옮-----------------------------------------------------------------------*/
@@ -497,10 +507,8 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
             progressDialog = ProgressDialog.show(TestLIstView.this,
                     "잠시만 기다려 주세요.", null, true, true);
-            Log.e("ddd onPre", "씨발 여기 넘어가?(2)");
         }
 
 
@@ -508,7 +516,6 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.e("ddd onPostExecute", "씨발 여기 넘어가?(4)");
             progressDialog.dismiss();
             /*result로 JsonArray를 받아와서 Json으로 하나씪 분리해서 값을 뽑아야됨*/
             try{
@@ -528,6 +535,8 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
 //                    Log.e("ddd", ""+distanceFromArrive.intValue());
 
                     Item_New_Driver_Info item = new Item_New_Driver_Info();
+                    item.setDriver_info_id(arr.getJSONObject(i).getString("id")); // 카풀정보
+
                     item.setUser_email(arr.getJSONObject(i).getString("user_email"));
                     item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
                     item.setUser_start_time(arr.getJSONObject(i).getString("user_start_time"));
@@ -550,6 +559,12 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
 /*---------------------------------------------------------------거리계산및 세팅부분--------------------------------------------------------------------------------------------------------------*/
                     //거리구하기 테스트
                     String[] arr_startArrivePoint = startArrivePoint.split("#");
+                    //탑승자 위치정보저장~
+                    item.setRider_start_lat(arr_startArrivePoint[0]);
+                    item.setRider_start_lng(arr_startArrivePoint[1]);
+                    item.setRider_arrive_lat(arr_startArrivePoint[2]);
+                    item.setRider_arrive_lng(arr_startArrivePoint[3]);
+
                     Float distanceFromStart = getDistanceInMeter(arr_startArrivePoint[0],arr_startArrivePoint[1], arr.getJSONObject(i).getString("user_start_lat"),arr.getJSONObject(i).getString("user_start_lng"));
                     Float distanceFromArrive = getDistanceInMeter(arr_startArrivePoint[2],arr_startArrivePoint[3], arr.getJSONObject(i).getString("user_arrive_lat"),arr.getJSONObject(i).getString("user_arrive_lng"));
                     if(option_spinnner_distance.getSelectedItem().toString().equals("지정 출발지로부터 카풀 출발지까지")){
@@ -596,6 +611,7 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
                 adapter.applySearchOptionDistance(option_distance, option_distance_meters);
                 adapter.applySexOption(option_sex);
                 adapter.applyHowToShow(option_howtoshow);
+                adapter.checkNoneOfItem();
                 /*--------------------------------------------------------------------------------------------------------------------정렬------------------------------------------------------------------------------------------------------------------------------*/
                 adapter.notifyDataSetChanged();
 
@@ -617,19 +633,19 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
 
         @Override
         protected String doInBackground(String... params) {
-            Log.e("ddd doInBackground", "씨발 여기 넘어가?(3)");
+
             /*user_email,user_name,user_pwd,user_age,user_sex*/
           //  String user_email = (String) params[0];
 
             String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/testgetalldriverinfo.php";
           ///  String postParameters = "user_email=" + user_email;
-            Log.e("ddd doInBackground", "씨발 여기 넘어가?(3.1)");
+
 
             try {
 
                 URL url = new URL(serverURL);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                Log.e("ddd doInBackground", "씨발 여기 넘어가?(3.2)");
+
 
                 httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setConnectTimeout(5000);
@@ -669,7 +685,7 @@ Log.e("ddd onPre", "씨발 여기 넘어가?(1)");
 
                 bufferedReader.close();
 
-                Log.e("ddd doInBackground", "씨발 여기 넘어가?(3.3)");
+
                 return sb.toString();
 
 

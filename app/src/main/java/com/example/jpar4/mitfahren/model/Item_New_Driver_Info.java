@@ -10,11 +10,17 @@ import java.io.Serializable;
  */
 
 public class Item_New_Driver_Info implements Serializable, ClusterItem{
+    String driver_info_id;
+    String rider_start_lat; //탑승자용
+    String rider_start_lng;
+    String rider_arrive_lat;
+    String rider_arrive_lng;
+
     String user_email;
     String user_start_date;
     String user_start_time;
     String user_with_poeple;
-    String user_start_lat;
+    String user_start_lat;//운전자용
     String user_start_lng;
     String user_arrive_lat;
     String user_arrive_lng;
@@ -28,6 +34,46 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
     String distance_option;
     String distance_meters;
     String user_sex;
+
+    public String getRider_start_lat() {
+        return rider_start_lat;
+    }
+
+    public void setRider_start_lat(String rider_start_lat) {
+        this.rider_start_lat = rider_start_lat;
+    }
+
+    public String getRider_start_lng() {
+        return rider_start_lng;
+    }
+
+    public void setRider_start_lng(String rider_start_lng) {
+        this.rider_start_lng = rider_start_lng;
+    }
+
+    public String getRider_arrive_lat() {
+        return rider_arrive_lat;
+    }
+
+    public void setRider_arrive_lat(String rider_arrive_lat) {
+        this.rider_arrive_lat = rider_arrive_lat;
+    }
+
+    public String getRider_arrive_lng() {
+        return rider_arrive_lng;
+    }
+
+    public void setRider_arrive_lng(String rider_arrive_lng) {
+        this.rider_arrive_lng = rider_arrive_lng;
+    }
+
+    public String getDriver_info_id() {
+        return driver_info_id;
+    }
+
+    public void setDriver_info_id(String driver_info_id) {
+        this.driver_info_id = driver_info_id;
+    }
 
     public String getUser_sex() {
         return user_sex;

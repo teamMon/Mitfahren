@@ -324,6 +324,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
+            nev_Menu.findItem(R.id.nav_noti).setVisible(false);
           //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 
@@ -405,9 +406,11 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
         } else if (id == R.id.nav_talk) {
 
-        } else if (id == R.id.nav_noti) {
-
-        }*/ else if (id == R.id.nav_logout) {
+        } */
+        else if (id == R.id.nav_noti) {
+            Intent intent = new Intent(NewSearchActivity.this, NewNotiActivity.class);
+            startActivity(intent);
+        }else if (id == R.id.nav_logout) {
                 app.setLoginOK(false);
             Intent intent = new Intent(NewSearchActivity.this, NewSearchActivity.class);
             startActivity(intent);
@@ -520,6 +523,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(true);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(true);
             nev_Menu.findItem(R.id.nav_logout).setVisible(true);
+            nev_Menu.findItem(R.id.nav_noti).setVisible(true);
             nev_Menu.findItem(nav_mycarpool).setVisible(true);
 
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
@@ -549,6 +553,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
+            nev_Menu.findItem(R.id.nav_noti).setVisible(false);
           //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 

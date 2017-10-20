@@ -53,5 +53,6 @@
     <color name="carpool_searchdone">#eb006fff</color>
     <color name="carpool_complete">#eb07df16</color>
     <color name="carpool_cancel">#ebdf072f</color>
+    <color name="carpool_before_item_click">#ed38b7ff</color>
 
 </resources>

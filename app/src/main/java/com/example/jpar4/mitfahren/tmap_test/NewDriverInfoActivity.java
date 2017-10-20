@@ -20,8 +20,12 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,6 +35,7 @@ import android.widget.Toast;
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.model.Item_New_Driver_Info;
+import com.example.jpar4.mitfahren.model.Item_Notification;
 import com.example.jpar4.mitfahren.service.MyService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -87,7 +92,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
     /*화면 View 객체 세팅*/
-    ImageView iv_driver_info_pic;
+    ImageView iv_driver_info_pic, iv_driver_info_pic2;
     TextView tv_driver_info_date, tv_driver_info_time, tv_driver_info_people, tv_driver_info_start, tv_driver_info_arrive;
     Button btn_driver_info_confirm, iv_driver_info_see_user_info, btn_see_apply_list, btn_carpool_apply;
     Item_New_Driver_Info item_new_driver_info;
@@ -101,13 +106,27 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     private boolean isLineOnMap = false;
     /*출발지 마커*/
     private Marker StartMarker = null;
+    private Marker StartMarker_rider = null;
     /*도착지 마커*/
     private Marker ArriveMarker = null;
+    private Marker ArriveMarker_rider = null;
     //디폴트 위치, Seoul
     private static final LatLng DEFAULT_LOCATION = new LatLng(37.56, 126.97);
     private AppCompatActivity mActivity;
     String Whr_r_u_from;
 
+/*---------탑승자 정보 데이터클래스-------------------------------------------------------------------------------------------*/
+ArrayList<Item_Notification> itemList_rider;
+    Boolean rider_clicked = true;
+    String user_start_lat_info;
+    String user_start_lng_info;
+    String user_arrive_lat_info;
+    String user_arrive_lng_info;
+
+    /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
+    RecyclerView horizontal_recycler_view;
+    HorizontalAdapter horizontalAdapter;
+    /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +141,8 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
         Intent intent = getIntent();
         /*에드드라이버2에서 날라올때*/
-        String  user_start_date = intent.getStringExtra("user_start_date");
-
+        String user_start_date = intent.getStringExtra("user_start_date");
+        String carpool_ID = intent.getStringExtra("carpool_ID");
 /*ADD Driver2에서 올때만 값을 넣어줌 */
         Whr_r_u_from = intent.getStringExtra("Whr_r_u_from");
         if(Whr_r_u_from!=null){
@@ -135,6 +154,9 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
 
         iv_driver_info_pic = (ImageView) findViewById(R.id.iv_driver_info_pic);
+        iv_driver_info_pic2 = (ImageView) findViewById(R.id.iv_driver_info_pic2);
+        iv_driver_info_pic2.setOnClickListener(this);
+
         tv_driver_info_date = (TextView) findViewById(R.id.tv_driver_info_date);
         tv_driver_info_time = (TextView) findViewById(R.id.tv_driver_info_time);
         tv_driver_info_people = (TextView) findViewById(R.id.tv_driver_info_people);
@@ -152,6 +174,7 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
         btn_carpool_apply = (Button)findViewById(R.id.btn_carpool_apply); //카풀 신청하기
         btn_carpool_apply.setOnClickListener(this);
+
 
 
        /*
@@ -186,11 +209,22 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
            }
 
        }else{// 운전자 검색을 통해 운전자 아이디를 전달 받는 경우, 이메일을 전달받는 경우 이를 운전자 정보 페이지에도 전달할 수 있도록 구현해야 함.
-           GetDriverInfo task = new GetDriverInfo();
-           //task.execute("qlql@qlql.com");
-           Log.e("ddd 3", item_new_driver_info.getUser_email()+","+item_new_driver_info.getUser_start_date());
-           task.execute(item_new_driver_info.getUser_email(), item_new_driver_info.getUser_start_date());
-           Toast.makeText(app, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
+            if(carpool_ID == null){
+                GetDriverInfo task = new GetDriverInfo();
+                Log.e("ddd 3", item_new_driver_info.getUser_email()+","+item_new_driver_info.getUser_start_date());
+                task.execute(item_new_driver_info.getUser_email(), item_new_driver_info.getUser_start_date());
+                Toast.makeText(app, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
+
+
+            }else{
+                Log.e("ddd 3", carpool_ID);
+                GetDriverInfo2 task = new GetDriverInfo2();
+                task.execute(carpool_ID);
+                Toast.makeText(app, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
+
+
+            }
+
        }
 
 
@@ -371,6 +405,180 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
         }
     }
+    /*-----------------------------------------------------------------------디비에서 운전자 정보를 가져옮-----------------------------------------------------------------------*/
+        /*로그인 확인하는 쓰레드*/
+    class GetDriverInfo2 extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = ProgressDialog.show(NewDriverInfoActivity.this,
+                    "잠시만 기다려 주세요.", null, true, true);
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+            Log.e("ddd", "여기2");
+            Log.e("ddd", "여기2"+ result);
+            //  Toast.makeText(LoginActivity.this, result, Toast.LENGTH_SHORT).show();
+
+            String[] arr_result = result.split("#");
+            Log.e("ddd result", result);
+            for(int i=0;i<arr_result.length;i++){
+                Log.e("ddd result", arr_result[i]);
+            }
+/*에이싱크결과값 받아옴*/
+            String user_email = arr_result[0];
+            String user_start_date = arr_result[1];
+            String user_start_time = arr_result[2];
+            String user_with_poeple = arr_result[3];
+            String user_start_lat = arr_result[4];
+            String user_start_lng = arr_result[5];
+            String user_arrive_lat = arr_result[6];
+            String user_arrive_lng = arr_result[7];
+            String user_having_rider = arr_result[8];
+            String user_car_photo = arr_result[9];
+        /*---------------------------------------------------------------------------------------------------------------------------------아이템리스트*/
+/*            itemList_rider.get(0).setUser_start_lat(user_start_lat);
+            itemList_rider.get(0).setUser_start_lng(user_start_lng);
+            itemList_rider.get(0).setUser_arrive_lat(user_arrive_lat);
+            itemList_rider.get(0).setUser_arrive_lng(user_arrive_lng);*/
+            user_start_lat_info = user_start_lat;
+            user_start_lng_info = user_start_lng;
+            user_arrive_lat_info = user_arrive_lat;
+            user_arrive_lng_info = user_arrive_lng;
+           // Log.e("ddd", "dd : "+)
+
+            tv_driver_info_date.setText(user_start_date);
+
+            SimpleDateFormat old_time_format = new SimpleDateFormat("hh:mm:ss");
+            SimpleDateFormat new_time_format = new SimpleDateFormat("hh:mm aa");
+            String new_time="";
+            try{
+                Date start_time = old_time_format.parse(user_start_time);
+                new_time = new_time_format.format(start_time);
+
+            }catch(ParseException e){
+                e.printStackTrace();
+            }
+
+
+            tv_driver_info_time.setText(new_time);
+            tv_driver_info_people.setText(user_with_poeple + " 명");
+            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+user_car_photo).into(iv_driver_info_pic);
+
+            //getCurrentAddress2(user_start_lat, user_start_lng); // 출발지 주소
+            //getCurrentAddress2(user_arrive_lat, user_arrive_lng); // 도착지 주소
+            tv_driver_info_start.setText( getCurrentAddress2(user_start_lat, user_start_lng));
+            tv_driver_info_arrive.setText(getCurrentAddress2(user_arrive_lat, user_arrive_lng));
+
+            //TextView tv_driver_info_date, tv_driver_info_time, tv_driver_info_people, tv_driver_info_start, tv_driver_info_arrive;iv_driver_info_pic
+
+            /*마커찍기*/
+            setStartLocation(Double.parseDouble(user_start_lat), Double.parseDouble(user_start_lng));
+            setArriveLocation(Double.parseDouble(user_arrive_lat), Double.parseDouble(user_arrive_lng));
+
+            /*카메라 포커스*/
+            // 카메라로 두 마커가 보이게 조절거리에 따른 줌레벨 조절 필요
+            Double cLat =  (Double)((Double.parseDouble(user_start_lat)+Double.parseDouble(user_arrive_lat))/2);
+            Double cLon =  (Double)((Double.parseDouble(user_start_lng)+Double.parseDouble(user_arrive_lng))/2);
+            LatLng currentLocation = new LatLng( cLat, cLon);
+
+            /*줌레벨 설정*/
+            float distanceInMeters= getDistanceInMeter((Double.parseDouble(user_start_lat)), (Double.parseDouble(user_start_lng)), (Double.parseDouble(user_arrive_lat)), (Double.parseDouble(user_arrive_lng))); // 거리계산
+            float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
+            Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
+
+            /*경로 보여주기(해야됨)*/
+            GetPathJson getJsonPath = new GetPathJson();
+            getJsonPath.execute(""+(Double.parseDouble(user_start_lat)), ""+(Double.parseDouble(user_start_lng)), ""+(Double.parseDouble(user_arrive_lat)), ""+(Double.parseDouble(user_arrive_lng)));
+
+            /*경로 표시*/
+
+            Log.d(TAG, "POST response  - " + result);
+
+            /*----------------------------------------------운전자 정보 다 불러오고 탑승자 정보 불러옴-----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+            GetNotiInfo task2 = new GetNotiInfo();
+            task2.execute();
+
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+            String carpool_id = (String)params[0];
+Log.e("ddd", "여기1");
+
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/get_driver_info2.php";
+            String postParameters = "carpool_id=" + carpool_id;// + "&user_start_date=" + user_start_date;
+
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                //httpURLConnection.setRequestProperty("content-type", "application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if(responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                }
+                else{
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while((line = bufferedReader.readLine()) != null){
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "EmailCheck: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
 /*-----------------------------------------------------------------------------------------------버튼------------------------------------------------------------------------------------------------------------------*/
     @Override
     public void onClick(View v) {
@@ -427,6 +635,46 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
                     } else {
                         Toast.makeText(mContext, "로그인 후에 카풀신청이 가능합니다.", Toast.LENGTH_SHORT).show();
                     }
+                }
+                break;
+            /*라이더 클릭*/
+            case R.id.iv_driver_info_pic2: // 사진을 누르면 신청자 출발지 도착지로 줌되고 다시 누르면 원상복귀 + 마커제거
+
+                if(rider_clicked){
+                    rider_clicked = false;
+                    Toast.makeText(app, "신청인의 출발지와 목적지 입니다. \n한번 더 누르면 원래 화면으로 돌아갑니다.", Toast.LENGTH_SHORT).show();
+                                         /*마커찍기*/
+                    setStartLocation_rider(Double.parseDouble(itemList_rider.get(0).getRider_start_lat()), Double.parseDouble(itemList_rider.get(0).getRider_start_lng()));
+                    setArriveLocation_rider(Double.parseDouble(itemList_rider.get(0).getRider_arrive_lat()), Double.parseDouble(itemList_rider.get(0).getRider_arrive_lng()));
+
+
+            /*카메라 포커스*/
+                    // 카메라로 두 마커가 보이게 조절거리에 따른 줌레벨 조절 필요
+                    Double cLat =  (Double)((Double.parseDouble(itemList_rider.get(0).getRider_start_lat())+Double.parseDouble(itemList_rider.get(0).getRider_arrive_lat()))/2);
+                    Double cLon =  (Double)((Double.parseDouble(itemList_rider.get(0).getRider_start_lng())+Double.parseDouble(itemList_rider.get(0).getRider_arrive_lng()))/2);
+                    LatLng currentLocation = new LatLng( cLat, cLon);
+
+            /*줌레벨 설정*/
+                    float distanceInMeters= getDistanceInMeter((Double.parseDouble(itemList_rider.get(0).getRider_start_lat())), (Double.parseDouble(itemList_rider.get(0).getRider_start_lng())), (Double.parseDouble(itemList_rider.get(0).getRider_arrive_lat())), (Double.parseDouble(itemList_rider.get(0).getRider_arrive_lng()))); // 거리계산
+                    float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
+                  //  Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트*/
+                }
+                else {
+                    rider_clicked = true;
+                    if (StartMarker_rider != null) StartMarker_rider.remove();
+                    if (ArriveMarker_rider != null) ArriveMarker_rider.remove();
+
+                    /*카메라 포커스*/
+                    // 카메라로 두 마커가 보이게 조절거리에 따른 줌레벨 조절 필요
+                    Double cLat =  (Double)((Double.parseDouble(user_start_lat_info)+Double.parseDouble(user_arrive_lat_info))/2);
+                    Double cLon =  (Double)((Double.parseDouble(user_start_lng_info)+Double.parseDouble(user_arrive_lng_info))/2);
+                    LatLng currentLocation = new LatLng( cLat, cLon);
+
+            /*줌레벨 설정*/
+                    float distanceInMeters= getDistanceInMeter((Double.parseDouble(user_start_lat_info)), (Double.parseDouble(user_start_lng_info)), (Double.parseDouble(user_arrive_lat_info)), (Double.parseDouble(user_arrive_lng_info))); // 거리계산
+                    float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
                 }
                 break;
         }
@@ -552,6 +800,30 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_LOCATION));*/
 
     }
+    public void setStartLocation_rider(Double Latitude, Double Longitude) {
+
+        if (StartMarker_rider != null) StartMarker_rider.remove();
+
+
+
+        LatLng startLocation = new LatLng(Latitude, Longitude);
+
+        //마커를 원하는 이미지로 변경해줘야함
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(startLocation);
+       /* markerOptions.title("출발지");*/
+        // markerOptions.snippet(markerSnippet);
+        markerOptions.draggable(true);
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_start)));
+               /* .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));*/
+        StartMarker_rider = mGoogleMap.addMarker(markerOptions); //최초마커 지우기
+
+
+        //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(startLocation));
+
+        return;
+
+    }
 
     public void setArriveLocation(Double Latitude, Double Longitude) {
 
@@ -587,6 +859,29 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
 
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_LOCATION));
 */
+    }
+    public void setArriveLocation_rider(Double Latitude, Double Longitude) {
+
+        if (ArriveMarker_rider != null) ArriveMarker_rider.remove();
+
+
+
+        LatLng arriveLocation = new LatLng( Latitude, Longitude);
+
+        //마커를 원하는 이미지로 변경해줘야함
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(arriveLocation);
+     /*   markerOptions.title("도착지");*/
+        //markerOptions.snippet(markerSnippet);
+        markerOptions.draggable(true);
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_arrive)));
+                /*.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));*/
+        ArriveMarker_rider = mGoogleMap.addMarker(markerOptions); //최초마커 지우기
+
+
+        //mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(arriveLocation));
+
+        return;
     }
 
     public String getCurrentAddress2(String Latitude, String Longitude){
@@ -834,6 +1129,147 @@ public class NewDriverInfoActivity extends AppCompatActivity implements
     }
 /*-----------------------------------------ParsePathJson---------------------------------------------------------------------------------------------------*/
 /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+ /*-----------------------------------------------------------------------디비에서 노티 정보를 가져옮-----------------------------------------------------------------------*/
+class GetNotiInfo extends AsyncTask<String, Void, String> {
+    ProgressDialog progressDialog;
+
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        /*--------------------------------------------------------왜 안되는지 모르겠는데 프로그래스이거 안되서 없애버림-------------------------------------------------------------------*/
+/*        progressDialog = ProgressDialog.show(mContext,
+                "잠시만 기다려 주세요.", null, true, true);*/
+    }
+
+
+
+    @Override
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
+/*        progressDialog.dismiss();*/
+            /*result로 JsonArray를 받아와서 Json으로 하나씪 분리해서 값을 뽑아야됨*/
+        try{
+            //JSONObject obj = new JSONObject(result);
+            JSONArray arr = new JSONArray(result);
+            itemList_rider = new ArrayList<>();
+            /*리사이 아이템 입력부분*/
+            for (int i = 0; i < arr.length(); i++)
+            {
+                Item_Notification item = new Item_Notification();
+                    if(arr.getJSONObject(i).getInt("msg_type")==1) {
+                        item.setCarpool_ID(arr.getJSONObject(i).getString("carpool_id"));
+                        item.setNoti_title("카풀신청");
+                        item.setNoti_content(arr.getJSONObject(i).getString("user_name")+"님이 카풀을 신청하셨습니다.");
+                        item.setNoti_profile_pic(arr.getJSONObject(i).getString("user_photo"));
+                        item.setRider_start_lat(arr.getJSONObject(i).getString("rider_start_lat"));
+                        item.setRider_start_lng(arr.getJSONObject(i).getString("rider_start_lng"));
+                        item.setRider_arrive_lat(arr.getJSONObject(i).getString("rider_arrive_lat"));
+                        item.setRider_arrive_lng(arr.getJSONObject(i).getString("rider_arrive_lng"));
+                        item.setRider_email(arr.getJSONObject(i).getString("sender_email"));
+                        //프로필사직 클릭여부
+                        item.setRider_clicked(true);
+
+
+                }
+                itemList_rider.add(item);
+                Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(0).getNoti_profile_pic()).into(iv_driver_info_pic2);
+                      /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
+                horizontal_recycler_view= (RecyclerView) findViewById(R.id.horizontal_recycler_view);
+
+                //data = fill_with_data();
+
+
+                horizontalAdapter=new HorizontalAdapter(itemList_rider,mContext);
+
+                LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(NewDriverInfoActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                horizontal_recycler_view.setLayoutManager(horizontalLayoutManager);
+                horizontal_recycler_view.setAdapter(horizontalAdapter);
+        /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+/*
+            /*경로 보여주기(해야됨)*/
+         /*       GetPathJson getJsonPath = new GetPathJson();
+                getJsonPath.execute(""+(Double.parseDouble(user_start_lat)), ""+(Double.parseDouble(user_start_lng)), ""+(Double.parseDouble(user_arrive_lat)), ""+(Double.parseDouble(user_arrive_lng)));*/
+
+            }
+Log.e("ddd", "dd"+itemList_rider.get(0).getNoti_profile_pic());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+        //  String user_email = (String) params[0];
+
+        String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
+        ///  String postParameters = "user_email=" + user_email;
+
+
+        try {
+
+            URL url = new URL(serverURL);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+            httpURLConnection.setReadTimeout(5000);
+            httpURLConnection.setConnectTimeout(5000);
+            httpURLConnection.setRequestMethod("POST");
+            //httpURLConnection.setRequestProperty("content-type", "application/json");
+            httpURLConnection.setDoInput(true);
+            httpURLConnection.connect();
+
+
+            OutputStream outputStream = httpURLConnection.getOutputStream();
+            // outputStream.write(postParameters.getBytes("UTF-8"));
+            outputStream.flush();
+            outputStream.close();
+
+
+            int responseStatusCode = httpURLConnection.getResponseCode();
+            Log.d(TAG, "POST response code - " + responseStatusCode);
+
+            InputStream inputStream;
+            if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                inputStream = httpURLConnection.getInputStream();
+            } else {
+                inputStream = httpURLConnection.getErrorStream();
+            }
+
+
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+
+
+            bufferedReader.close();
+
+
+            return sb.toString();
+
+
+        } catch (Exception e) {
+
+            Log.d(TAG, "EmailCheck: Error ", e);
+
+            return new String("Error: " + e.getMessage());
+        }
+
+    }
+}
+    /*-----------------------------------------------------------------------디비에서 노티 정보를 가져옮-----------------------------------------------------------------------*/
 private ServiceConnection mConnection = new ServiceConnection() {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -864,4 +1300,127 @@ private ServiceConnection mConnection = new ServiceConnection() {
         }
     }
     /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    public class HorizontalAdapter extends RecyclerView.Adapter<HorizontalAdapter.MyViewHolder> {
+
+
+       // List<Item_New_Driver_Info> horizontalList = Collections.emptyList();
+        ArrayList<Item_Notification> horizontalList = new ArrayList<>();
+        Context context;
+
+
+        public HorizontalAdapter(ArrayList<Item_Notification> horizontalList, Context context) {
+            this.horizontalList = horizontalList;
+            this.context = context;
+        }
+
+
+        public class MyViewHolder extends RecyclerView.ViewHolder {
+
+            ImageView imageView;
+            Button btn_rider_info, btn_rider_accept, btn_rider_reject;
+            TextView txtview;
+            public MyViewHolder(View view) {
+                super(view);
+                imageView=(ImageView) view.findViewById(R.id.iv_driver_info_pic2_item);
+                btn_rider_info = (Button) view.findViewById(R.id.btn_rider_info);
+                btn_rider_accept = (Button) view.findViewById(R.id.btn_rider_accept);
+                btn_rider_reject = (Button) view.findViewById(R.id.btn_rider_reject);
+
+                //txtview=(TextView) view.findViewById(R.id.txtview);
+            }
+        }
+
+
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_rider_select, parent, false);
+
+            return new MyViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(final MyViewHolder holder, final int position) {
+            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(position).getNoti_profile_pic()).into(holder.imageView);
+           // holder.imageView.setImageResource(horizontalList.get(position).imageId);
+     //       holder.txtview.setText(horizontalList.get(position).txt);
+
+            holder.imageView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                   // String list = horizontalList.get(position).txt.toString();
+                   //Toast.makeText(NewDriverInfoActivity.this, "dd "+position, Toast.LENGTH_SHORT).show();
+                    if(itemList_rider.get(position).getRider_clicked()){
+                        itemList_rider.get(position).setRider_clicked(false);
+                        Toast.makeText(app, "신청인의 출발지와 목적지 입니다. \n한번 더 누르면 원래 화면으로 돌아갑니다.", Toast.LENGTH_SHORT).show();
+                                         /*마커찍기*/
+                        setStartLocation_rider(Double.parseDouble(itemList_rider.get(position).getRider_start_lat()), Double.parseDouble(itemList_rider.get(position).getRider_start_lng()));
+                        setArriveLocation_rider(Double.parseDouble(itemList_rider.get(position).getRider_arrive_lat()), Double.parseDouble(itemList_rider.get(position).getRider_arrive_lng()));
+
+
+            /*카메라 포커스*/
+                        // 카메라로 두 마커가 보이게 조절거리에 따른 줌레벨 조절 필요
+                        Double cLat =  (Double)((Double.parseDouble(itemList_rider.get(position).getRider_start_lat())+Double.parseDouble(itemList_rider.get(position).getRider_arrive_lat()))/2);
+                        Double cLon =  (Double)((Double.parseDouble(itemList_rider.get(position).getRider_start_lng())+Double.parseDouble(itemList_rider.get(position).getRider_arrive_lng()))/2);
+                        LatLng currentLocation = new LatLng( cLat, cLon);
+
+            /*줌레벨 설정*/
+                        float distanceInMeters= getDistanceInMeter((Double.parseDouble(itemList_rider.get(position).getRider_start_lat())), (Double.parseDouble(itemList_rider.get(position).getRider_start_lng())), (Double.parseDouble(itemList_rider.get(position).getRider_arrive_lat())), (Double.parseDouble(itemList_rider.get(position).getRider_arrive_lng()))); // 거리계산
+                        float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
+                        //  Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트*/
+                    }
+                    else {
+                        itemList_rider.get(position).setRider_clicked(true);
+                        if (StartMarker_rider != null) StartMarker_rider.remove();
+                        if (ArriveMarker_rider != null) ArriveMarker_rider.remove();
+
+                    /*카메라 포커스*/
+                        // 카메라로 두 마커가 보이게 조절거리에 따른 줌레벨 조절 필요
+                        Double cLat =  (Double)((Double.parseDouble(user_start_lat_info)+Double.parseDouble(user_arrive_lat_info))/2);
+                        Double cLon =  (Double)((Double.parseDouble(user_start_lng_info)+Double.parseDouble(user_arrive_lng_info))/2);
+                        LatLng currentLocation = new LatLng( cLat, cLon);
+
+            /*줌레벨 설정*/
+                        float distanceInMeters= getDistanceInMeter((Double.parseDouble(user_start_lat_info)), (Double.parseDouble(user_start_lng_info)), (Double.parseDouble(user_arrive_lat_info)), (Double.parseDouble(user_arrive_lng_info))); // 거리계산
+                        float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
+                    }
+                }
+            });
+
+            // user_email을 전달해줘야됨
+            holder.btn_rider_info.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(NewDriverInfoActivity.this, NewUserPageActivity.class);
+                    intent.putExtra("user_email", itemList_rider.get(position).getRider_email());
+                    startActivity(intent);
+                }
+            });
+
+            holder.btn_rider_accept.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+            holder.btn_rider_reject.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+        }
+
+
+        @Override
+        public int getItemCount()
+        {
+            return horizontalList.size();
+        }
+    }
 }
