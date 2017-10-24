@@ -10,8 +10,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.jpar4.mitfahren.R;
+import com.example.jpar4.mitfahren.fragment.CarpoolApplyFragment;
 import com.example.jpar4.mitfahren.fragment.DriverInfoFragment;
-import com.example.jpar4.mitfahren.fragment.YellowFragment;
 
 public class CarpoolInfoActivity extends AppCompatActivity {
 
@@ -29,7 +29,7 @@ public class CarpoolInfoActivity extends AppCompatActivity {
         //프레그먼트 생성
         Fragment[] arrFragments = new Fragment[2];
         arrFragments[0] = new DriverInfoFragment();
-        arrFragments[1] = new YellowFragment();
+        arrFragments[1] = new CarpoolApplyFragment();
       //  arrFragments[2] = new RedFragment();
       //  arrFragments[3] = new SearchFragment();
 
@@ -65,9 +65,9 @@ public class CarpoolInfoActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position){
                 case 0:
-                    return "운전자 정보";
+                    return "등록한 카풀 목록";
                 case 1:
-                    return "탑승자 정보";
+                    return "신청 카풀 목록";
                 case 2:
                     return "GAME";
                 case 3:

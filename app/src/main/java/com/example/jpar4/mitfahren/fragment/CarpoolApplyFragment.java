@@ -38,19 +38,17 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DriverInfoFragment extends Fragment {
-    private static final String TAG = "DriverInfoFragment";
+public class CarpoolApplyFragment extends Fragment {
+    private static final String TAG = "CarpoolApplyFragment";
     //private RecyclerView searchList;
     Context context;
     ListView listView;
     DriverInfoAdapter adapter;
     /*app객체 (로그인에 사용)*/
     Myapp app;
-//TEST CODE
-/*    String[] names = {"소녀시대", "AOA", "IOI", "걸스데이"};
-    String[] ages = {"28", "22", "20", "25"};*/
 
-    public DriverInfoFragment() {
+
+    public CarpoolApplyFragment() {
         // Required empty public constructor
     }
 
@@ -58,21 +56,12 @@ public class DriverInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.new_fragment_rider_info, container, false);
 
-
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.new_fragment_driver_info, container, false);
-      //  searchList = (RecyclerView) view.findViewById(R.id.driver_search_list);
-    //    searchList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         context=getContext();
         app = (Myapp)context.getApplicationContext();
-        listView = (ListView) view.findViewById(R.id.listView_item_carpool);
+        listView = (ListView) view.findViewById(R.id.listView_item_carpool_rider);
         adapter = new DriverInfoAdapter();
-//TEST CODE
-      /*  adapter.addItem(new Item_New_Driver_Info(names[0], ages[0])); // 데이터 추가
-        adapter.addItem(new Item_New_Driver_Info(names[1], ages[1]));
-        adapter.addItem(new Item_New_Driver_Info(names[2], ages[2]));
-        adapter.addItem(new Item_New_Driver_Info(names[3], ages[3]));*/
 
 /*데이터 추가*/
         GetDriverInfo task = new GetDriverInfo();
@@ -149,7 +138,7 @@ public class DriverInfoFragment extends Fragment {
                 ArrayList<Item_New_Driver_Info> itemList = new ArrayList<>();
                 for (int i = 0; i < arr.length(); i++)
                 {
-                    if(app.getUser_email().equals(arr.getJSONObject(i).getString("user_email"))){ // 현재 로그인한 사람과 등록된 이메일이 같을 경우만 보여줌
+                    if(app.getUser_email().equals(arr.getJSONObject(i).getString("sender_email"))){ // 현재 로그인한 사람과 보낸사람 이메일이 같을 경우만 보여줌
                         Item_New_Driver_Info item = new Item_New_Driver_Info();
                         item.setUser_email(arr.getJSONObject(i).getString("user_email"));
                         item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
@@ -198,8 +187,7 @@ public class DriverInfoFragment extends Fragment {
 
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             //  String user_email = (String) params[0];
-
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/testgetalldriverinfo.php";
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_driver_info.php";
             ///  String postParameters = "user_email=" + user_email;
 
 

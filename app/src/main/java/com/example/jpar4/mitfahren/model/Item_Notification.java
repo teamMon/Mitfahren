@@ -19,6 +19,7 @@ public class Item_Notification {
     String noti_date;
     String noti_profile_pic;
     String noti_content;
+    String rider_num;
 
     String rider_start_lat; //탑승자용
     String rider_start_lng;
@@ -33,6 +34,14 @@ public class Item_Notification {
 
     /*라이더 클릭했는지 안했는지*/
     Boolean rider_clicked = true;
+
+    public String getRider_num() {
+        return rider_num;
+    }
+
+    public void setRider_num(String rider_num) {
+        this.rider_num = rider_num;
+    }
 
     public String getRider_email() {
         return rider_email;

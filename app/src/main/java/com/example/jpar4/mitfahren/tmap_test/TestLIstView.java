@@ -359,7 +359,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
                 view.setStart(curItem.getUser_start());
                 view.setArrive(curItem.getUser_arrive());
                 view.setItem_new_driver_info(curItem);
-               view.deliveryService(mService);
+                view.deliveryService(mService);
                 return view;
             }
             boolean searchFirstOrNot=false; //첫 검색결과를 보존
@@ -536,6 +536,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
 
                     Item_New_Driver_Info item = new Item_New_Driver_Info();
                     item.setDriver_info_id(arr.getJSONObject(i).getString("id")); // 카풀정보
+                    item.setCarpool_id(arr.getJSONObject(i).getString("id"));
 
                     item.setUser_email(arr.getJSONObject(i).getString("user_email"));
                     item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
@@ -560,6 +561,7 @@ public class TestLIstView extends AppCompatActivity implements View.OnClickListe
                     //거리구하기 테스트
                     String[] arr_startArrivePoint = startArrivePoint.split("#");
                     //탑승자 위치정보저장~
+                    //핵심꼬임
                     item.setRider_start_lat(arr_startArrivePoint[0]);
                     item.setRider_start_lng(arr_startArrivePoint[1]);
                     item.setRider_arrive_lat(arr_startArrivePoint[2]);

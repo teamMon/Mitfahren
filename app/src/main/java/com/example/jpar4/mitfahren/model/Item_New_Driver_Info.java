@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 
 public class Item_New_Driver_Info implements Serializable, ClusterItem{
+    String carpool_id;
     String driver_info_id;
     String rider_start_lat; //탑승자용
     String rider_start_lng;
@@ -34,6 +35,14 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
     String distance_option;
     String distance_meters;
     String user_sex;
+
+    public String getCarpool_id() {
+        return carpool_id;
+    }
+
+    public void setCarpool_id(String carpool_id) {
+        this.carpool_id = carpool_id;
+    }
 
     public String getRider_start_lat() {
         return rider_start_lat;
@@ -107,16 +116,25 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
 this.user_start = a;
         this.user_arrive=b;
     }
-
+/*---------------------------------------------------클러스터링 item 세팅할떄 사용, 마커를 통해서 정보를 넘길때 여기다 Item_New_Driver_Info 생성자 세팅안해주면 제대로 안넘어감. 주의할것-------------------------------------------------------------------------------------------------------------------*/
     public Item_New_Driver_Info(Item_New_Driver_Info item){
+        this.carpool_id = item.getCarpool_id();
+        this.driver_info_id = item.getDriver_info_id();
         this.user_email = item.getUser_email();
         this.user_start_date = item.getUser_start_date();
         this.user_start_time = item.getUser_start_time();
         this.user_with_poeple = item.getUser_with_poeple();
+
         this.user_start_lat = item.getUser_start_lat();
         this.user_start_lng = item.getUser_start_lng();
         this.user_arrive_lat = item.getUser_arrive_lat();
         this.user_arrive_lng = item.getUser_arrive_lng();
+//핵심꼬임
+        this.rider_start_lat = item.getRider_start_lat();
+        this.rider_start_lng = item.getRider_start_lng();
+        this.rider_arrive_lat = item.getRider_arrive_lat();
+        this.rider_arrive_lng = item.getRider_arrive_lng();
+
         this.user_car_photo = item.getUser_car_photo();
         this.user_having_rider = item.getUser_having_rider();
         this.user_carpool_complete = item.getUser_carpool_complete();

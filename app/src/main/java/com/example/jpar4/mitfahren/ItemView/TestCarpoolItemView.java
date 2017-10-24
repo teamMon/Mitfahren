@@ -113,6 +113,7 @@ public class TestCarpoolItemView extends LinearLayout implements View.OnClickLis
                         *
                         *
                         * */
+                        //핵심꼬임
                         sendMsgObj.put("kindOfmsg", "1"); //    kindOfmsg : 1 = carpool_applying
                         sendMsgObj.put("carpool_id", item_new_driver_info.getDriver_info_id()); // 등록된 카풀정보의 아이디(유일값)
                         sendMsgObj.put("sender", app.getUser_email()); // sender : 보내는 사람

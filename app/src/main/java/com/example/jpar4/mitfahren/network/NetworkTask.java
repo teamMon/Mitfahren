@@ -3,11 +3,12 @@ package com.example.jpar4.mitfahren.network;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
-import com.example.jpar4.mitfahren.service.MyService;
 import com.example.jpar4.mitfahren.tmap_test.NewNotiActivity;
 
 import org.json.JSONException;
@@ -34,13 +35,13 @@ public class NetworkTask extends Thread {
     private String msg;
     private String email;
     boolean isConnected = true;
-    MyService service;
+    Context service;
 
     public NetworkTask(){
 
     }
 
-    public NetworkTask(MyService service, String email){
+    public NetworkTask(Context service, String email){
        this.service = service;
        this.email = email;
 
@@ -82,6 +83,14 @@ public class NetworkTask extends Thread {
 
                     }else {// json형식 아닐때
                         //clientsMap.get(key).writeUTF(msg); // 그냥 찍어보냄
+                        if(msg.equals("success")){
+                            Toast.makeText(service, "카풀신청이 되었습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(msg.equals("failure")){
+                            Toast.makeText(service.getApplicationContext(), "이미 요청된 카풀입니다.", Toast.LENGTH_SHORT).show();
+                            ToastSender toastSender = new ToastSender("이미 요청된 카풀입니다.");
+                            toastSender.start();
+                        }
                     }
 
                 }catch(Exception e) {
@@ -122,6 +131,19 @@ public class NetworkTask extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    class ToastSender extends Thread{
+        String msg3;
+
+        public ToastSender(String msg){
+            this.msg3 = msg;
+        }
+
+        @Override
+        public void run() {
+            Toast.makeText(service, msg3, Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -325,7 +325,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
             nev_Menu.findItem(R.id.nav_noti).setVisible(false);
-          //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
+            nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 
         /*로그아웃상태일 때 nav_logout nav_out_mem nav_myinfo nav_add_driver*/
@@ -391,7 +391,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             /*Intent intent = new Intent(NewSearchActivity.this, UserPageActivity.class);
             startActivity(intent);*/
             /*등록한 카풀 정보가 있을 때만 나오게 하기*/
-        } else if (id == R.id.nav_mycarpool) {
+        } else if (id == R.id.nav_mycarpool) { //카풀
             Intent intent = new Intent(NewSearchActivity.this, CarpoolInfoActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_add_driver) {
@@ -520,7 +520,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_login).setVisible(false);
             nev_Menu.findItem(R.id.nav_join).setVisible(false);
             nev_Menu.findItem(R.id.nav_myinfo).setVisible(true);
-            nev_Menu.findItem(R.id.nav_out_mem).setVisible(true);
+            nev_Menu.findItem(R.id.nav_out_mem).setVisible(false);
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(true);
             nev_Menu.findItem(R.id.nav_logout).setVisible(true);
             nev_Menu.findItem(R.id.nav_noti).setVisible(true);
@@ -538,7 +538,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
             Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
 
-        }else{
+        }else{ //로그아웃상태일때
                   /*해더 네임 이메일 변경*/
             nav_header_name.setText("손님1");
             nav_header_email.setText("customer1@gmail.com");
@@ -554,7 +554,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(false);
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
             nev_Menu.findItem(R.id.nav_noti).setVisible(false);
-          //  nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
+            nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
         }
 
     }
@@ -1725,14 +1725,26 @@ public float getZoomForMetersWide(double desiredMeters) {
 
                             Item_New_Driver_Info item = new Item_New_Driver_Info();
 
+                            item.setCarpool_id(arr.getJSONObject(i).getString("id"));
+                            item.setDriver_info_id(arr.getJSONObject(i).getString("id"));
                             item.setUser_email(arr.getJSONObject(i).getString("user_email"));
                             item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
                             item.setUser_start_time(arr.getJSONObject(i).getString("user_start_time"));
                             item.setUser_with_poeple(arr.getJSONObject(i).getString("user_with_poeple"));
+
                             item.setUser_start_lat(arr.getJSONObject(i).getString("user_start_lat"));
                             item.setUser_start_lng(arr.getJSONObject(i).getString("user_start_lng"));
                             item.setUser_arrive_lat(arr.getJSONObject(i).getString("user_arrive_lat"));
                             item.setUser_arrive_lng(arr.getJSONObject(i).getString("user_arrive_lng"));
+/*마커로 바로 신청하면 라이더 좌표정보 없으므로 넣어줌.*/
+//핵심꼬임
+                          item.setRider_start_lat(arr.getJSONObject(i).getString("user_start_lat"));
+                            item.setRider_start_lng(arr.getJSONObject(i).getString("user_start_lng"));
+                            item.setRider_arrive_lat(arr.getJSONObject(i).getString("user_arrive_lat"));
+                            item.setRider_arrive_lng(arr.getJSONObject(i).getString("user_arrive_lng"));
+                            //있어야될듯 라이더좌표추가하는거..
+
+
                             item.setUser_car_photo(arr.getJSONObject(i).getString("user_car_photo"));
                             item.setUser_having_rider(arr.getJSONObject(i).getString("user_having_rider"));
                             item.setUser_carpool_complete(arr.getJSONObject(i).getString("user_carpool_complete"));
@@ -1750,7 +1762,8 @@ public float getZoomForMetersWide(double desiredMeters) {
 
                             mClusterManager.setRenderer(new DriverInfoRenderer(getApplicationContext(), mGoogleMap, mClusterManager));
 
-                            mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start()));
+                            mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start())); // 아이템 생성자 세팅해줘야 넘길떄 제대로 넘어감
+                            Log.e("ddd ", "item.getUser_start() : "+item.getUser_start());
 
                         /*    MarkerOptions markerOptions = new MarkerOptions();
                             markerOptions.position(item.getLocation());
