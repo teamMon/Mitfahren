@@ -404,9 +404,13 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             startActivity(intent);
         }/*else if (id == R.id.nav_see_friend) {
 
-        } else if (id == R.id.nav_talk) {
-
-        } */
+        }*/
+        else if (id == R.id.nav_talk) {
+            Intent intent = new Intent(NewSearchActivity.this, ChattingRoomLIstActivity.class);
+            startActivity(intent);
+      /*      Intent intent = new Intent(NewSearchActivity.this, ChattingRoomActivity.class);
+            startActivity(intent);*/
+        }
         else if (id == R.id.nav_noti) {
             Intent intent = new Intent(NewSearchActivity.this, NewNotiActivity.class);
             startActivity(intent);

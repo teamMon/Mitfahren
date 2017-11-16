@@ -10,18 +10,21 @@ import java.io.Serializable;
  */
 
 public class Item_New_Driver_Info implements Serializable, ClusterItem{
+    String item_id;// 정렬용
     String carpool_id;
     String driver_info_id;
     String rider_start_lat; //탑승자용
     String rider_start_lng;
     String rider_arrive_lat;
     String rider_arrive_lng;
+    String rider_carpool_status;
 
     String user_email;
     String user_start_date;
     String user_start_time;
     String user_with_poeple;
     String user_start_lat;//운전자용
+    String driver_email; // receiver_email
     String user_start_lng;
     String user_arrive_lat;
     String user_arrive_lng;
@@ -35,6 +38,30 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
     String distance_option;
     String distance_meters;
     String user_sex;
+
+    public String getItem_id() {
+        return item_id;
+    }
+
+    public void setItem_id(String item_id) {
+        this.item_id = item_id;
+    }
+
+    public String getDriver_email() {
+        return driver_email;
+    }
+
+    public void setDriver_email(String driver_email) {
+        this.driver_email = driver_email;
+    }
+
+    public String getRider_carpool_status() {
+        return rider_carpool_status;
+    }
+
+    public void setRider_carpool_status(String rider_carpool_status) {
+        this.rider_carpool_status = rider_carpool_status;
+    }
 
     public String getCarpool_id() {
         return carpool_id;
@@ -113,7 +140,7 @@ public class Item_New_Driver_Info implements Serializable, ClusterItem{
     }
 
     public Item_New_Driver_Info(String a, String b){//테스트용
-this.user_start = a;
+        this.user_start = a;
         this.user_arrive=b;
     }
 /*---------------------------------------------------클러스터링 item 세팅할떄 사용, 마커를 통해서 정보를 넘길때 여기다 Item_New_Driver_Info 생성자 세팅안해주면 제대로 안넘어감. 주의할것-------------------------------------------------------------------------------------------------------------------*/

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:id="@+id/drawer"
+    android:layout_gravity="end"
+    >
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+
+    android:background="#EDEDED"
+    >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"
+        />
+    <!--android:background="#cce1e1e1"-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="대화상대"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_margin="16dp"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"
+        />
+    <ListView
+        android:id="@+id/chatting_people_list"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+
+        android:background="#EDEDED"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"
+        />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="초대 가능한 사람"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_margin="16dp"
+        android:layout_centerVertical="true"
+        />
+        <ImageButton
+            android:id="@+id/btn_addadd"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerVertical="true"
+            android:background="@mipmap/ic_add_chatter"
+            android:layout_marginRight="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"
+        />
+    <ListView
+        android:id="@+id/invitable_poeple_list"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#EDEDED"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp" />
+    <Button
+        android:id="@+id/btn_add_chatter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="초대하기"
+        android:visibility="invisible"
+        />
+</LinearLayout>
+</ScrollView>

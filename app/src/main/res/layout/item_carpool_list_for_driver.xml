@@ -153,11 +153,20 @@
         <ImageView
             android:id="@+id/iv_item_carpool_info_status"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="115dp"
             android:src="@drawable/searching"
-            android:layout_marginBottom="35dp"
+
             android:layout_marginRight="10dp"
             android:layout_marginTop="25dp"
+            />
+        <Button
+            android:id="@+id/btn_chatting_driver"
+            android:layout_marginRight="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:text="채팅"
+            android:visibility="invisible"
             />
     </LinearLayout>
 </LinearLayout>

@@ -61,7 +61,12 @@ public class ItemNotiView extends LinearLayout implements View.OnClickListener{
         item_notification=item;
         tv_item_noti_title.setText(item.getNoti_title());
         tv_item_noti_content.setText(item.getNoti_content());
+        tv_item_noti_date.setText(item.getNoti_date());
         Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item.getNoti_profile_pic()).into(iv_item_noti_profile_pic);
+        if(item.getNoti_checked().equals("Y")){
+            iv_item_noti_main.setBackgroundColor(Color.WHITE);
+        }
+
 
         //iv_driver_info_main
     //   Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_new_driver_info.getUser_car_photo()).into(iv_driver_info_main);

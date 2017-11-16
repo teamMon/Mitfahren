@@ -15,6 +15,8 @@ public class Item_Notification {
         this.carpool_ID = carpool_ID;
     }
 
+    int noti_id;
+    String noti_checked;
     String noti_title;
     String noti_date;
     String noti_profile_pic;
@@ -26,11 +28,39 @@ public class Item_Notification {
     String rider_arrive_lat;
     String rider_arrive_lng;
     String rider_email;
+    String rider_carpool_status; // 카풀 수락됨, 거절됨, 취소됨
 
     String user_start_lat;//운전자용
     String user_start_lng;
     String user_arrive_lat;
     String user_arrive_lng;
+    String user_carpool_complete;
+
+    public int getNoti_id() {
+        return noti_id;
+    }
+
+    public void setNoti_id(int noti_id) {
+        this.noti_id = noti_id;
+    }
+
+    public String getNoti_checked() {
+        return noti_checked;
+    }
+
+    public void setNoti_checked(String noti_checked) {
+        this.noti_checked = noti_checked;
+    }
+
+    public String getUser_driver_email() { // 신청카풀목록에서 카풀정보아이디만 넘겨서 액티비티를 실행하면 운전자일경우(노티에서 오늘경우와) 혼선이 있을 수 있으므로 드라이버 이메일을 추가하여 둘을 구별할수 있게 하려고 함
+        return user_driver_email;
+    }
+
+    public void setUser_driver_email(String user_driver_email) {
+        this.user_driver_email = user_driver_email;
+    }
+
+    String user_driver_email;
 
     /*라이더 클릭했는지 안했는지*/
     Boolean rider_clicked = true;
@@ -153,5 +183,21 @@ public class Item_Notification {
 
     public void setUser_arrive_lng(String user_arrive_lng) {
         this.user_arrive_lng = user_arrive_lng;
+    }
+
+    public String getRider_carpool_status() {
+        return rider_carpool_status;
+    }
+
+    public void setRider_carpool_status(String rider_carpool_status) {
+        this.rider_carpool_status = rider_carpool_status;
+    }
+
+    public String getUser_carpool_complete() {
+        return user_carpool_complete;
+    }
+
+    public void setUser_carpool_complete(String user_carpool_complete) {
+        this.user_carpool_complete = user_carpool_complete;
     }
 }

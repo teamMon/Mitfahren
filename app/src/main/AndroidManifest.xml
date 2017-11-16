@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera2" />
+    <uses-feature android:name="android.hardware.camera" />
+
     <!-- 카풀인포에 서비스 바인딩후 오류생겨서 아래 퍼미션 추가함 이거 추가하고 되긴하는데 없어도 되긴함? ㅋㅋㅋ 뭐지.. ㅅㅂ 근데 뭔가 오류 엄청남 -->
     <!-- <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" android:protectionLevel="signature"/> -->
     <application
@@ -49,6 +54,8 @@
         <!-- android:launchMode="singleTask" -> 플레그 사용하기 위해 바꿈. -->
         <!-- <activity android:name=".activity.UserPageActivity"> -->
         <!-- <activity android:name=".activity.CarpoolPageActivity"> -->
+        <!-- android:name=".tmap_test.NewSearchActivity" -->
+        <!-- android:name=".tmap_test.ChattingRoomActivity" -->
         <activity
             android:name=".tmap_test.NewSearchActivity"
             android:launchMode="singleTask"
@@ -102,7 +109,19 @@
 
         <service android:name=".service.MyService" />
 
-        <activity android:name=".tmap_test.NewNotiActivity"></activity>
+        <activity android:name=".tmap_test.NewNotiActivity" />
+        <activity android:name=".tmap_test.ChattingRoomActivity" />
+        <activity android:name=".tmap_test.ChattingRoomLIstActivity"></activity>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.jpar4.mitfahren"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -127,6 +127,9 @@ ArrayList<Item_Notification> itemList_rider;
     RecyclerView horizontal_recycler_view;
     HorizontalAdapter horizontalAdapter;
     String carpool_ID ;
+    String INETENT_SENT_FROM=null;
+    String driver_email=null;
+    String user_carpool_complete=null;
     /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
 
     @Override
@@ -143,7 +146,16 @@ ArrayList<Item_Notification> itemList_rider;
         Intent intent = getIntent();
         /*에드드라이버2에서 날라올때*/
         String user_start_date = intent.getStringExtra("user_start_date");
+        //알림에서 올때, 카풀 신청 정보에서 올때
         carpool_ID = intent.getStringExtra("carpool_ID");
+        
+        //카풀신청정보에서 올때
+        INETENT_SENT_FROM = intent.getStringExtra("INETENT_SENT_FROM");
+        if(INETENT_SENT_FROM!=null){
+            driver_email = intent.getStringExtra("driver_email");
+            Log.e("ddd INETENT_SENT_FROM", INETENT_SENT_FROM);
+        }
+        
 /*ADD Driver2에서 올때만 값을 넣어줌 */
         Whr_r_u_from = intent.getStringExtra("Whr_r_u_from");
         if(Whr_r_u_from!=null){
@@ -191,7 +203,7 @@ ArrayList<Item_Notification> itemList_rider;
                    //task.execute("qlql@qlql.com");
 //               Log.e("ddd ", app.getUser_email()+","+item_new_driver_info.getUser_start_date());
                    task.execute(app.getUser_email(), user_start_date);
-               }else{//알림으로 들어갈때
+               }else{//알림으로 들어갈때 또는 카풀 정보 보기에서 라이더가 카풀정보보기할때
                    GetDriverInfo2 task = new GetDriverInfo2();
                    task.execute(carpool_ID);
                }
@@ -470,6 +482,7 @@ ArrayList<Item_Notification> itemList_rider;
             String user_arrive_lng = arr_result[7];
             String user_having_rider = arr_result[8];
             String user_car_photo = arr_result[9];
+            user_carpool_complete = arr_result[10];
         /*---------------------------------------------------------------------------------------------------------------------------------아이템리스트*/
 /*            itemList_rider.get(0).setUser_start_lat(user_start_lat);
             itemList_rider.get(0).setUser_start_lng(user_start_lng);
@@ -615,7 +628,19 @@ Log.e("ddd", "여기1");
                 intent = new Intent(NewDriverInfoActivity.this, NewUserPageActivity.class);
                 if(app.isLoginOK()){ // 로그인 되어 있을 때
                     if(item_new_driver_info==null){ // 등록후 확인페이지면 null
-                        intent.putExtra("user_email", app.getUser_email());
+                        if(INETENT_SENT_FROM!=null){
+                            if(INETENT_SENT_FROM.equals("ItemCarpoolListForRiderView")){
+                                Toast.makeText(app, "111", Toast.LENGTH_SHORT).show();
+                                Log.e("ddd INETENT_SENT_FROM", INETENT_SENT_FROM);
+                                intent.putExtra("user_email", driver_email);
+                            }
+                            else if(INETENT_SENT_FROM.equals("ItemCarpoolListForDriverView")){
+                                intent.putExtra("user_email", driver_email);
+                            }
+
+                        }else{
+                            intent.putExtra("user_email", app.getUser_email());
+                        }
                     }else {
                         if(!app.getUser_email().equals(item_new_driver_info.getUser_email())){// 다르면 카풀 신청하기 나오고
                             intent.putExtra("user_email", item_new_driver_info.getUser_email());
@@ -638,6 +663,8 @@ Log.e("ddd", "여기1");
                     intent.putExtra("Whr_r_u_from", "ADD_Driver2");
                     Log.e("ddd 2", Whr_r_u_from);
                     app.setWhr_r_u_from("ADD_Driver2"); // 인텐트 전송이 잘 안먹혀서 그냥 어플객체 이용
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
                 }
                /* intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);*/
@@ -1198,13 +1225,16 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
                     item.setRider_arrive_lat(arr.getJSONObject(i).getString("rider_arrive_lat"));
                     item.setRider_arrive_lng(arr.getJSONObject(i).getString("rider_arrive_lng"));
                     item.setRider_email(arr.getJSONObject(i).getString("sender_email"));
+                    item.setUser_driver_email(arr.getJSONObject(i).getString("receiver_email"));
+                    item.setRider_carpool_status(arr.getJSONObject(i).getString("carpool_status"));
+                  /*  item.setUser_carpool_complete(arr.getJSONObject(i).getString("user_carpool_complete")); 이거 없음.. */
                     //프로필사직 클릭여부
                     item.setRider_clicked(true);
 
 
                 }
                 /*카풀아이디에 해당하는 item만 포함시키기*/
-                if (carpool_ID.equals(arr.getJSONObject(i).getString("carpool_id"))) {
+                if (carpool_ID.equals(arr.getJSONObject(i).getString("carpool_id")) && app.getUser_email().equals(arr.getJSONObject(i).getString("receiver_email"))) {
                     itemList_rider.add(item);
 
                 }
@@ -1334,6 +1364,102 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 /*        progressDialog.dismiss();*/
+           Log.e("ddd", result);
+
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+            String carpool_id = (String) params[0];
+            String sender_email = (String) params[1];
+            String accept_cancel = (String) params[2];
+
+            Log.e("ddd", carpool_id+sender_email+accept_cancel);
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
+            String postParameters = "carpool_id="+carpool_id+"&sender_email="+sender_email+"&accept_cancel="+accept_cancel;
+
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                //httpURLConnection.setRequestProperty("content-type", "application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                } else {
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                Log.d(TAG, "EmailCheck: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+    /*-----------------------------------------------------------------------수락버튼 눌렀을때-----------------------------------------------------------------------*/
+     /*-----------------------------------------------------------------------거절버튼 눌렀을때-----------------------------------------------------------------------*/
+    class PushButtonReject extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        /*--------------------------------------------------------왜 안되는지 모르겠는데 프로그래스이거 안되서 없애버림-------------------------------------------------------------------*/
+/*        progressDialog = ProgressDialog.show(mContext,
+                "잠시만 기다려 주세요.", null, true, true);*/
+        }
+
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+/*        progressDialog.dismiss();*/
+
 
         }
 
@@ -1405,7 +1531,7 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
 
         }
     }
-    /*-----------------------------------------------------------------------수락버튼 눌렀을때-----------------------------------------------------------------------*/
+    /*-----------------------------------------------------------------------거절버튼 눌렀을때-----------------------------------------------------------------------*/
 
 private ServiceConnection mConnection = new ServiceConnection() {
     @Override
@@ -1455,15 +1581,15 @@ private ServiceConnection mConnection = new ServiceConnection() {
 
             ImageView imageView;
             Button btn_rider_info, btn_rider_accept, btn_rider_reject;
-            TextView txtview;
+            TextView tv_rider_noti;
             public MyViewHolder(View view) {
                 super(view);
                 imageView=(ImageView) view.findViewById(R.id.iv_driver_info_pic2_item);
                 btn_rider_info = (Button) view.findViewById(R.id.btn_rider_info);
                 btn_rider_accept = (Button) view.findViewById(R.id.btn_rider_accept);
                 btn_rider_reject = (Button) view.findViewById(R.id.btn_rider_reject);
+                tv_rider_noti =(TextView) view.findViewById(R.id.tv_rider_noti);
 
-                //txtview=(TextView) view.findViewById(R.id.txtview);
             }
         }
 
@@ -1538,20 +1664,153 @@ private ServiceConnection mConnection = new ServiceConnection() {
             });
 /*수락*/
             holder.btn_rider_accept.setOnClickListener(new View.OnClickListener() {
+                String accept_cancel="accept";
                 @Override
-                public void onClick(View v) {
-                    //Toast.makeText(context, carpool_ID, Toast.LENGTH_SHORT).show();
+                public void onClick(View v) {// carpool_ID랑 sender_id 를 보내야됨
+                   // Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
+                    //itemList_rider.get(position).setRider_carpool_status("accepted");
+                    Log.e("ddd", itemList_rider.get(position).getRider_carpool_status());
+                    if(holder.btn_rider_accept.getText().toString().equals("수락")){
+                        accept_cancel="accept";
+                        Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
+                        itemList_rider.get(position).setRider_carpool_status("accepted");
+                        PushButtonAccept task = new PushButtonAccept();
+                        task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);
+                    }else{//수락취소
+                        accept_cancel="cancel";
+                        itemList_rider.get(position).setRider_carpool_status("waiting");
+                        PushButtonAccept task = new PushButtonAccept();
+                        task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);
+                    }
+
+                    if(itemList_rider.get(position).getRider_carpool_status().equals("accepted")){
+                        Log.e("ddd", itemList_rider.get(position).getRider_carpool_status());
+                        holder.tv_rider_noti.setText("수락된 신청인 입니다.");
+                        holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_complete));
+                        holder.tv_rider_noti.setVisibility(View.VISIBLE);
+
+                        holder.btn_rider_accept.setText("수락취소");
+                        holder.btn_rider_reject.setVisibility(View.GONE);
+                    }else if(itemList_rider.get(position).getRider_carpool_status().equals("waiting")){
+                        holder.tv_rider_noti.setVisibility(View.GONE);
+                        holder.btn_rider_accept.setText("수락");
+                        holder.btn_rider_accept.setVisibility(View.VISIBLE);
+                        holder.btn_rider_reject.setVisibility(View.VISIBLE);
+                    }
+
                 }
             });
 /*거절*/
             holder.btn_rider_reject.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    String accept_cancel="reject";
+                    if(holder.btn_rider_reject.getText().toString().equals("거절")){
+                        accept_cancel="reject";
+                        Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
+                        itemList_rider.get(position).setRider_carpool_status("rejected");
+                        PushButtonAccept task = new PushButtonAccept();
+                        task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);
+                    }else{
+                        accept_cancel="reject_cancel";
+                        itemList_rider.get(position).setRider_carpool_status("waiting");
+                        PushButtonAccept task = new PushButtonAccept();
+                        task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);
+                    }
 
+                    if(itemList_rider.get(position).getRider_carpool_status().equals("rejected")){
+                        holder.tv_rider_noti.setText("거절된 신청인 입니다.");
+                        holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                        holder.tv_rider_noti.setVisibility(View.VISIBLE);
+                        holder.btn_rider_accept.setVisibility(View.GONE);
+                        holder.btn_rider_reject.setText("거절취소");
+                    }else if(itemList_rider.get(position).getRider_carpool_status().equals("waiting")) {
+                        holder.tv_rider_noti.setVisibility(View.GONE);
+                        holder.btn_rider_reject.setText("거절");
+                        holder.btn_rider_accept.setText("수락");
+                        holder.btn_rider_accept.setVisibility(View.VISIBLE);
+                        holder.btn_rider_reject.setVisibility(View.VISIBLE);
+                    }
                 }
             });
 
+            if(itemList_rider.get(position).getRider_carpool_status().equals("accepted")){
+                Log.e("ddd", itemList_rider.get(position).getRider_carpool_status());
+                holder.tv_rider_noti.setText("수락된 신청인 입니다.");
+                holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_complete));
+                holder.tv_rider_noti.setVisibility(View.VISIBLE);
+
+                holder.btn_rider_accept.setText("수락취소");
+                holder.btn_rider_reject.setVisibility(View.GONE);
+            }else if(itemList_rider.get(position).getRider_carpool_status().equals("rejected")){
+                holder.tv_rider_noti.setText("거절된 신청인 입니다.");
+                holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                holder.tv_rider_noti.setVisibility(View.VISIBLE);
+                holder.btn_rider_accept.setVisibility(View.GONE);
+                holder.btn_rider_reject.setText("거절취소");
+            }else if(itemList_rider.get(position).getRider_carpool_status().equals("waiting")) {
+                holder.tv_rider_noti.setVisibility(View.GONE);
+                holder.btn_rider_reject.setText("거절");
+                holder.btn_rider_accept.setText("수락");
+                holder.btn_rider_accept.setVisibility(View.VISIBLE);
+                holder.btn_rider_reject.setVisibility(View.VISIBLE);
+            }
+
+            if(user_carpool_complete.equals("모집완료됨")){
+                if(itemList_rider.get(position).getRider_carpool_status().equals("completed")){
+                    holder.tv_rider_noti.setText("카풀 완료 했습니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_complete));
+                }
+                else if(itemList_rider.get(position).getRider_carpool_status().equals("accepted")){
+                    holder.tv_rider_noti.setText("카풀 완료를 기다립니다.(카풀완료 대기중)");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_searchdone));
+                }
+                else if(itemList_rider.get(position).getRider_carpool_status().equals("rejected")){
+                    holder.tv_rider_noti.setText("카풀 거절된 사용자 입니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                }
+                else{
+                    holder.tv_rider_noti.setText("카풀 거절된 사용자 입니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                }
+
+                holder.tv_rider_noti.setVisibility(View.VISIBLE);
+                holder.btn_rider_accept.setVisibility(View.GONE);
+                holder.btn_rider_reject.setVisibility(View.GONE);
+            }
+            if(user_carpool_complete.equals("카풀취소됨")){
+                holder.tv_rider_noti.setText("카풀이 취소되었습니다.");
+                holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                holder.tv_rider_noti.setVisibility(View.VISIBLE);
+                holder.btn_rider_accept.setVisibility(View.GONE);
+                holder.btn_rider_reject.setVisibility(View.GONE);
+            }
+
+            if(user_carpool_complete.equals("카풀완료됨")){
+                if(itemList_rider.get(position).getRider_carpool_status().equals("completed")){
+                    holder.tv_rider_noti.setText("카풀 완료 했습니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_complete));
+                }
+                else if(itemList_rider.get(position).getRider_carpool_status().equals("accepted")){
+                    holder.tv_rider_noti.setText("카풀 완료 기다립니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_searchdone));
+                }
+                else if(itemList_rider.get(position).getRider_carpool_status().equals("rejected")){
+                    holder.tv_rider_noti.setText("카풀 거절된 사용자 입니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                }
+                else{
+                    holder.tv_rider_noti.setText("카풀 거절된 사용자 입니다.");
+                    holder.tv_rider_noti.setBackgroundColor(getResources().getColor(R.color.carpool_cancel));
+                }
+
+                holder.tv_rider_noti.setVisibility(View.VISIBLE);
+                holder.btn_rider_accept.setVisibility(View.GONE);
+                holder.btn_rider_reject.setVisibility(View.GONE);
+            }
+
         }
+
 
 
         @Override

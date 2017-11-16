@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    >
+    <!--        android:focusable="false"
+       android:focusableInTouchMode="false"-->
+    <ImageView
+
+        android:id="@+id/chatting_room_pic"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_launcher_round" />
+
+    <TextView
+        android:layout_toRightOf="@+id/chatting_room_pic"
+        android:layout_toLeftOf="@+id/chatting_room_num"
+        android:layout_marginLeft="8dp"
+        android:id="@+id/chatting_room_title"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:text="채팅방"
+        />
+
+    <TextView
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="8dp"
+        android:id="@+id/chatting_room_num"
+        android:layout_width="40dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+
+        android:text="1명"
+        />
+    <!--android:background="#94ff0900"-->
+</RelativeLayout>

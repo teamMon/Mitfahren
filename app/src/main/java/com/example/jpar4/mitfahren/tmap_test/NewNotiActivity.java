@@ -28,6 +28,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class NewNotiActivity extends AppCompatActivity {
     private static final String TAG = "Notification_Activity";
@@ -104,6 +106,12 @@ public class NewNotiActivity extends AppCompatActivity {
 
             Item_Notification curItem = items.get(position);// 현재 아이템
             view.setItem_notitication(curItem);
+
+            /*노티확인*/
+       /*    if(items.get(position).getNoti_checked().equals("Y")){
+                ItemNotiView view2 =(ItemNotiView)getView(position,view,parent);
+                view2.setItemBackgrouncColorWhite();
+            }*/
             //view.deliveryService(mService);
             return view;
         }
@@ -113,15 +121,41 @@ public class NewNotiActivity extends AppCompatActivity {
             Log.e("ddd", "리스트포지션"+position+" 아이디 "+id);
             ItemNotiView view2 =(ItemNotiView)getView(position,view,parent);
             view2.setItemBackgrouncColorWhite();
+            PushButton task = new PushButton();
+            task.execute(items.get(position).getCarpool_ID(), items.get(position).getRider_email(), "noti_checked_1");
+            Log.e("ddd notichecked", ""+items.get(position).getCarpool_ID()+items.get(position).getRider_email());
+
             intent = new Intent(mContext,  NewDriverInfoActivity.class);
           //  intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//현재 액티비티를 최상으로 올리고, 최상의 액티비티를 제외한 모든 액티비티를없앤다.
             intent.putExtra("carpool_ID", items.get(position).getCarpool_ID());
           /*  intent.putExtra("data", item_new_driver_info);
             Log.e("ddd driver_info", item_new_driver_info.getUser_email().toString());
             Log.e("ddd driver_info", item_new_driver_info.getUser_start_date().toString());*/
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);// 누가에서는 괜찮은데 구형폰에서 안되서 추가함
             mContext.startActivity(intent);
 
         }
+        /*-----------------------------------------------54321 내림차순정렬--------------------------------------------------------------------------*/
+        public void idDescSort(){
+            Comparator<Item_Notification> idDesc = new Comparator<Item_Notification>() {
+                @Override
+                public int compare(Item_Notification item1, Item_Notification item2) {
+                    int ret = 0 ;
+
+                    if (item1.getNoti_id() < item2.getNoti_id())
+                        ret = 1 ;
+                    else if (item1.getNoti_id() ==  item2.getNoti_id())
+                        ret = 0 ;
+                    else
+                        ret = -1 ;
+
+                    return ret ;
+                    //-1이랑 1이랑 바꾸면 내림차순으로 바뀜
+                }
+            };
+            Collections.sort(items, idDesc) ;
+        }
+
     }
 
     /*-----------------------------------------------------------------------디비에서 노티 정보를 가져옮-----------------------------------------------------------------------*/
@@ -153,10 +187,14 @@ public class NewNotiActivity extends AppCompatActivity {
                     if(arr.getJSONObject(i).getString("receiver_email").equals(app.getUser_email())){
                         Item_Notification item = new Item_Notification();
                         if(arr.getJSONObject(i).getInt("msg_type")==1) {
+                            item.setNoti_id(Integer.parseInt(arr.getJSONObject(i).getString("0")));// id로 하니까 제대로 안나와서 0번으로 함. jsonObject참고
+                            item.setRider_email(arr.getJSONObject(i).getString("sender_email")); // receiver_email과 capool_id 조합은 유일키가 되지 못해서 sender_email이 필요함
+                            item.setNoti_checked(arr.getJSONObject(i).getString("noti_checked"));
                             item.setCarpool_ID(arr.getJSONObject(i).getString("carpool_id"));
                             item.setNoti_title("카풀신청");
                             item.setNoti_content(arr.getJSONObject(i).getString("user_name")+"님이 카풀을 신청하셨습니다.");
                             item.setNoti_profile_pic(arr.getJSONObject(i).getString("user_photo"));
+                            item.setNoti_date(arr.getJSONObject(i).getString("day_of_apply"));
                         }
                         adapter.addItem(item);
                     }
@@ -179,7 +217,9 @@ public class NewNotiActivity extends AppCompatActivity {
                     //Log.e("ddd json"+i, arr.getJSONObject(i).toString());
                    // Log.e("ddd user_email", arr.getJSONObject(i).getString("user_email")) ;
                 }
+
                 /*--------------------------------------------------------------------------------------------------------------------정렬---------------------------------------------------------------------------------------------------------------------------*/
+                adapter.idDescSort();
                 /*--------------------------------------------------------------------------------------------------------------------정렬------------------------------------------------------------------------------------------------------------------------------*/
                 adapter.notifyDataSetChanged();
 
@@ -258,4 +298,98 @@ public class NewNotiActivity extends AppCompatActivity {
         }
     }
     /*-----------------------------------------------------------------------디비에서 노티 정보를 가져옮-----------------------------------------------------------------------*/
+    /*-----------------------------------------------------------------------알림항목 눌렀을때-----------------------------------------------------------------------*/
+    class PushButton extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+/*        progressDialog = ProgressDialog.show(mContext,
+                "잠시만 기다려 주세요.", null, true, true);*/
+        }
+
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+/*        progressDialog.dismiss();*/
+            Log.e("ddd", result);
+
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            /*user_email,user_name,user_pwd,user_age,user_sex*/
+            String carpool_id = (String) params[0];
+            String sender_email = (String) params[1];
+            String accept_cancel = (String) params[2];
+
+            Log.e("ddd", carpool_id+sender_email+accept_cancel);
+            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
+            String postParameters = "carpool_id="+carpool_id+"&sender_email="+sender_email+"&accept_cancel="+accept_cancel;
+
+
+            try {
+
+                URL url = new URL(serverURL);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                //httpURLConnection.setRequestProperty("content-type", "application/json");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                //   Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                } else {
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+
+                bufferedReader.close();
+
+
+                return sb.toString();
+
+
+            } catch (Exception e) {
+
+                // Log.d(TAG, "EmailCheck: Error ", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+
+        }
+    }
+    /*----------------------------------------------------------------------알림항목 눌렀을때---------------------------------------------------------------------*/
 }

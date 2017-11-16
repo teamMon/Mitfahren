@@ -1,8 +1,5 @@
 package com.example.jpar4.mitfahren.activity;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +21,7 @@ import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.network.ClientBackground;
 import com.example.jpar4.mitfahren.network.NetworkTask;
 import com.example.jpar4.mitfahren.service.MyService;
+import com.example.jpar4.mitfahren.test_join.test_join;
 import com.example.jpar4.mitfahren.tmap_test.NewSearchActivity;
 
 import java.io.BufferedReader;
@@ -32,8 +30,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -89,21 +85,21 @@ public class LoginActivity extends AppCompatActivity {
         btn_join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {//회원가입
-  /*              Intent intent = new Intent(LoginActivity.this,  test_join.class);
-                startActivity(intent);*/
+                Intent intent = new Intent(LoginActivity.this,  test_join.class);
+                startActivity(intent);
           /*연습*/
 
-                NotificationManager notificationManager= (NotificationManager)LoginActivity.this.getSystemService(LoginActivity.this.NOTIFICATION_SERVICE);
+              /*  NotificationManager notificationManager= (NotificationManager)LoginActivity.this.getSystemService(LoginActivity.this.NOTIFICATION_SERVICE);
                 Intent intent1 = new Intent(LoginActivity.this.getApplicationContext(),LoginActivity.class); //인텐트 생성.
                 Notification.Builder builder = new Notification.Builder(getApplicationContext());
                 //intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP| Intent.FLAG_ACTIVITY_CLEAR_TOP);//현재 액티비티를 최상으로 올리고, 최상의 액티비티를 제외한 모든 액티비티를없앤다.
 
                 PendingIntent pendingNotificationIntent = PendingIntent.getActivity( LoginActivity.this,0, intent1, FLAG_UPDATE_CURRENT);
                 //PendingIntent는 일회용 인텐트 같은 개념입니다.
-              /*  FLAG_UPDATE_CURRENT - > 만일 이미 생성된 PendingIntent가 존재 한다면, 해당 Intent의 내용을 변경함.
+              *//*  FLAG_UPDATE_CURRENT - > 만일 이미 생성된 PendingIntent가 존재 한다면, 해당 Intent의 내용을 변경함.
                   FLAG_CANCEL_CURRENT - .이전에 생성한 PendingIntent를 취소하고 새롭게 하나 만든다.
                   FLAG_NO_CREATE -> 현재 생성된 PendingIntent를 반환합니다.
-                  FLAG_ONE_SHOT - >이 플래그를 사용해 생성된 PendingIntent는 단 한번밖에 사용할 수 없습니다*/
+                  FLAG_ONE_SHOT - >이 플래그를 사용해 생성된 PendingIntent는 단 한번밖에 사용할 수 없습니다*//*
 
                 builder.setSmallIcon(R.drawable.searching).setTicker("HETT").setWhen(System.currentTimeMillis())
                         .setNumber(1).setContentTitle("푸쉬 제목").setContentText("푸쉬내용")
@@ -115,7 +111,7 @@ public class LoginActivity extends AppCompatActivity {
                 //setContentTitle-> 알림 제목
                 //setConentText->푸쉬내용
 
-                notificationManager.notify(1, builder.build()); // Notification send
+                notificationManager.notify(1, builder.build()); // Notification send*/
           /*연습*/
             }
         });

@@ -1,6 +1,7 @@
 package com.example.jpar4.mitfahren.fragment;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.location.Address;
@@ -8,6 +9,7 @@ import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +33,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,14 +42,16 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DriverInfoFragment extends Fragment {
+public class DriverInfoFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
     private static final String TAG = "DriverInfoFragment";
     //private RecyclerView searchList;
     Context context;
+    Activity mActivity;
     ListView listView;
     DriverInfoAdapter adapter;
     /*app객체 (로그인에 사용)*/
     Myapp app;
+    SwipeRefreshLayout mSwipeRefreshLayout;
 //TEST CODE
 /*    String[] names = {"소녀시대", "AOA", "IOI", "걸스데이"};
     String[] ages = {"28", "22", "20", "25"};*/
@@ -65,7 +71,17 @@ public class DriverInfoFragment extends Fragment {
       //  searchList = (RecyclerView) view.findViewById(R.id.driver_search_list);
     //    searchList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         context=getContext();
+        mActivity = getActivity();
         app = (Myapp)context.getApplicationContext();
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(
+                android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light
+        );
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         listView = (ListView) view.findViewById(R.id.listView_item_carpool);
         adapter = new DriverInfoAdapter();
 //TEST CODE
@@ -83,9 +99,28 @@ public class DriverInfoFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onRefresh() {
+        adapter.clearItems();
+/*데이터 추가*/
+        GetDriverInfo task = new GetDriverInfo();
+        task.execute();
+/*데이터 추가*/
+
+        // 새로고침 완료
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
     class DriverInfoAdapter extends BaseAdapter {
         ArrayList<Item_New_Driver_Info> items = new ArrayList<>(); // 아이템 보관하기 위한 소스
 
+        public void clearItems(){
+            items.clear();
+         /*   int count = items.size();
+            for(int i =0; i<count;i++){
+                items.remove(i);
+            }*/
+        }
 
         @Override
         public int getCount() { // 리스트뷰가 어댑터한테 리스트 몇 개가지고 있냐고 물어보면 실행하는 메소드
@@ -111,7 +146,7 @@ public class DriverInfoFragment extends Fragment {
 
             ItemCarpoolListForDriverView view = null;
             if (convertView == null) { // 뷰가 없으면 생성
-                view = new ItemCarpoolListForDriverView(context.getApplicationContext());
+                view = new ItemCarpoolListForDriverView(context.getApplicationContext(), mActivity);
             } else {// 재사용
                 view = (ItemCarpoolListForDriverView) convertView;
             }
@@ -121,6 +156,25 @@ public class DriverInfoFragment extends Fragment {
             view.setArrive(curItem.getUser_arrive());
             view.setItem_new_driver_info(curItem);
             return view;
+        }
+        public void idDescSort(){
+            Comparator<Item_New_Driver_Info> idDesc = new Comparator<Item_New_Driver_Info>() {
+                @Override
+                public int compare(Item_New_Driver_Info item1, Item_New_Driver_Info item2) {
+                    int ret = 0 ;
+
+                    if (Integer.parseInt(item1.getItem_id()) < Integer.parseInt(item2.getItem_id()))
+                        ret = 1 ;
+                    else if (Integer.parseInt(item1.getItem_id()) ==  Integer.parseInt(item2.getItem_id()))
+                        ret = 0 ;
+                    else
+                        ret = -1 ;
+
+                    return ret ;
+                    //-1이랑 1이랑 바꾸면 내림차순으로 바뀜
+                }
+            };
+            Collections.sort(items, idDesc) ;
         }
     }
       /*-----------------------------------------------------------------------디비에서 운전자 정보를 가져옮-----------------------------------------------------------------------*/
@@ -140,17 +194,20 @@ public class DriverInfoFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             progressDialog.dismiss();
+
             /*result로 JsonArray를 받아와서 Json으로 하나씪 분리해서 값을 뽑아야됨*/
             try{
                 //JSONObject obj = new JSONObject(result);
                 JSONArray arr = new JSONArray(result);
                 ArrayList<Item_New_Driver_Info> itemList = new ArrayList<>();
+
                 for (int i = 0; i < arr.length(); i++)
                 {
                     if(app.getUser_email().equals(arr.getJSONObject(i).getString("user_email"))){ // 현재 로그인한 사람과 등록된 이메일이 같을 경우만 보여줌
                         Item_New_Driver_Info item = new Item_New_Driver_Info();
+                        item.setItem_id(arr.getJSONObject(i).getString("0")); // item_id
+                        item.setCarpool_id(arr.getJSONObject(i).getString("id"));
                         item.setUser_email(arr.getJSONObject(i).getString("user_email"));
                         item.setUser_start_date(arr.getJSONObject(i).getString("user_start_date"));
                         item.setUser_start_time(arr.getJSONObject(i).getString("user_start_time"));
@@ -175,6 +232,7 @@ public class DriverInfoFragment extends Fragment {
                         Log.e("ddd user_email", arr.getJSONObject(i).getString("user_email")) ;
                     }
                 }
+                adapter.idDescSort();
                 adapter.notifyDataSetChanged();
 
                 Log.e("ddd",arr.get(0).toString());
