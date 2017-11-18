@@ -49,7 +49,7 @@ android:id="@+id/msg_layout"
     <ImageView
         android:id="@+id/img_received_content"
         android:layout_width="125dp"
-        android:layout_height="125dp    "
+        android:layout_height="125dp"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@+id/msg_sender_pic"
         android:layout_below="@+id/msg_sender_name"
