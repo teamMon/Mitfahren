@@ -13,9 +13,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -57,6 +59,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -119,18 +122,35 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
     /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
     /*----------------------------------------사진 앨범 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*버전1*/
     private static final int MY_PERMISSION_CAMERA = 1111;
     private static final int REQUEST_TAKE_PHOTO = 2222;
     private static final int REQUEST_TAKE_ALBUM = 3333;
     private static final int REQUEST_IMAGE_CROP = 4444;
+
+    /*버전2*/
+    final int PICK_FROM_ALBUM = 2001;
+    final int AFTER_FROM_ALBUM = 2002; //크롭
+    private static final int REQUEST_TAKE_PHOTO2= 2003;
+    private Uri mImageCaptureUri;
+    Bitmap roundimage_bitmap;
+    boolean picOk = false;
+    boolean PIC_OK=false;
+    String imagePath;
+
+
     private String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}; //권한 설정 변수
     private static final int MULTIPLE_PERMISSIONS = 101; //권한 동의 여부 문의 후 CallBack 함수에 쓰일 변수
 
     ImageView iv_view;
 
     String mCurrentPhotoPath;
-    Uri imageUri;
-    Uri photoURI, albumURI;
+    Uri imageUri; // 사진찍기
+    Uri photoURI, albumURI; // 앨범
+    Uri imageURI = null;// 전송할것
+    String send_image; // Image_Preview_Activity에서 왔음을 의미
+    String file_lastthree ;//확장자 // 크롬후 파일명 만들때 사용
+
     /*----------------------------------------사진 앨범 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
     @Override
@@ -156,7 +176,6 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         app = (Myapp)getApplicationContext();
 
 
-
         chattinghandler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
@@ -176,7 +195,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     chatting_adapter.notifyDataSetChanged();
                 }
 
-                if(msg.what == 2) { //그냥 채팅 String carpool_id, String sender_email, String sender_name, String sender_pic, String contents
+                if(msg.what == 2) { //그냥 채팅 String carpool_id, String sender_email, String sender_name, String sender_pic, String contents  //메시지 받은부분 처리해주는 곳 띠용
                     String carpool_id = msg.getData().getString("carpool_id");
                     String sender_email = msg.getData().getString("sender_email");
                     String sender_name = msg.getData().getString("sender_name");
@@ -185,7 +204,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 //carpool_ID 이년이 carpool_id이년과 같을 떄만 보여주기. 이게 방개념이 되려나>
                     if(carpool_ID.equals(carpool_id)){ // 방나눠짐. ㅋㅋㅋ
                         if(!app.getUser_email().equals(sender_email)){ // 보낸사람이랑 유저랑 다를때만 받기
-                            chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_DISABLED ); // 받을때는 안움직이게
+                            chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_NORMAL ); // 받을때는 안움직이게
                             Calendar calendar = Calendar.getInstance();
                             java.util.Date date = calendar.getTime();
                             String received_time = (new SimpleDateFormat("aa hh:mm ").format(date));
@@ -208,6 +227,40 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                         }
                     }
                 }
+                if(msg.what == 3) { //그냥 채팅 String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name//이미지메시지 받은부분 처리해주는 곳 띠용
+                    String carpool_id = msg.getData().getString("carpool_id");
+                    String sender_email = msg.getData().getString("sender_email");
+                    String sender_name = msg.getData().getString("sender_name");
+                    String sender_pic = msg.getData().getString("sender_pic");
+                    String contents = msg.getData().getString("contents");
+                    String img_file_name = msg.getData().getString("img_file_name");
+//carpool_ID 이년이 carpool_id이년과 같을 떄만 보여주기. 이게 방개념이 되려나>
+                    if(carpool_ID.equals(carpool_id)){ // 방나눠짐. ㅋㅋㅋ
+                        if(!app.getUser_email().equals(sender_email)){ // 보낸사람이랑 유저랑 다를때만 받기
+                            chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_NORMAL ); // 받을때는 안움직이게
+                            Calendar calendar = Calendar.getInstance();
+                            java.util.Date date = calendar.getTime();
+                            String received_time = (new SimpleDateFormat("aa hh:mm ").format(date));
+                            String received_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
+                            Item_Chatting item = new Item_Chatting();
+                            item.setMsg_date(received_date);
+
+                            item.setCarpool_id(carpool_id);
+                            item.setSender_name(sender_name);
+                            item.setSender_pic(sender_pic);
+                            item.setReceived_time(received_time);
+                            item.setReceived_content(contents);
+                            item.setImg_file_name(img_file_name); // 서버의 이미지 주소 입력
+                            item.setSent(false);
+                            chatting_adapter.addItem(item);
+                            chatting_adapter.notifyDataSetChanged();
+
+                            //receive_msg(String msg_type, String received_date, String carpool_id, String sender_email, String sender_name, String sender_pic, String received_time, String sent_text) ;
+                            /*여기서 저장하면 받을때, 이 액티비티 아니면 저장 안함 따라서 서비스에서 저장하는게 굳일듯*/
+                            //receive_msg( "2",  received_date,  carpool_id,  sender_email,  sender_name,  sender_pic,  received_time,  contents) ;
+                        }
+                    }
+                }
             }
         };
 
@@ -218,6 +271,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         chatting_people_list = (ListView)findViewById(R.id.chatting_people_list); // 현재 대화 상대
         invitable_poeple_list  = (ListView)findViewById(R.id.invitable_poeple_list); // 초대 가능한 사람
         chatting_display = (ListView)findViewById(R.id.chatting_display); // 채팅 화면
+        chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
+
         /*초대버튼*/
         btn_addadd = (ImageButton) findViewById(R.id.btn_addadd);
         btn_addadd.setOnClickListener(this);
@@ -278,9 +333,12 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         chatting_adapter = new ChattingAdapter();
         chatting_display.setAdapter(chatting_adapter);
 
+
         Intent intent = getIntent();
         //카풀 신청 정보에서 올때
         carpool_ID = intent.getStringExtra("carpool_ID");
+
+
 
         /*현재 대화 상대 불러오기*/
         GetCurrentChatter task1 = new GetCurrentChatter();
@@ -294,8 +352,48 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         sqliteDB = init_database();
         init_tables();
         load_msg();
-        chatting_adapter.notifyDataSetChanged();
+
         /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------------이미지 전송---------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+        /* 받아온 이미지 처리 */
+        send_image = intent.getStringExtra("send_image");
+        /* 보낸 이미지 주소 */
+        String img_file_name = intent.getStringExtra("img_file_name");
+
+        if(send_image != null){
+            imageURI=  intent.getParcelableExtra("imageURI");
+            if(imageURI !=null) { // 버전1
+                Toast.makeText(context, "imageURI 없다", Toast.LENGTH_SHORT).show();
+            }else{ // 버전2
+                Bitmap imageBitmap = intent.getParcelableExtra("imageBitmap"); // 전송할 비트맵 이미지
+                Calendar calendar = Calendar.getInstance();
+                java.util.Date date = calendar.getTime();
+                String sent_time = (new SimpleDateFormat("aa hh:mm ").format(date));
+                String sent_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
+                Item_Chatting item = new Item_Chatting();
+                //
+                /*채팅방에 표시*/
+                item.setMsg_date(sent_date);
+                item.setSent_time(sent_time);
+                item.setImg_file_name(img_file_name);
+                item.setSent(true);
+                //chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
+                chatting_adapter.addItem(item);
+
+                send_imgmsg( "3",  sent_date,  sent_time,  "(사진)", img_file_name); // sqLite에 채팅 이미지메시지 저장   // 띠용 // 3은 이미지메시지
+            }
+
+            img_file_name=null;// 초기화
+            send_image=null;
+        }
+        if(chatting_adapter.isEmpty() == false) // 리스트뷰 맨 아래로
+            chatting_display.setSelection(chatting_adapter.getCount());
+
+        chatting_adapter.notifyDataSetChanged();
+
+
+     /*----------------------------------------이미지 전송---------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         checkPermissions();
     }
 
@@ -307,7 +405,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                         this);
 
-                final CharSequence[] items = {"앨범선택", "사진촬영", "취소"};
+              //  final CharSequence[] items = {"앨범선택", "사진촬영", "취소"};
+                final CharSequence[] items = {"앨범선택", "취소"};
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);     // 여기서 this는 Activity의 this
 
@@ -322,7 +421,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                                         break;
                                     case 1:
                                         //Toast.makeText(getApplicationContext(), items[index], Toast.LENGTH_SHORT).show();
-                                        captureCamera();
+                                       // captureCamera();
+                                       // captureCamera2();
                                         break;
                                     case 2:
                                         break;
@@ -358,7 +458,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 }
                 /*---------------------------------------------------------------로그인시 tcp통신 연결----------------------------------------------------------------------------------*/
                 break;
-
+ /*----------------------------------------텍스트 전송---------------------------------------------------------------------------------------------------------------------------------------------------------------*/
             case R.id.btn_text_send:
                 String sent_text = input_text.getText().toString(); // 텍스트 가져오고
                 input_text.setText(""); // 텍스트 지우고
@@ -1060,8 +1160,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             chattinghandler.sendMessage(message);
 
         }
-
-        public void recvChattingMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){
+//띠용
+        public void recvChattingMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){ // 채팅 메시지 처리
 
             Log.e("ddd", "ddd"+" recvChattingMsg");
             Message message= Message.obtain();
@@ -1073,6 +1173,25 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             bundle.putString("sender_name",sender_name);
             bundle.putString("sender_pic",sender_pic);
             bundle.putString("contents",contents);
+
+            //    bundle.putLong("time",time);
+            message.setData(bundle);
+            chattinghandler.sendMessage(message);
+        }
+
+        @Override
+        public void recvChattingImgMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name) { // 채팅 이미지 메시지 처리
+            Log.e("ddd", "ddd"+" recvChattingImgMsg");
+            Message message= Message.obtain();
+            message.what = 3; //채팅이미지 메시지
+            Bundle bundle = new Bundle();
+            //  bundle.putString("friendId",friendId);
+            bundle.putString("carpool_id",carpool_id);
+            bundle.putString("sender_email",sender_email);
+            bundle.putString("sender_name",sender_name);
+            bundle.putString("sender_pic",sender_pic);
+            bundle.putString("contents",contents);
+            bundle.putString("img_file_name",img_file_name);
 
             //    bundle.putLong("time",time);
             message.setData(bundle);
@@ -1130,6 +1249,12 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         sendMsgObj.put("contents", sent_text);*/
 
         if (sqliteDB != null) {
+     /*       String sqlDelete = "DELETE FROM CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDelete) ;*/
+/*            String sqlDropTbl = "DROP TABLE CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDropTbl) ;*/
+
+
             String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CHATTING_TABLE (" +
                     "NO "           + "INTEGER PRIMARY KEY NOT NULL," +
                     "MSG_TYPE "         + "TEXT," +
@@ -1139,7 +1264,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     "SENDER_PIC "        + "TEXT," +
                     "TIME "        + "TEXT," +
                     "IS_READ "        + "TEXT," +
-                    "CONTENTS "       + "TEXT" + ")" ;
+                    "CONTENTS "       + "TEXT," +
+                    "IMG_MSG "        + "TEXT" +")" ;
                 //    "OVER20 "       + "INTEGER" + ")" ;
 
             System.out.println(sqlCreateTbl) ;
@@ -1166,25 +1292,47 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
 
             while (cursor.moveToNext()) {
-                Log.e("ddd select문", cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3)+cursor.getString(4)+cursor.getString(5)+cursor.getString(7)+cursor.getString(8) );
+                Log.e("ddd select문", cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3)+cursor.getString(4)+cursor.getString(5)+cursor.getString(7)+cursor.getString(8)+cursor.getString(9));
 
                 if(carpool_ID.equals(cursor.getString(2))){ // 방번호가 같은때만 채팅 표시해줌
                     Item_Chatting item = new Item_Chatting();
                     if(app.getUser_email().equals(cursor.getString(3))) {// 보낸분자
+                        if(cursor.getString(9).equals("NO_IMG")){ // 문자메시지 일때
+                            item.setSent_time(cursor.getString(6));
+                            item.setSent_content(cursor.getString(8));
+                            item.setSent(true);
+                            chatting_adapter.addItem(item);
+                        }else{// 이미지 메시지 일때, 띠용
+                            item.setSent_time(cursor.getString(6));
+                            item.setImg_file_name(cursor.getString(9));
+                            item.setSent(true);
+                            //chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
+                            chatting_adapter.addItem(item);
+                        }
                        // item.setMsg_date(sent_date);
-                        item.setSent_time(cursor.getString(6));
-                        item.setSent_content(cursor.getString(8));
-                        item.setSent(true);
-                        chatting_adapter.addItem(item);
+
                     }else{//받은문자
-                        //                item.setMsg_date(received_date);
-                        item.setCarpool_id(cursor.getString(2));
-                        item.setSender_name(cursor.getString(4));
-                        item.setSender_pic(cursor.getString(5));
-                        item.setReceived_time(cursor.getString(6));
-                        item.setReceived_content(cursor.getString(8));
-                        item.setSent(false);
-                        chatting_adapter.addItem(item);
+                        if(cursor.getString(9).equals("NO_IMG")) { // 받은 문자메시지 일때
+                            //                item.setMsg_date(received_date);
+                            item.setCarpool_id(cursor.getString(2));
+                            item.setSender_name(cursor.getString(4));
+                            item.setSender_pic(cursor.getString(5));
+                            item.setReceived_time(cursor.getString(6));
+                            item.setReceived_content(cursor.getString(8));
+                            item.setSent(false);
+                            chatting_adapter.addItem(item);
+                        }
+                        else{ //받은 이미지 메시지 일때
+                            item.setCarpool_id(cursor.getString(2));
+                            item.setSender_name(cursor.getString(4));
+                            item.setSender_pic(cursor.getString(5));
+                            item.setReceived_time(cursor.getString(6));
+                            item.setReceived_content(cursor.getString(8));
+                            item.setImg_file_name(cursor.getString(9)); // 서버의 이미지 주소 입력
+                            item.setSent(false);
+                            chatting_adapter.addItem(item);
+                        }
+
                     }
                 }
             }
@@ -1239,13 +1387,26 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         item.setSent_content(sent_text);
         item.setSent(true);*/
        //  String sqlInsert = "INSERT INTO CONTACT_T " + "(NO, NAME, PHONE, OVER20) VALUES (" + Integer.toString(no) + "," + "'" + name + "'," + "'" + phone + "'," + ((isOver20 == true) ? "1" : "0") + ")" ; System.out.println(sqlInsert) ; sqliteDB.execSQL(sqlInsert) ;
-        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ("
-                + "'" + msg_type + "'," + "'" + carpool_ID + "',"+ "'" + app.getUser_email() + "',"+ "'" + app.getUser_name() + "',"+ "'" + app.getUser_photo() + "',"+ "'" + sent_time + "'," +"'Y' ," +"'" + sent_text + "'" + ")" ;
+        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_ID + "',"+ "'" + app.getUser_email() + "',"+ "'" + app.getUser_name() + "',"+ "'" + app.getUser_photo() + "',"+ "'" + sent_time + "'," +"'Y' ," +"'" + sent_text + "'," +"'NO_IMG'" + ")" ;
        //String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ('2', '63', 'z@z.com', '유아인', 'z@zcom/z.gif', '12:11', 'Y', '하...')" ;
          Log.e("ddd send", sqlInsert);
          sqliteDB.execSQL(sqlInsert) ;
 
         }
+    private void send_imgmsg(String msg_type, String sent_date, String sent_time, String sent_text, String sent_img) {
+   /*     item.setMsg_date(sent_date);
+        item.setSent_time(sent_time);
+        item.setSent_content(sent_text);
+        item.setSent(true);*/
+        //  String sqlInsert = "INSERT INTO CONTACT_T " + "(NO, NAME, PHONE, OVER20) VALUES (" + Integer.toString(no) + "," + "'" + name + "'," + "'" + phone + "'," + ((isOver20 == true) ? "1" : "0") + ")" ; System.out.println(sqlInsert) ; sqliteDB.execSQL(sqlInsert) ;
+        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_ID + "',"+ "'" + app.getUser_email() + "',"+ "'" + app.getUser_name() + "',"+ "'" + app.getUser_photo() + "',"+ "'" + sent_time + "'," +"'Y' ," +"'" + sent_text + "'," + "'" + sent_img + "'" + ")" ;
+        //String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ('2', '63', 'z@z.com', '유아인', 'z@zcom/z.gif', '12:11', 'Y', '하...')" ;
+        Log.e("ddd imgsend", sqlInsert);
+        sqliteDB.execSQL(sqlInsert) ;
+
+    }
 
     private void receive_msg(String msg_type, String received_date, String carpool_id, String sender_email, String sender_name, String sender_pic, String received_time, String sent_text) {
 
@@ -1297,8 +1458,8 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     Log.e("captureCamera Error", ex.toString());
                 }
                 if (photoFile != null) {
-                    // getUriForFile의 두 번째 인자는 Manifest provier의 authorites와 일치해야 함
 
+                    // getUriForFile의 두 번째 인자는 Manifest provier의 authorites와 일치해야 함
                     Uri providerURI = FileProvider.getUriForFile(this, getPackageName(), photoFile);
                     imageUri = providerURI;
 
@@ -1308,6 +1469,41 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
                 }
             }
+        } else {
+            Toast.makeText(this, "저장공간이 접근 불가능한 기기입니다", Toast.LENGTH_SHORT).show();
+            return;
+        }
+    }
+    private void captureCamera2(){
+        String state = Environment.getExternalStorageState();
+        // 외장 메모리 검사
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                File photoFile = null;
+                try {
+                    photoFile = createImageFile();
+                } catch (IOException ex) {
+                    Log.e("captureCamera Error", ex.toString());
+                }
+                if (photoFile != null) {
+
+                    // getUriForFile의 두 번째 인자는 Manifest provier의 authorites와 일치해야 함
+                    Uri providerURI = FileProvider.getUriForFile(this, getPackageName(), photoFile);
+                    imageUri = providerURI;
+
+                    // 인텐트에 전달할 때는 FileProvier의 Return값인 content://로만!!, providerURI의 값에 카메라 데이터를 넣어 보냄
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, providerURI);
+                    takePictureIntent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                    takePictureIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO2);
+                }
+            }
+
+
+
+
+
         } else {
             Toast.makeText(this, "저장공간이 접근 불가능한 기기입니다", Toast.LENGTH_SHORT).show();
             return;
@@ -1336,9 +1532,14 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
     private void getAlbum(){
         Log.i("getAlbum", "Call");
         Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
+        /*  버전 1 */
+/*        intent.setType("image*//*");
         intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-        startActivityForResult(intent, REQUEST_TAKE_ALBUM);
+        startActivityForResult(intent, REQUEST_TAKE_ALBUM);*/
+
+        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+        intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, PICK_FROM_ALBUM);
     }
 
     private void galleryAddPic(){
@@ -1381,6 +1582,11 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                         Log.i("REQUEST_TAKE_PHOTO", "OK");
                         galleryAddPic();
                         iv_view.setImageURI(imageUri);
+                        Intent intent = new Intent(ChattingRoomActivity.this, Image_Preview_Activity.class);
+                        intent.putExtra("imageURI", imageUri);
+                     //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.putExtra("carpool_ID", carpool_ID);
+                        startActivity(intent);
 
                     } catch (Exception e) {
                         Log.e("REQUEST_TAKE_PHOTO", e.toString());
@@ -1407,17 +1613,182 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 }
                 break;
 
+            case REQUEST_TAKE_PHOTO2:
+                if (resultCode == Activity.RESULT_OK) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        checkPermissions2();
+                    }
+                    try {
+                        Log.i("REQUEST_TAKE_PHOTO2", "OK");
+                        galleryAddPic();
+                        mImageCaptureUri = data.getData();
+                        Intent intent = new Intent("com.android.camera.action.CROP");
+                        intent.setDataAndType(mImageCaptureUri, "image/*");
+                        //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.putExtra("carpool_ID", carpool_ID);
+                        file_lastthree="png"; // 확장자
+
+                        intent.putExtra("outputX", 200);
+                        intent.putExtra("outputY", 200);
+                        intent.putExtra("aspectX", 1);
+                        intent.putExtra("aspectY", 1);
+                        intent.putExtra("scale", true);
+                        intent.putExtra("return-data", true);
+                        //intent.putExtra("file_lastthree", file_lastthree);
+
+
+                        startActivityForResult(intent, AFTER_FROM_ALBUM);
+                        startActivity(intent);
+
+                    } catch (Exception e) {
+                        Log.e("REQUEST_TAKE_PHOTO", e.toString());
+                    }
+                } else {
+                    Toast.makeText(ChattingRoomActivity.this, "사진찍기를 취소하였습니다.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case PICK_FROM_ALBUM: {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    checkPermissions2();
+                }
+                picOk = true;
+                mImageCaptureUri = data.getData();
+                Intent intent = new Intent("com.android.camera.action.CROP");
+                intent.setDataAndType(mImageCaptureUri, "image/*");
+
+                /*추가추가*/
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                Cursor cursor = getContentResolver().query(mImageCaptureUri, filePathColumn, null, null, null);
+
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    imagePath = cursor.getString(columnIndex);
+
+
+            /*        Picasso.with(mContext).load(new File(imagePath))
+                            .transform(PicassoTransformations.resizeTransformation)
+                            .into(imageView);*/
+                    cursor.close();
+
+                }
+
+                file_lastthree = imagePath.substring(imagePath.lastIndexOf("."));//확장자 // 나중에 파일명 만들때 사용할꺼
+
+                /*추가추가*/
+                intent.putExtra("outputX", 200);
+                intent.putExtra("outputY", 200);
+                intent.putExtra("aspectX", 1);
+                intent.putExtra("aspectY", 1);
+                intent.putExtra("scale", true);
+                intent.putExtra("return-data", true);
+                //intent.putExtra("file_lastthree", file_lastthree);
+
+
+                startActivityForResult(intent, AFTER_FROM_ALBUM);
+
+                try {
+                    //이미지 데이터를 비트맵으로 받아온다.
+               /*     Bitmap image_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                    roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(image_bitmap, 1024);
+                    image.setImageBitmap(roundimage_bitmap);
+                    PIC_OK=true;*/
+                    roundimage_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    //iv_view.setImageBitmap(roundimage_bitmap);
+                    //ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                  //  iv_view.setImageBitmap(roundimage_bitmap);
+
+                    //Bitmap image_bitmap2 = MRRoundedImageView.getCroppedBitmap(roundimage_bitmap, 1024);
+                   //image.setImageBitmap(roundimage_bitmap);
+                    //PIC_OK=true;
+
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+
             case REQUEST_IMAGE_CROP:
                 if (resultCode == Activity.RESULT_OK) {
 
                     galleryAddPic();
                     iv_view.setImageURI(albumURI);
+                    Intent intent = new Intent(ChattingRoomActivity.this, Image_Preview_Activity.class);
+                    intent.putExtra("imageURI", albumURI);
+                    intent.putExtra("carpool_ID", carpool_ID);
+
+                    //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
                 }
+                break;
+
+            case AFTER_FROM_ALBUM :
+                // 크롭이 된 이후의 이미지를 넘겨 받습니다.
+                // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
+                // 임시 파일을 삭제합니다.
+                final Bundle extras = data.getExtras();
+
+
+                                      /*추가추가*/
+/*                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                Cursor cursor = getContentResolver().query(cropUri, filePathColumn, null, null, null);
+                String cropimagePath = null;
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                     cropimagePath = cursor.getString(columnIndex);
+
+                    cursor.close();
+
+                }
+                Log.e("ddd", cropimagePath);*/
+                /*추가추가*/
+
+                if(extras != null)
+                {
+                    Bitmap photo = extras.getParcelable("data");
+                    iv_view.setImageBitmap(photo);
+                    Intent intent = new Intent(ChattingRoomActivity.this, Image_Preview_Activity.class);
+                    intent.putExtra("imageURI", albumURI);
+                    intent.putExtra("carpool_ID", carpool_ID);
+                    intent.putExtra("imageBitmap", photo);
+                    intent.putExtra("file_lastthree", file_lastthree);
+                    Log.e("ddd file_lastthree", file_lastthree);
+                    //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(intent);
+                 //   ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                  //  roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(photo, 1024);
+                  //  image.setImageBitmap(roundimage_bitmap);
+                 //   PIC_OK=true;
+                    //saveBitmaptoJpeg(image_bitmap2, "imagefolder","123");
+
+                }
+
+        /*        // 임시 파일 삭제
+                File f = new File(mImageCaptureUri.getPath());
+                if(f.exists())
+                {
+                    f.delete();
+                }
+*/
                 break;
         }
     }
 
-
+/*버전1*/
     private boolean checkPermissions() {
         int result;
         List<String> permissionList = new ArrayList<>();
@@ -1432,6 +1803,26 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             return false;
         }
         return true;
+    }
+/*버전2*/
+    private void checkPermissions2(){
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED||
+                ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },
+                    1052);
+
+        }
+
     }
 
     //아래는 권한 요청 Callback 함수입니다. PERMISSION_GRANTED로 권한을 획득했는지 확인할 수 있습니다. 아래에서는 !=를 사용했기에
@@ -1460,6 +1851,22 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     }
                 } else {
                     showNoPermissionToastAndFinish();
+                }
+                return;
+            }
+            case 1052: {
+                // If request is cancelled, the result
+                // arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED ){
+
+                    // permission was granted.
+
+                } else {
+                    // Permission denied - Show a message
+                    // to inform the user that this app only works
+                    // with these permissions granted
                 }
                 return;
             }

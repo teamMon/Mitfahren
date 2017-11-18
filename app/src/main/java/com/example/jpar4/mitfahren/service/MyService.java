@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
+import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.tmap_test.CarpoolInfoActivity;
 import com.example.jpar4.mitfahren.tmap_test.NewNotiActivity;
 
@@ -80,6 +81,7 @@ public class MyService extends Service {
     public interface ICallback {
         public void recvData(String msg); //액티비티에서 선언한 콜백 함수.
         public void recvChattingMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents);
+        public void recvChattingImgMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name);
     }
 
     private ICallback mCallback;
@@ -101,8 +103,15 @@ public class MyService extends Service {
     public void chattingMsgDeliver(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){
         Log.e("ddd", "chattingMsgDeliver");
         //서비스에서 처리할 내용
-        mCallback.recvChattingMsg(carpool_id, sender_email, sender_name, sender_pic, contents);
+        mCallback.recvChattingMsg(carpool_id, sender_email, sender_name, sender_pic, contents); // 채팅 메시지
         // return msg;
+    }
+
+    //액티비티에서 서비스 함수를 호출하기 위한 함수 생성
+    public void chattingImgMsgDeliver(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name){
+        Log.e("ddd", "chattingImgMsgDeliver");
+        //서비스에서 처리할 내용
+        mCallback.recvChattingImgMsg(carpool_id, sender_email, sender_name, sender_pic, contents, img_file_name);// 채팅 이미지 메시지
     }
 
 //서비스에서 액티비티 함수 호출은..
@@ -116,6 +125,8 @@ public class MyService extends Service {
  */
 
  class NetworkTask extends Thread {
+    Myapp app;
+
     String dstAddress;
     int dstPort;
     String response;
@@ -139,6 +150,7 @@ public class MyService extends Service {
         this.service = service;
         this.email = email;
         this.myService = myService;
+        this.app = (Myapp)service.getApplicationContext();
 
     }
 
@@ -168,16 +180,23 @@ public class MyService extends Service {
     private void receive_msg(String msg_type, String received_date, String carpool_id, String sender_email, String sender_name, String sender_pic, String received_time, String sent_text) {
 
         if (sqliteDB != null) {
+             /*       String sqlDelete = "DELETE FROM CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDelete) ;*/
+/*            String sqlDropTbl = "DROP TABLE CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDropTbl) ;*/
+
+
             String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CHATTING_TABLE (" +
-                    "NO " + "INTEGER PRIMARY KEY NOT NULL," +
-                    "MSG_TYPE " + "TEXT," +
-                    "CARPOOL_ID " + "TEXT," +
-                    "SENDER " + "TEXT," +
-                    "SENDER_NAME " + "TEXT," +
-                    "SENDER_PIC " + "TEXT," +
-                    "TIME " + "TEXT," +
-                    "IS_READ " + "TEXT," +
-                    "CONTENTS " + "TEXT" + ")";
+                    "NO "           + "INTEGER PRIMARY KEY NOT NULL," +
+                    "MSG_TYPE "         + "TEXT," +
+                    "CARPOOL_ID "         + "TEXT," +
+                    "SENDER "         + "TEXT," +
+                    "SENDER_NAME "         + "TEXT," +
+                    "SENDER_PIC "        + "TEXT," +
+                    "TIME "        + "TEXT," +
+                    "IS_READ "        + "TEXT," +
+                    "CONTENTS "       + "TEXT," +
+                    "IMG_MSG "        + "TEXT" +")" ;
             //    "OVER20 "       + "INTEGER" + ")" ;
 
             System.out.println(sqlCreateTbl);
@@ -191,8 +210,53 @@ public class MyService extends Service {
                 item.setReceived_time(received_time);
                 item.setReceived_content(contents);*/
         //  String sqlInsert = "INSERT INTO CONTACT_T " + "(NO, NAME, PHONE, OVER20) VALUES (" + Integer.toString(no) + "," + "'" + name + "'," + "'" + phone + "'," + ((isOver20 == true) ? "1" : "0") + ")" ; System.out.println(sqlInsert) ; sqliteDB.execSQL(sqlInsert) ;
-        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ("
-                + "'" + msg_type + "'," + "'" + carpool_id + "',"+ "'" + sender_email + "',"+ "'" + sender_name + "',"+ "'" + sender_pic + "',"+ "'" + received_time + "'," +"'Y' ," +"'" + sent_text + "'" + ")" ;
+/*        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_ID + "',"+ "'" + app.getUser_email() + "',"+ "'" + app.getUser_name() + "',"+ "'" + app.getUser_photo() + "',"+ "'" + sent_time + "'," +"'Y' ," +"'" + sent_text + "'," +"'NO_IMG'" + ")" ;*/
+        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_id + "',"+ "'" + sender_email + "',"+ "'" + sender_name + "',"+ "'" + sender_pic + "',"+ "'" + received_time + "'," +"'Y' ," +"'" + sent_text + "'," +"'NO_IMG'" + ")" ;
+        //String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ('2', '63', 'z@z.com', '유아인', 'z@zcom/z.gif', '12:11', 'Y', '하...')" ;
+        Log.e("ddd receive", sqlInsert);
+        sqliteDB.execSQL(sqlInsert) ; // 디비 닫아야 하나??
+        sqliteDB.close();
+
+    }
+    private void receive_imgmsg(String msg_type, String received_date, String carpool_id, String sender_email, String sender_name, String sender_pic, String received_time, String received_text, String received_img) {
+
+        if (sqliteDB != null) {
+             /*       String sqlDelete = "DELETE FROM CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDelete) ;*/
+/*            String sqlDropTbl = "DROP TABLE CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDropTbl) ;*/
+
+
+            String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CHATTING_TABLE (" +
+                    "NO "           + "INTEGER PRIMARY KEY NOT NULL," +
+                    "MSG_TYPE "         + "TEXT," +
+                    "CARPOOL_ID "         + "TEXT," +
+                    "SENDER "         + "TEXT," +
+                    "SENDER_NAME "         + "TEXT," +
+                    "SENDER_PIC "        + "TEXT," +
+                    "TIME "        + "TEXT," +
+                    "IS_READ "        + "TEXT," +
+                    "CONTENTS "       + "TEXT," +
+                    "IMG_MSG "        + "TEXT" +")" ;
+            //    "OVER20 "       + "INTEGER" + ")" ;
+
+            System.out.println(sqlCreateTbl);
+            Log.e("ddd sqlCreateTbl", sqlCreateTbl);
+            sqliteDB.execSQL(sqlCreateTbl);
+        }
+   /*           item.setMsg_date(received_date);
+                item.setCarpool_id(carpool_id);
+                item.setSender_name(sender_name);
+                item.setSender_pic(sender_pic);
+                item.setReceived_time(received_time);
+                item.setReceived_content(contents);*/
+        //  String sqlInsert = "INSERT INTO CONTACT_T " + "(NO, NAME, PHONE, OVER20) VALUES (" + Integer.toString(no) + "," + "'" + name + "'," + "'" + phone + "'," + ((isOver20 == true) ? "1" : "0") + ")" ; System.out.println(sqlInsert) ; sqliteDB.execSQL(sqlInsert) ;
+/*        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_ID + "',"+ "'" + app.getUser_email() + "',"+ "'" + app.getUser_name() + "',"+ "'" + app.getUser_photo() + "',"+ "'" + sent_time + "'," +"'Y' ," +"'" + sent_text + "'," +"'NO_IMG'" + ")" ;*/
+        String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS, IMG_MSG) VALUES ("
+                + "'" + msg_type + "'," + "'" + carpool_id + "',"+ "'" + sender_email + "',"+ "'" + sender_name + "',"+ "'" + sender_pic + "',"+ "'" + received_time + "'," +"'Y' ," +"'" + received_text + "',"  +"'" + received_img + "'" + ")" ;
         //String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ('2', '63', 'z@z.com', '유아인', 'z@zcom/z.gif', '12:11', 'Y', '하...')" ;
         Log.e("ddd receive", sqlInsert);
         sqliteDB.execSQL(sqlInsert) ; // 디비 닫아야 하나??
@@ -230,20 +294,39 @@ public class MyService extends Service {
                             Log.e("ddd 노티알람", jsonObj.get("sender").toString()+"님이 카풀을 신청하셨습니다.");
                             sencNotification(msg);//노티피케이션---------------------------------------jsonObj.get("sender").toString()
                         }
-                        if(jsonObj.get("kindOfmsg").equals("2")){ //1번은 카풀신청
+                        if(jsonObj.get("kindOfmsg").equals("2")){ //2번은 메시지 전송
                             Log.e("ddd 챗팅왔다", jsonObj.get("sender").toString()+"님이 메시지 보냄 : " +jsonObj.get("contents").toString() );
                            // myService.myServiceFunc(jsonObj.get("contents").toString()); //에코체팅
                             //카풀아이디, 센더 이메일, 센더 이음, 센더 사진, 전달한 내용 넣어줌
         /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+                        if(!app.getUser_email().equals( jsonObj.get("sender").toString())){ // 자기가 보낸 메시지면 저장 안해도됨
                             sqliteDB = init_database();
                             Calendar calendar = Calendar.getInstance();
                             java.util.Date date = calendar.getTime();
                             String received_time = (new SimpleDateFormat("aa hh:mm ").format(date));
                             String received_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
                             receive_msg( "2",  received_date,  jsonObj.get("carpool_id").toString(),  jsonObj.get("sender").toString(),  jsonObj.get("sender_name").toString(),  jsonObj.get("sender_pic").toString(),  received_time,  jsonObj.get("contents").toString()) ;
+                        }
         /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
                             myService.chattingMsgDeliver(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString());
+                        }
+                        if(jsonObj.get("kindOfmsg").equals("3")){ //3번은 이미지 메시지 전송
+                            Log.e("ddd 이미지왔다", jsonObj.get("sender").toString()+"님이 이미지 보냄 : " +jsonObj.get("contents").toString() );
+                            // myService.myServiceFunc(jsonObj.get("contents").toString()); //에코체팅
+                            //카풀아이디, 센더 이메일, 센더 이음, 센더 사진, 전달한 내용 넣어줌
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+                            if(!app.getUser_email().equals( jsonObj.get("sender").toString())) { // 자기가 보낸 메시지면 저장 안해도됨
+                                sqliteDB = init_database();
+                                Calendar calendar = Calendar.getInstance();
+                                java.util.Date date = calendar.getTime();
+                                String received_time = (new SimpleDateFormat("aa hh:mm ").format(date));
+                                String received_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
+                                receive_imgmsg( "3",  received_date,  jsonObj.get("carpool_id").toString(),  jsonObj.get("sender").toString(),  jsonObj.get("sender_name").toString(),  jsonObj.get("sender_pic").toString(),  received_time,  jsonObj.get("contents").toString(), jsonObj.get("img_file_name").toString()) ;
+                            }
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+                            myService.chattingImgMsgDeliver(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString(),  jsonObj.get("img_file_name").toString());
                         }
 
                     }else {// json형식 아닐때

@@ -14,6 +14,15 @@ public class Item_Chatting {
     String sent_time; // 메시지 보낸 시간
     String sent_content; // 메시지 내용
     String msg_date;// 채팅 날짜
+    String img_file_name = null; // 서버의 이미지 주소
+
+    public String getImg_file_name() {
+        return img_file_name;
+    }
+
+    public void setImg_file_name(String img_file_name) {
+        this.img_file_name = img_file_name;
+    }
 
     public String getCarpool_id() {
         return carpool_id;
