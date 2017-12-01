@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="1"
+    android:layout_centerHorizontal="true">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="270dp"
+            android:src="@drawable/sky11"
+            android:scaleType="fitXY"
+            />
+        <ImageView
+            android:src="@drawable/bora"
+            android:id="@+id/profile_pic"
+            android:layout_gravity="center"
+            android:layout_width="140dp"
+            android:layout_height="140dp" />
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="88dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:text="보라돌이"
+            />
+        <TextView
+            android:layout_marginTop="140dp"
+            android:layout_gravity="center"
+            android:id="@+id/tv_call_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="유아인 님이 영상통화를 요청합니다."
+            android:visibility="gone"
+            />
+        <RelativeLayout
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+        <EditText
+            android:visibility="gone"
+            android:id="@+id/room_edittext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:inputType="text"/>
+
+            <ImageButton
+                android:layout_marginRight="8dp"
+                android:id="@+id/connect_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/connect_description"
+                android:background="@android:drawable/sym_action_call" />
+
+            <TextView
+                android:layout_marginRight="8dp"
+                android:id="@+id/tv_connect_label"
+                android:layout_below="@+id/connect_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="영상 통화"
+                android:textColor="@color/black"
+                />
+            <ImageButton
+                android:visibility="gone"
+                android:layout_marginLeft="12dp"
+                android:layout_toRightOf="@+id/connect_button"
+                android:id="@+id/disconnect_button"
+                android:background="@drawable/disconnect"
+                android:contentDescription="@string/disconnect_call"
+                android:layout_width="48dp"
+                android:layout_height="48dp"/>
+
+            <TextView
+                android:id="@+id/tv_disconnect_label"
+                android:visibility="gone"
+                android:layout_marginLeft="8dp"
+                android:layout_toRightOf="@+id/tv_connect_label"
+                android:layout_below="@+id/disconnect_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="통화 거절"
+                android:textColor="@color/black"
+                />
+        </RelativeLayout>
+    </FrameLayout>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/room_edittext_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/room_description"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginBottom="8dp">
+
+
+
+        <ImageButton
+            android:visibility="gone"
+            android:id="@+id/add_favorite_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/add_favorite_description"
+            android:background="@android:drawable/ic_input_add" />
+    </LinearLayout>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/room_listview_description"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:lines="1"
+        android:maxLines="1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/favorites"
+        android:gravity="center_vertical"/>
+
+    <FrameLayout
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ListView
+            android:id="@+id/room_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawSelectorOnTop="false" />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/no_favorites" />
+    </FrameLayout>
+</LinearLayout>
