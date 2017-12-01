@@ -2,10 +2,18 @@ package com.example.jpar4.mitfahren.tmap_test;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,10 +27,12 @@ import com.example.jpar4.mitfahren.ItemView.ItemChattingListView;
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.model.Item_ChattingRoomList;
+import com.example.jpar4.mitfahren.service.MyService;
 
 import org.json.JSONArray;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -41,12 +51,42 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
     private ListView listView_chattingroomlist; // 리스트뷰 선언
     RoomListAdpater roomListAdpater; //대화상대 어댑터
 
+    /*메시지처리핸들러*/
+    Handler chattinghandler;
+
+    /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    SQLiteDatabase sqliteDB;
+    /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    MyService mService; //서비스객체
+    boolean mBound;
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting_room_list);
         context=getApplicationContext();
         app = (Myapp)getApplicationContext();
+        chattinghandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == 1001) { //에코체팅
+                    String carpool_id = msg.getData().getString("carpool_id");
+                //    Log.e("ddd handleMessage","여기 오나요??");
+                    for(int i=0; i< roomListAdpater.getCount();i++){
+            //            Log.e("handleMessage conut", ""+i);
+                       if(((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id().equals(carpool_id)){
+               //            Log.e("handleMessage item", ""+((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id().equals(carpool_id));
+                           ((Item_ChattingRoomList)roomListAdpater.getItem(i)).setNum_unread_msg(get_unread_num(carpool_id));
+                       }
+                    }
+                    roomListAdpater.notifyDataSetChanged();
+                }
+            }
+        };
+
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
         mSwipeRefreshLayout.setColorSchemeResources(
                 android.R.color.holo_blue_bright,
@@ -71,6 +111,12 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
         String chatter_email = app.getUser_email();
         GetRoomList task = new GetRoomList();
         task.execute(chatter_email);
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+        sqliteDB = init_database();
+        init_tables();
+        //load_msg();
+
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     }
 
     @Override
@@ -88,6 +134,7 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        /*d없*/
         //Toast.makeText(context, ""+position+roomListAdpater.items.get(position).getCarpool_id(), Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(ChattingRoomLIstActivity.this, ChattingRoomActivity.class);
         intent.putExtra("carpool_ID",roomListAdpater.items.get(position).getCarpool_id());
@@ -200,6 +247,7 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
                     item.setRoom_title(arr.getJSONObject(i).getString("room_title")); //
                     item.setCar_pic(arr.getJSONObject(i).getString("car_pic"));
                     item.setRoom_num(arr.getJSONObject(i).getString("poeple_num"));
+                    item.setNum_unread_msg(get_unread_num(arr.getJSONObject(i).getString("carpool_id")));
 
                     roomListAdpater.addItem(item);
                 }
@@ -281,4 +329,257 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
         }
     }
     /*-----------------------------------------------------------------------디비에서 채팅방 정보를 가져옮-----------------------------------------------------------------------*/
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+/*        for(int i=0; i< roomListAdpater.getCount();i++){
+           // Log.e("ddd dddx", ""+((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id());
+                ((Item_ChattingRoomList)roomListAdpater.getItem(i)).setNum_unread_msg(get_unread_num(((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id()));
+        }
+        roomListAdpater.notifyDataSetChanged();*/
+    }
+
+    /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    private SQLiteDatabase init_database() {
+        Log.e("ddd", "데이터베이스세팅");
+        SQLiteDatabase db = null ;
+        // File file = getDatabasePath("chatting.db");
+        File file = new File(getFilesDir(), "chatting.db");
+        Log.e("ddd PATH : ", file.toString());
+
+        try {
+            db = SQLiteDatabase.openOrCreateDatabase(file, null) ;
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+
+        if (db == null) {
+            Log.e("ddd DB creation failed", file.getAbsolutePath().toString()) ; }
+        return db ;
+    }
+
+    private void init_tables() {
+ /*       sendMsgObj.put("kindOfmsg", "2"); //    kindOfmsg : 1 = carpool_applying ; 2 : chatting
+        sendMsgObj.put("carpool_id", carpool_ID); // 등록된 카풀정보의 아이디(유일값), 방번호 어떻게 할지 생각해보고
+        //  sendMsgObj.put("sender", app.getUser_email()); // sender : 보내는 사람
+        sendMsgObj.put("sender", app.getUser_email());
+        sendMsgObj.put("sender_name", app.getUser_name());
+        sendMsgObj.put("sender_pic", app.getUser_photo());
+        //   sendMsgObj.put("receiver", item_new_driver_info.getUser_email()); // receiver : 받는 사람
+        //   sendMsgObj.put("receiver", "z@z.com");
+        sendMsgObj.put("contents", sent_text);*/
+
+        if (sqliteDB != null) {
+     /*       String sqlDelete = "DELETE FROM CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDelete) ;*/
+/*            String sqlDropTbl = "DROP TABLE CHATTING_TABLE" ;
+            sqliteDB.execSQL(sqlDropTbl) ;*/
+
+
+            String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CHATTING_TABLE (" +
+                    "NO "           + "INTEGER PRIMARY KEY NOT NULL," +
+                    "MSG_TYPE "         + "TEXT," +
+                    "CARPOOL_ID "         + "TEXT," +
+                    "SENDER "         + "TEXT," +
+                    "SENDER_NAME "         + "TEXT," +
+                    "SENDER_PIC "        + "TEXT," +
+                    "TIME "        + "TEXT," +
+                    "IS_READ "        + "TEXT," +
+                    "CONTENTS "       + "TEXT," +
+                    "IMG_MSG "        + "TEXT" +")" ;
+            //    "OVER20 "       + "INTEGER" + ")" ;
+
+            System.out.println(sqlCreateTbl) ;
+            Log.e("ddd sqlCreateTbl", sqlCreateTbl);
+            sqliteDB.execSQL(sqlCreateTbl) ;
+        }
+    }
+    private String get_unread_num(String carpool_id) {
+
+        // String sqlInsert = "INSERT INTO CONTACT_T " + "(NO, NAME, PHONE, OVER20) VALUES (" + Integer.toString(no) + "," + "'" + name + "'," + "'" + phone + "'," + ((isOver20 == true) ? "1" : "0") + ")" ; System.out.println(sqlInsert) ; sqliteDB.execSQL(sqlInsert) ;
+        //  String sqlInsert = "INSERT INTO CHATTING_TABLE " + "(MSG_TYPE, CARPOOL_ID, SENDER, SENDER_NAME, SENDER_PIC, TIME, IS_READ, CONTENTS) VALUES ('2', '63', 'z@z.com', '유아인', 'z@zcom/z.gif', '12:11', 'Y', '하...')" ;
+        // Log.e("ddd", sqlInsert);
+        //  sqliteDB.execSQL(sqlInsert) ;
+
+String unread_num="0";
+
+        if (sqliteDB != null) {
+            String sqlQueryTbl = "SELECT count(*) FROM CHATTING_TABLE where IS_READ='Y' and CARPOOL_ID="+"'"+carpool_id+"'" ;
+            Cursor cursor = null ;
+
+            // 쿼리 실행
+            cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
+
+            while (cursor.moveToNext()) {
+                    // Log.e("ddd select문", cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3)+cursor.getString(4)+cursor.getString(5)+cursor.getString(7)+cursor.getString(8)+cursor.getString(9));
+                Log.e("ddd count문", cursor.getString(0));
+                unread_num = cursor.getString(0);
+/*                if(carpool_ID.equals(cursor.getString(2))){ // 방번호가 같은때만 채팅 표시해줌
+                    Item_Chatting item = new Item_Chatting();
+                    if(app.getUser_email().equals(cursor.getString(3))) {// 보낸분자
+                        if(cursor.getString(9).equals("NO_IMG")){ // 문자메시지 일때
+                            item.setSent_time(cursor.getString(6));
+                            item.setSent_content(cursor.getString(8));
+                            item.setSent(true);
+                            chatting_adapter.addItem(item);
+                        }else{// 이미지 메시지 일때, 띠용
+                            item.setSent_time(cursor.getString(6));
+                            item.setImg_file_name(cursor.getString(9));
+                            item.setSent(true);
+                            //chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
+                            chatting_adapter.addItem(item);
+                        }
+                        // item.setMsg_date(sent_date);
+
+                    }else{//받은문자
+                        if(cursor.getString(9).equals("NO_IMG")) { // 받은 문자메시지 일때
+                            //                item.setMsg_date(received_date);
+                            item.setCarpool_id(cursor.getString(2));
+                            item.setSender_name(cursor.getString(4));
+                            item.setSender_pic(cursor.getString(5));
+                            item.setReceived_time(cursor.getString(6));
+                            item.setReceived_content(cursor.getString(8));
+                            item.setSent(false);
+                            chatting_adapter.addItem(item);
+                        }
+                        else{ //받은 이미지 메시지 일때
+                            item.setCarpool_id(cursor.getString(2));
+                            item.setSender_name(cursor.getString(4));
+                            item.setSender_pic(cursor.getString(5));
+                            item.setReceived_time(cursor.getString(6));
+                            item.setReceived_content(cursor.getString(8));
+                            item.setImg_file_name(cursor.getString(9)); // 서버의 이미지 주소 입력
+                            item.setSent(false);
+                            chatting_adapter.addItem(item);
+                        }
+
+                    }
+                }*/
+            }
+        }
+        return unread_num;
+    }
+    /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyService.LocalBinder binder = (MyService.LocalBinder) service;
+            mService = binder.getService();
+            mService.registerCallback(mCallback); //콜백 등록
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBound = false;
+        }
+    };
+
+    //서비스에서 아래의 콜백 함수를 호출하며, 콜백 함수에서는 액티비티에서 처리할 내용 입력
+    private MyService.ICallback mCallback = new MyService.ICallback() {
+        @Override
+        public String getCarpool_ID() {
+            return null;
+        }
+
+        @Override
+        public void recvRejectCall(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents) {
+
+        }
+
+        @Override
+        public void recvRoomID(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents) {
+
+        }
+
+        @Override
+        public void changeUnreadMsgNum(String carpool_id) {
+            Log.e("ddd changeUnreadMsgNum", " "+carpool_id);
+            Message message= Message.obtain();
+            message.what = 1001; // 안읽은 메시지수 표시
+            Bundle bundle = new Bundle();
+            //  bundle.putString("friendId",friendId);
+            bundle.putString("carpool_id",carpool_id);
+            //    bundle.putLong("time",time);
+            message.setData(bundle);
+            chattinghandler.sendMessage(message);
+        }
+
+        public void recvData(String txt) {
+            Log.e("ddd", "ddd"+" "+txt);
+            Message message= Message.obtain();
+            message.what = 1; //에코채팅
+            Bundle bundle = new Bundle();
+            //  bundle.putString("friendId",friendId);
+            bundle.putString("content",txt);
+            //    bundle.putLong("time",time);
+            message.setData(bundle);
+           // chattinghandler.sendMessage(message);
+
+        }
+        //띠용
+        public void recvChattingMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){ // 채팅 메시지 처리
+
+            Log.e("ddd", "ddd"+" recvChattingMsg");
+            Message message= Message.obtain();
+            message.what = 2; //채팅
+            Bundle bundle = new Bundle();
+            //  bundle.putString("friendId",friendId);
+            bundle.putString("carpool_id",carpool_id);
+            bundle.putString("sender_email",sender_email);
+            bundle.putString("sender_name",sender_name);
+            bundle.putString("sender_pic",sender_pic);
+            bundle.putString("contents",contents);
+
+            //    bundle.putLong("time",time);
+            message.setData(bundle);
+            //chattinghandler.sendMessage(message);
+        }
+
+        @Override
+        public void recvChattingImgMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name) { // 채팅 이미지 메시지 처리
+            Log.e("ddd", "ddd"+" recvChattingImgMsg");
+            Message message= Message.obtain();
+            message.what = 3; //채팅이미지 메시지
+            Bundle bundle = new Bundle();
+            //  bundle.putString("friendId",friendId);
+            bundle.putString("carpool_id",carpool_id);
+            bundle.putString("sender_email",sender_email);
+            bundle.putString("sender_name",sender_name);
+            bundle.putString("sender_pic",sender_pic);
+            bundle.putString("contents",contents);
+            bundle.putString("img_file_name",img_file_name);
+
+            //    bundle.putLong("time",time);
+            message.setData(bundle);
+           // chattinghandler.sendMessage(message);
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+                for(int i=0; i< roomListAdpater.getCount();i++){
+           // Log.e("ddd dddx", ""+((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id());
+                ((Item_ChattingRoomList)roomListAdpater.getItem(i)).setNum_unread_msg(get_unread_num(((Item_ChattingRoomList)roomListAdpater.getItem(i)).getCarpool_id()));
+        }
+        roomListAdpater.notifyDataSetChanged();
+
+        Intent intent = new Intent(this, MyService.class);
+        // startService(intent);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mBound){
+            unbindService(mConnection);
+            mBound=false;
+        }
+
+    }
+    /*----------------------------------------서비스 바인딩 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 }

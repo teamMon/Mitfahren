@@ -1,5 +1,6 @@
 package com.example.jpar4.mitfahren.service;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,7 +17,9 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.R;
 import com.example.jpar4.mitfahren.app.Myapp;
+import com.example.jpar4.mitfahren.apprtc.ConnectActivity;
 import com.example.jpar4.mitfahren.tmap_test.CarpoolInfoActivity;
+import com.example.jpar4.mitfahren.tmap_test.ChattingRoomActivity;
 import com.example.jpar4.mitfahren.tmap_test.NewNotiActivity;
 
 import org.json.JSONException;
@@ -29,10 +32,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * Created by jpar4 on 2017-09-29.
@@ -79,9 +86,13 @@ public class MyService extends Service {
 
     //콜백 인터페이스 선언
     public interface ICallback {
+        public String getCarpool_ID();// 카풀아이디 가져옴
         public void recvData(String msg); //액티비티에서 선언한 콜백 함수.
         public void recvChattingMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents);
         public void recvChattingImgMsg(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents, String img_file_name);
+        public void changeUnreadMsgNum(String carpool_id); // 안읽음 메시지 숫자 바꾸기
+        public void recvRoomID(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents);
+        public void recvRejectCall(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents);
     }
 
     private ICallback mCallback;
@@ -89,6 +100,10 @@ public class MyService extends Service {
     //액티비티에서 콜백 함수를 등록하기 위함.
     public void registerCallback(ICallback cb) {
         mCallback = cb;
+    }
+
+    public String getCarpoolID(){
+        return mCallback.getCarpool_ID();
     }
 
     //액티비티에서 서비스 함수를 호출하기 위한 함수 생성
@@ -104,6 +119,7 @@ public class MyService extends Service {
         Log.e("ddd", "chattingMsgDeliver");
         //서비스에서 처리할 내용
         mCallback.recvChattingMsg(carpool_id, sender_email, sender_name, sender_pic, contents); // 채팅 메시지
+        mCallback.changeUnreadMsgNum(carpool_id);// 채팅메시지가 와도 바꿔주고
         // return msg;
     }
 
@@ -112,6 +128,34 @@ public class MyService extends Service {
         Log.e("ddd", "chattingImgMsgDeliver");
         //서비스에서 처리할 내용
         mCallback.recvChattingImgMsg(carpool_id, sender_email, sender_name, sender_pic, contents, img_file_name);// 채팅 이미지 메시지
+        mCallback.changeUnreadMsgNum(carpool_id);// 채팅이미지메시지가 와도 바꿔줌
+    }
+
+    //액티비티에서 서비스 함수를 호출하기 위한 함수 생성
+    public void roomIDDeliver(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){
+        Log.e("ddd", "roomIDDeliver");
+        //서비스에서 처리할 내용
+        mCallback.recvRoomID(carpool_id, sender_email, sender_name, sender_pic, contents); // 룸 ID
+        // 서비스에서 바로 액티비티 열어줌.
+        Intent intent = new Intent(this, ConnectActivity.class);
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                /*intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);*/
+        intent.putExtra("profile_pic", sender_pic);
+        intent.putExtra("prfile_name", sender_name);
+        intent.putExtra("carpool_ID", carpool_id);
+        intent.putExtra("room_ID", contents); // contents = roomID 메시지타입이 4번일때.
+        intent.putExtra("callRecv","Recv");
+        startActivity(intent);
+        // return msg;
+    }
+    //액티비티에서 서비스 함수를 호출하기 위한 함수 생성
+    public void rejectCall(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents){
+        Log.e("ddd", "chattingMsgDeliver");
+        //서비스에서 처리할 내용
+        mCallback.recvRejectCall(carpool_id, sender_email, sender_name, sender_pic, contents); // 채팅 메시지
+
+        // return msg;
     }
 
 //서비스에서 액티비티 함수 호출은..
@@ -310,6 +354,62 @@ public class MyService extends Service {
         /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
                             myService.chattingMsgDeliver(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString());
+
+         /*----------------------------------------현재 액티비티 확인하기 ----------------------------------------------------------------------------------------*/
+                            Log.e("ddd ABC","ChattingRoomActivity 여기와?");
+                            ActivityManager activityManager = (ActivityManager) service.getSystemService(service.ACTIVITY_SERVICE);
+                            List<ActivityManager.RunningTaskInfo> info;
+                            info = activityManager.getRunningTasks(7);
+           /*                 List<ActivityManager.AppTask> info;
+                            info = activityManager.getAppTasks();*/
+                          //  for (Iterator iterator = info.iterator(); iterator.hasNext();)  {
+                                Iterator iterator = info.iterator(); iterator.hasNext();
+                                ActivityManager.RunningTaskInfo runningTaskInfo = (ActivityManager.RunningTaskInfo) iterator.next();
+
+                                if(runningTaskInfo.topActivity.getClassName().equals("com.example.jpar4.mitfahren.tmap_test.ChattingRoomActivity")) { //채팅방일때
+                                    Log.e("ddd ABC","ChattingRoomActivity");
+                                    if(myService.getCarpoolID().equals(jsonObj.get("carpool_id").toString())){//같으면 보내지말고
+
+                                    }else{// 다르면 보내야지
+                                        NotificationManager notificationManager= (NotificationManager)service.getSystemService(service.NOTIFICATION_SERVICE);
+                                        Intent intent1 = new Intent(service.getApplicationContext(),ChattingRoomActivity.class); //인텐트 생성.
+                                        intent1.putExtra("carpool_ID",jsonObj.get("carpool_id").toString());
+                                        intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                        Notification.Builder builder = new Notification.Builder(service.getApplicationContext());
+                                        PendingIntent pendingNotificationIntent = PendingIntent.getActivity( service,0, intent1, FLAG_UPDATE_CURRENT);
+                                        builder.setSmallIcon(R.drawable.searching).setTicker("알림").setWhen(System.currentTimeMillis())
+                                                .setContentTitle("채팅메시지").setContentText(""+jsonObj.get("sender_name").toString()+": "+jsonObj.get("contents").toString())
+                                                //.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true).setOngoing(true);
+                                                .setContentIntent(pendingNotificationIntent).setAutoCancel(true)
+                                                .setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
+                                                //.setFullScreenIntent(pendingNotificationIntent, true)
+                                                .setContentIntent(pendingNotificationIntent);
+                                        notificationManager.notify(0, builder.build()); // Notification send
+
+                                    }
+
+                                }else{// 채팅방 아닐때 노티 ㅋㅋㅋ
+                                    NotificationManager notificationManager= (NotificationManager)service.getSystemService(service.NOTIFICATION_SERVICE);
+                                        Intent intent1 = new Intent(service.getApplicationContext(),ChattingRoomActivity.class); //인텐트 생성.
+                                        intent1.putExtra("carpool_ID",jsonObj.get("carpool_id").toString());
+                                        intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                        Notification.Builder builder = new Notification.Builder(service.getApplicationContext());
+                                        PendingIntent pendingNotificationIntent = PendingIntent.getActivity( service,0, intent1, FLAG_UPDATE_CURRENT);
+                                        builder.setSmallIcon(R.drawable.searching).setTicker("알림").setWhen(System.currentTimeMillis())
+                                                .setContentTitle("채팅메시지").setContentText(""+jsonObj.get("sender_name").toString()+": "+jsonObj.get("contents").toString())
+                                                //.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true).setOngoing(true);
+                                                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true)
+                                                .setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
+                                                //.setFullScreenIntent(pendingNotificationIntent, true);
+                                                .setContentIntent(pendingNotificationIntent);
+                                        notificationManager.notify(0, builder.build()); // Notification send
+                                }
+                                Log.e("ABC ", runningTaskInfo.topActivity.getClassName().toString());
+
+                    //        }
+        /*----------------------------------------현재 액티비티 확인하기스 ----------------------------------------------------------------------------------------*/
+
+
                         }
                         if(jsonObj.get("kindOfmsg").equals("3")){ //3번은 이미지 메시지 전송
                             Log.e("ddd 이미지왔다", jsonObj.get("sender").toString()+"님이 이미지 보냄 : " +jsonObj.get("contents").toString() );
@@ -327,6 +427,84 @@ public class MyService extends Service {
         /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
                             myService.chattingImgMsgDeliver(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString(),  jsonObj.get("img_file_name").toString());
+                                     /*----------------------------------------현재 액티비티 확인하기 ----------------------------------------------------------------------------------------*/
+                            Log.e("ddd ABC","ChattingRoomActivity 여기와?");
+                            ActivityManager activityManager = (ActivityManager) service.getSystemService(service.ACTIVITY_SERVICE);
+                            List<ActivityManager.RunningTaskInfo> info;
+                            info = activityManager.getRunningTasks(7);
+           /*                 List<ActivityManager.AppTask> info;
+                            info = activityManager.getAppTasks();*/
+                            //  for (Iterator iterator = info.iterator(); iterator.hasNext();)  {
+                            Iterator iterator = info.iterator(); iterator.hasNext();
+                            ActivityManager.RunningTaskInfo runningTaskInfo = (ActivityManager.RunningTaskInfo) iterator.next();
+
+                            if(runningTaskInfo.topActivity.getClassName().equals("com.example.jpar4.mitfahren.tmap_test.ChattingRoomActivity")) { //채팅방일때
+                                Log.e("ddd ABC","ChattingRoomActivity");
+                                if(myService.getCarpoolID().equals(jsonObj.get("carpool_id").toString())){//같으면 보내지말고
+
+                                }else{// 다르면 보내야지
+                                    NotificationManager notificationManager= (NotificationManager)service.getSystemService(service.NOTIFICATION_SERVICE);
+                                    Intent intent1 = new Intent(service.getApplicationContext(),ChattingRoomActivity.class); //인텐트 생성.
+                                    intent1.putExtra("carpool_ID",jsonObj.get("carpool_id").toString());
+                                    intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    Notification.Builder builder = new Notification.Builder(service.getApplicationContext());
+                                    PendingIntent pendingNotificationIntent = PendingIntent.getActivity( service,0, intent1, FLAG_UPDATE_CURRENT);
+                                    builder.setSmallIcon(R.drawable.searching).setTicker("알림").setWhen(System.currentTimeMillis())
+                                            .setContentTitle("채팅메시지").setContentText(""+jsonObj.get("sender_name").toString()+": "+jsonObj.get("contents").toString())
+                                            .setContentIntent(pendingNotificationIntent).setAutoCancel(true)
+                                            .setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
+                                            .setContentIntent(pendingNotificationIntent);
+                                    //.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true)
+                                    //.setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
+                                    //.setFullScreenIntent(pendingNotificationIntent, true);
+                                    //.setContentIntent(pendingNotificationIntent)
+                                    //.setOngoing(true);
+                                    notificationManager.notify(0, builder.build()); // Notification send
+                                }
+
+                            }else{// 채팅방 아닐때 노티 ㅋㅋㅋ
+                                if(!app.getUser_email().equals( jsonObj.get("sender").toString())) { // 자기가 보낸 메시지면 노티 안띄워도 되는데 테스트폰에서 갑자기 띄워서 방어막침
+                                    NotificationManager notificationManager= (NotificationManager)service.getSystemService(service.NOTIFICATION_SERVICE);
+                                    Intent intent1 = new Intent(service.getApplicationContext(),ChattingRoomActivity.class); //인텐트 생성.
+                                    intent1.putExtra("carpool_ID",jsonObj.get("carpool_id").toString());
+                                    intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                    Notification.Builder builder = new Notification.Builder(service.getApplicationContext());
+                                    PendingIntent pendingNotificationIntent = PendingIntent.getActivity( service,0, intent1, FLAG_UPDATE_CURRENT);
+                                    builder.setSmallIcon(R.drawable.searching).setTicker("알림").setWhen(System.currentTimeMillis())
+                                            .setContentTitle("채팅메시지").setContentText(""+jsonObj.get("sender_name").toString()+": "+jsonObj.get("contents").toString())
+                                            //.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true).setOngoing(true);
+                                            .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingNotificationIntent).setAutoCancel(true)
+                                            .setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
+                                            //.setFullScreenIntent(pendingNotificationIntent, true);
+                                            .setContentIntent(pendingNotificationIntent);
+                                            //.setOngoing(true);
+                                    notificationManager.notify(0, builder.build()); // Notification send
+                                }
+                            }
+                            Log.e("ABC ", runningTaskInfo.topActivity.getClassName().toString());
+
+                            //        }
+        /*----------------------------------------현재 액티비티 확인하기스 ----------------------------------------------------------------------------------------*/
+
+                        }
+                        if(jsonObj.get("kindOfmsg").equals("4")){ //4번은 화상채팅 여기선 contents가 roomid
+                            Log.e("ddd 화상채팅", jsonObj.get("sender").toString()+"님이 화상채팅 룸아이디 보냄 : " +jsonObj.get("contents").toString() );
+                            // myService.myServiceFunc(jsonObj.get("contents").toString()); //에코체팅
+                            //카풀아이디, 센더 이메일, 센더 이음, 센더 사진, 전달한 내용 넣어줌
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+        /*----------------------------------------채팅 데이터베이스 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+                            if(jsonObj.get("contents").toString().equals("reject")){//contents는 RoomID또는 reject가 날라올수 있음
+                                if(!app.getUser_email().equals( jsonObj.get("sender").toString())) { // 자기가 보낸 메시지면 실행 안해도됨
+                                    myService.rejectCall(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString());
+                                }
+                            }
+                            else{// 룸 아이디가 날라온 경우
+                                if(!app.getUser_email().equals( jsonObj.get("sender").toString()))  {// 자기가 보낸 메시지면 실행 안해도됨
+                                    myService.roomIDDeliver(jsonObj.get("carpool_id").toString(), jsonObj.get("sender").toString(), jsonObj.get("sender_name").toString(), jsonObj.get("sender_pic").toString(), jsonObj.get("contents").toString());
+                                }
+                            }
                         }
 
                     }else {// json형식 아닐때

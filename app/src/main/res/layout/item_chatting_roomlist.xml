@@ -17,18 +17,37 @@
         android:layout_height="50dp"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher_round" />
-
-    <TextView
-        android:layout_toRightOf="@+id/chatting_room_pic"
-        android:layout_toLeftOf="@+id/chatting_room_num"
+    <FrameLayout
         android:layout_marginLeft="8dp"
-        android:id="@+id/chatting_room_title"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:gravity="center"
-        android:textColor="@color/black"
-        android:text="채팅방"
-        />
+        android:layout_toRightOf="@+id/chatting_room_pic"
+        android:layout_toLeftOf="@+id/chatting_room_num"
+        >
+
+        <TextView
+            android:id="@+id/chatting_room_title"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:text="채팅방"
+            />
+
+        <TextView
+            android:id="@+id/tv_unread_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:background="#e7fa0101"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_gravity="end"
+            android:padding="2dp"
+            />
+    </FrameLayout>
+
+
 
     <TextView
         android:layout_alignParentRight="true"

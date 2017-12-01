@@ -362,7 +362,7 @@ ArrayList<Item_Notification> itemList_rider;
             float distanceInMeters= getDistanceInMeter((Double.parseDouble(user_start_lat)), (Double.parseDouble(user_start_lng)), (Double.parseDouble(user_arrive_lat)), (Double.parseDouble(user_arrive_lng))); // 거리계산
             float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
-            Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
+       //     Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
 
             /*경로 보여주기(해야됨)*/
            GetPathJson getJsonPath = new GetPathJson();
@@ -533,7 +533,7 @@ ArrayList<Item_Notification> itemList_rider;
             float distanceInMeters= getDistanceInMeter((Double.parseDouble(user_start_lat)), (Double.parseDouble(user_start_lng)), (Double.parseDouble(user_arrive_lat)), (Double.parseDouble(user_arrive_lng))); // 거리계산
             float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel-1));
-            Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
+       //     Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
 
             /*경로 보여주기(해야됨)*/
             GetPathJson getJsonPath = new GetPathJson();
@@ -630,7 +630,7 @@ Log.e("ddd", "여기1");
                     if(item_new_driver_info==null){ // 등록후 확인페이지면 null
                         if(INETENT_SENT_FROM!=null){
                             if(INETENT_SENT_FROM.equals("ItemCarpoolListForRiderView")){
-                                Toast.makeText(app, "111", Toast.LENGTH_SHORT).show();
+                     //           Toast.makeText(app, "111", Toast.LENGTH_SHORT).show();
                                 Log.e("ddd INETENT_SENT_FROM", INETENT_SENT_FROM);
                                 intent.putExtra("user_email", driver_email);
                             }
@@ -1672,7 +1672,7 @@ private ServiceConnection mConnection = new ServiceConnection() {
                     Log.e("ddd", itemList_rider.get(position).getRider_carpool_status());
                     if(holder.btn_rider_accept.getText().toString().equals("수락")){
                         accept_cancel="accept";
-                        Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
+                    //    Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
                         itemList_rider.get(position).setRider_carpool_status("accepted");
                         PushButtonAccept task = new PushButtonAccept();
                         task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);
@@ -1707,7 +1707,7 @@ private ServiceConnection mConnection = new ServiceConnection() {
                     String accept_cancel="reject";
                     if(holder.btn_rider_reject.getText().toString().equals("거절")){
                         accept_cancel="reject";
-                        Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
+                //        Toast.makeText(context, carpool_ID+ " "+itemList_rider.get(position).getRider_email() + itemList_rider.get(position).getRider_carpool_status() , Toast.LENGTH_SHORT).show();
                         itemList_rider.get(position).setRider_carpool_status("rejected");
                         PushButtonAccept task = new PushButtonAccept();
                         task.execute(carpool_ID, itemList_rider.get(position).getRider_email(), accept_cancel);

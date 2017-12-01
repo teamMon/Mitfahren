@@ -7,6 +7,7 @@ android:id="@+id/msg_layout"
     android:layout_marginLeft="4dp"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
+    android:descendantFocusability="blocksDescendants"
     >
     <!--
         android:descendantFocusability="blocksDescendants"
@@ -33,19 +34,25 @@ android:id="@+id/msg_layout"
         android:visibility="gone"
         />
     <TextView
+        android:inputType="textMultiLine"
+        android:maxWidth="230dp"
         android:id="@+id/msg_received_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@+id/msg_sender_pic"
         android:layout_below="@+id/msg_sender_name"
-        android:text="안녕하세요."
+        android:text="안녕하세요. ddddd ddddddvdddd dddd dddd ddddd"
         android:background="#b3ffffff"
         android:visibility="gone"
         android:textSize="18sp"
         android:textColor="@color/black"
         />
     -->
+<!--    <ImageView
+        android:id="@+id/xxx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />-->
     <ImageView
         android:id="@+id/img_received_content"
         android:layout_width="125dp"
@@ -87,14 +94,18 @@ android:id="@+id/msg_layout"
         />
 
     <TextView
+        android:inputType="textMultiLine"
+        android:maxWidth="230dp"
         android:id="@+id/msg_sent_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/msg_sender_name"
+
         android:text="안녕하세요."
         android:background="#b3fdff7f"
         android:textSize="18sp"

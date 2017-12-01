@@ -66,6 +66,9 @@ public class ItemNotiView extends LinearLayout implements View.OnClickListener{
         if(item.getNoti_checked().equals("Y")){
             iv_item_noti_main.setBackgroundColor(Color.WHITE);
         }
+        else{
+            iv_item_noti_main.setBackgroundResource(R.drawable.carpool_before_item_click_bg);
+        }
 
 
         //iv_driver_info_main

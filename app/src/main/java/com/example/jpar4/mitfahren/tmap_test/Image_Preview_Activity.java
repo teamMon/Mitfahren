@@ -63,7 +63,7 @@ public class Image_Preview_Activity extends AppCompatActivity implements View.On
 
     Uri imageURI= null;
     String carpool_ID = null;
-    Bitmap imageBitmap = null;
+    Bitmap imageBitmap;
     Bitmap imageBitmapFilterd = null;
     String imagePath;
     String file_lastthree = null; // 확장자
@@ -356,6 +356,8 @@ public class Image_Preview_Activity extends AppCompatActivity implements View.On
     public void onThumbnailClick(Filter filter) {
         imageBitmapFilterd =filter.processFilter(Bitmap.createScaledBitmap(imageBitmap, 640, 640, false));
         iv_preview_image.setImageBitmap(imageBitmapFilterd);
+    /*아래로하면 이미지 전송이 안됨.*/
+/*        iv_preview_image.setImageBitmap(filter.processFilter(Bitmap.createScaledBitmap(imageBitmap, 640, 640, false)));*/
     }
     /*----------------------------------------이미지필터 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 }

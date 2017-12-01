@@ -96,7 +96,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.example.jpar4.mitfahren.R.id.nav_mycarpool;
+import static com.example.jpar4.mitfahren.R.id.nav_talk;
 
 
 public class NewSearchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -326,6 +326,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
             nev_Menu.findItem(R.id.nav_noti).setVisible(false);
             nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
+            nev_Menu.findItem(R.id.nav_talk).setVisible(false);
         }
 
         /*로그아웃상태일 때 nav_logout nav_out_mem nav_myinfo nav_add_driver*/
@@ -405,7 +406,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
         }/*else if (id == R.id.nav_see_friend) {
 
         }*/
-        else if (id == R.id.nav_talk) {
+        else if (id == nav_talk) {
             Intent intent = new Intent(NewSearchActivity.this, ChattingRoomLIstActivity.class);
             startActivity(intent);
       /*      Intent intent = new Intent(NewSearchActivity.this, ChattingRoomActivity.class);
@@ -528,7 +529,8 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_add_driver).setVisible(true);
             nev_Menu.findItem(R.id.nav_logout).setVisible(true);
             nev_Menu.findItem(R.id.nav_noti).setVisible(true);
-            nev_Menu.findItem(nav_mycarpool).setVisible(true);
+            nev_Menu.findItem(R.id.nav_mycarpool).setVisible(true);
+            nev_Menu.findItem(R.id.nav_talk).setVisible(true);
 
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
@@ -559,6 +561,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             nev_Menu.findItem(R.id.nav_logout).setVisible(false);
             nev_Menu.findItem(R.id.nav_noti).setVisible(false);
             nev_Menu.findItem(R.id.nav_mycarpool).setVisible(false);
+            nev_Menu.findItem(R.id.nav_talk).setVisible(false);
         }
 
     }
@@ -1366,7 +1369,7 @@ public float getZoomForMetersWide(double desiredMeters) {
 
             String result_msg = data.getStringExtra("result_msg");
             //et_search_depart.setText(result_msg);
-            Toast.makeText(mActivity, result_msg, Toast.LENGTH_SHORT).show();
+         //   Toast.makeText(mActivity, result_msg, Toast.LENGTH_SHORT).show();
 
             String juso = result_msg;
             String addr = "http://maps.googleapis.com/maps/api/geocode/json?address="
@@ -1766,8 +1769,47 @@ public float getZoomForMetersWide(double desiredMeters) {
 
                             mClusterManager.setRenderer(new DriverInfoRenderer(getApplicationContext(), mGoogleMap, mClusterManager));
 
-                            mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start())); // 아이템 생성자 세팅해줘야 넘길떄 제대로 넘어감
-                            Log.e("ddd ", "item.getUser_start() : "+item.getUser_start());
+
+                            SimpleDateFormat old_time_format = new SimpleDateFormat("hh:mm:ss");
+                            SimpleDateFormat new_time_format = new SimpleDateFormat("hhmmss");
+                            String new_time="";
+                            try{
+                                Date start_time = old_time_format.parse(arr.getJSONObject(i).getString("user_start_time"));
+                                new_time = new_time_format.format(start_time);
+
+                            }catch(ParseException e){
+                                e.printStackTrace();
+                            }
+
+                            String 카풀등록날짜 = arr.getJSONObject(i).getString("user_start_date");
+                            String 현재날짜 = (new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                           Log.e("날짜", "카풀등록날짜 :"+카풀등록날짜+"현재날자"+현재날짜+"비교:"+카풀등록날짜.compareTo(현재날짜));
+
+                            String 카풀시작시간 = new_time;
+                            String 현재시간 = (new SimpleDateFormat("HHmmss", Locale.KOREA).format(new Date()));
+                            int 시간차 = Integer.parseInt(카풀시작시간)-Integer.parseInt(현재시간);
+                            Log.e("날짜", "카풀시작시간 :"+카풀시작시간+"현재시간"+현재시간+"비교:"+ 시간차);
+                            //카풀등록날짜.compareTo(현재날짜)
+
+                            if(카풀등록날짜.compareTo(현재날짜)<0){//날짜 지남
+
+                            }
+                            else if(카풀등록날짜.compareTo(현재날짜)==0){//날짜 같음
+                                if(시간차<0){ // 시간 지남
+
+                                }else{ //시간 남음 마커찍어줌
+                                              /*시간이 지난 마커가 표시되지 않게 하기 위해 여기에 아이템을 넣기 전에 스타트 날짜와 현재날짜를 비교해 아이템을 넣어줄지 안넣어줄질 결정*/
+                                    mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start())); // 아이템 생성자 세팅해줘야 넘길떄 제대로 넘어감
+                                    Log.e("ddd ", "item.getUser_start() : "+item.getUser_start());
+                                }
+
+                            }
+                            else{// 0보다 클경우 날짜 남음 마커 추가
+                                     /*시간이 지난 마커가 표시되지 않게 하기 위해 여기에 아이템을 넣기 전에 스타트 날짜와 현재날짜를 비교해 아이템을 넣어줄지 안넣어줄질 결정*/
+                                mClusterManager.addItem(new Item_New_Driver_Info(item, item.getUser_start())); // 아이템 생성자 세팅해줘야 넘길떄 제대로 넘어감
+                                Log.e("ddd ", "item.getUser_start() : "+item.getUser_start());
+                            }
+
 
                         /*    MarkerOptions markerOptions = new MarkerOptions();
                             markerOptions.position(item.getLocation());

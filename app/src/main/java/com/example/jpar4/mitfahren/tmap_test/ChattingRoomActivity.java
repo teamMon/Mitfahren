@@ -47,8 +47,8 @@ import android.widget.Toast;
 
 import com.example.jpar4.mitfahren.ItemView.ItemChatterView;
 import com.example.jpar4.mitfahren.ItemView.ItemChattingInvitableView;
-import com.example.jpar4.mitfahren.ItemView.ItemChattingView;
 import com.example.jpar4.mitfahren.R;
+import com.example.jpar4.mitfahren.adapter.ChattingAdapter;
 import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.model.Item_Chatting;
 import com.example.jpar4.mitfahren.model.Item_Invitable;
@@ -150,7 +150,6 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
     Uri imageURI = null;// 전송할것
     String send_image; // Image_Preview_Activity에서 왔음을 의미
     String file_lastthree ;//확장자 // 크롬후 파일명 만들때 사용
-
     /*----------------------------------------사진 앨범 ----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
     @Override
@@ -174,6 +173,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
         context=getApplicationContext();
         app = (Myapp)getApplicationContext();
+        mActivity = this;
 
 
         chattinghandler = new Handler(){
@@ -211,7 +211,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                             String received_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
                             Item_Chatting item = new Item_Chatting();
                             item.setMsg_date(received_date);
-
+                            item.setMsg_id(get_max_msg_id());
                             item.setCarpool_id(carpool_id);
                             item.setSender_name(sender_name);
                             item.setSender_pic(sender_pic);
@@ -244,7 +244,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                             String received_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
                             Item_Chatting item = new Item_Chatting();
                             item.setMsg_date(received_date);
-
+                            item.setMsg_id(get_max_msg_id());
                             item.setCarpool_id(carpool_id);
                             item.setSender_name(sender_name);
                             item.setSender_pic(sender_pic);
@@ -330,7 +330,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
 
         //메시지 출력 어댑터 등록
-        chatting_adapter = new ChattingAdapter();
+        chatting_adapter = new ChattingAdapter(context, mActivity);
         chatting_display.setAdapter(chatting_adapter);
 
 
@@ -373,7 +373,10 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 String sent_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
                 Item_Chatting item = new Item_Chatting();
                 //
+                send_imgmsg( "3",  sent_date,  sent_time,  "(사진)", img_file_name); // sqLite에 채팅 이미지메시지 저장   // 띠용 // 3은 이미지메시지
+                item.setMsg_id(get_max_msg_id());
                 /*채팅방에 표시*/
+                item.setCarpool_id(carpool_ID);
                 item.setMsg_date(sent_date);
                 item.setSent_time(sent_time);
                 item.setImg_file_name(img_file_name);
@@ -381,7 +384,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 //chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
                 chatting_adapter.addItem(item);
 
-                send_imgmsg( "3",  sent_date,  sent_time,  "(사진)", img_file_name); // sqLite에 채팅 이미지메시지 저장   // 띠용 // 3은 이미지메시지
+
             }
 
             img_file_name=null;// 초기화
@@ -466,8 +469,12 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 java.util.Date date = calendar.getTime();
                 String sent_time = (new SimpleDateFormat("aa hh:mm ").format(date));
                 String sent_date = (new SimpleDateFormat("yyyy년 MM월 dd일 E요일", Locale.KOREA).format(date));
+                /*채팅 저장하고 프라이머리키값 받아와서 아이템에 넣어줌*/
+                send_msg( "2",  sent_date,  sent_time,  sent_text); // sqLite에 채팅 메시지 저장// sqlite에서 알아서 카풀아이디 추가해줌
                 Item_Chatting item = new Item_Chatting();
                 //
+                item.setCarpool_id(carpool_ID);
+                item.setMsg_id(get_max_msg_id());
                 item.setMsg_date(sent_date);
                 item.setSent_time(sent_time);
                 item.setSent_content(sent_text);
@@ -475,7 +482,10 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 chatting_display.setTranscriptMode( ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL );
                 chatting_adapter.addItem(item);
                 chatting_adapter.notifyDataSetChanged();
-                send_msg( "2",  sent_date,  sent_time,  sent_text); // sqLite에 채팅 메시지 저장
+
+
+
+
 
 /*                SimpleDateFormat old_time_format = new SimpleDateFormat("hh:mm:ss");
                 SimpleDateFormat new_time_format = new SimpleDateFormat("aa hh:mm ");
@@ -727,7 +737,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
     }
     /*------------------------------------------------------------------초대 가능한 사람 어댑터-------------*/
-    /*------------------------------------------------------------------채팅창 어댑터-------------*/
+ /*   *//*------------------------------------------------------------------채팅창 어댑터-------------*//*
     class ChattingAdapter extends BaseAdapter {
         ArrayList<Item_Chatting> items = new ArrayList<>(); // 아이템 보관하기 위한 소스
 
@@ -761,19 +771,19 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             final int mPosition = position;
             ItemChattingView view = null;
             if (convertView == null) { // 뷰가 없으면 생성
-                view = new ItemChattingView(context);
+                view = new ItemChattingView(context, mActivity);
             } else {// 재사용
                 view = (ItemChattingView) convertView;
             }
 
             Item_Chatting curItem = items.get(position);// 현재 아이템
             view.setItem_Chatting(curItem);
-         /*   view.setItem_Invitable(curItem);
+         *//*   view.setItem_Invitable(curItem);
             if(isThereCheckBox){// true면 checkBox보이고 아니면 안보이게
                 view.invitable_user_check.setVisibility(View.VISIBLE);
             }else{
                 view.invitable_user_check.setVisibility(View.GONE);
-            }*/
+            }*//*
 
 
             return view;
@@ -783,7 +793,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             this.notifyDataSetChanged();
         }
     }
-    /*------------------------------------------------------------------채팅창 어댑터-------------*/
+    *//*------------------------------------------------------------------채팅창 어댑터-------------*/
     /*------------------------------------------------------------------현재 대화 상대 어댑터-------------*/
     /*------------------------------------------------------------------현재 대화 상대 어댑터-------------*/
           /*-----------------------------------------------------------------------디비에서 초대 가능자 정보를 가져옮-----------------------------------------------------------------------*/
@@ -1148,6 +1158,26 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
     //서비스에서 아래의 콜백 함수를 호출하며, 콜백 함수에서는 액티비티에서 처리할 내용 입력
     private MyService.ICallback mCallback = new MyService.ICallback() {
+        @Override
+        public String getCarpool_ID() {
+            return carpool_ID;
+        }
+
+        @Override
+        public void recvRejectCall(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents) {
+
+        }
+
+        @Override
+        public void recvRoomID(String carpool_id, String sender_email, String sender_name, String sender_pic, String contents) {
+
+        }
+
+        @Override
+        public void changeUnreadMsgNum(String carpool_id) { // ChattingRoomListActivity용
+
+        }
+
         public void recvData(String txt) {
             Log.e("ddd", "ddd"+" "+txt);
             Message message= Message.obtain();
@@ -1205,6 +1235,12 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
         Intent intent = new Intent(this, MyService.class);
        // startService(intent);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onPause() {// 메시지 마지막 읽은 시점으로 업데이트
+        super.onPause();
+        update_isread();
     }
 
     @Override
@@ -1273,6 +1309,31 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             sqliteDB.execSQL(sqlCreateTbl) ;
         }
     }
+    private void update_isread(){// isread는 최후에 메시지 읽은 시간 카풀아이디가 같은 isread를 onpause 될때 업데이트한다.
+/*        Calendar calendar = Calendar.getInstance();
+        java.util.Date date = calendar.getTime();
+        String last_read_time = (new SimpleDateFormat("hhmmss").format(date));*/
+
+        String last_read_time ="read";
+
+        String sqlUpdate = "UPDATE CHATTING_TABLE SET IS_READ="+"'"+last_read_time+"'"+ " WHERE  CARPOOL_ID="+"'"+carpool_ID+"'" ;
+        Log.e("ddd update", sqlUpdate);
+        sqliteDB.execSQL(sqlUpdate) ;
+    }
+    private String get_max_msg_id(){
+        String max_msg_no = null;
+        if (sqliteDB != null) {
+            String sqlQueryTbl = "SELECT MAX(NO) FROM CHATTING_TABLE WHERE  CARPOOL_ID="+"'"+carpool_ID+"'" ;
+            Cursor cursor = null;
+
+            // 쿼리 실행
+            cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
+            cursor.moveToNext();
+           // Toast.makeText(context,  cursor.getString(0), Toast.LENGTH_SHORT).show();
+            max_msg_no =cursor.getString(0);
+        }
+        return max_msg_no;
+    }
 
 
     private void load_msg() {
@@ -1290,7 +1351,6 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
             // 쿼리 실행
             cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
-
             while (cursor.moveToNext()) {
                 Log.e("ddd select문", cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3)+cursor.getString(4)+cursor.getString(5)+cursor.getString(7)+cursor.getString(8)+cursor.getString(9));
 
@@ -1298,11 +1358,15 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     Item_Chatting item = new Item_Chatting();
                     if(app.getUser_email().equals(cursor.getString(3))) {// 보낸분자
                         if(cursor.getString(9).equals("NO_IMG")){ // 문자메시지 일때
+                            item.setMsg_id(cursor.getString(0));// 프라이머리키
+                            item.setCarpool_id(cursor.getString(2));
                             item.setSent_time(cursor.getString(6));
                             item.setSent_content(cursor.getString(8));
                             item.setSent(true);
                             chatting_adapter.addItem(item);
                         }else{// 이미지 메시지 일때, 띠용
+                            item.setMsg_id(cursor.getString(0));// 프라이머리키
+                            item.setCarpool_id(cursor.getString(2));
                             item.setSent_time(cursor.getString(6));
                             item.setImg_file_name(cursor.getString(9));
                             item.setSent(true);
@@ -1314,6 +1378,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     }else{//받은문자
                         if(cursor.getString(9).equals("NO_IMG")) { // 받은 문자메시지 일때
                             //                item.setMsg_date(received_date);
+                            item.setMsg_id(cursor.getString(0));// 프라이머리키
                             item.setCarpool_id(cursor.getString(2));
                             item.setSender_name(cursor.getString(4));
                             item.setSender_pic(cursor.getString(5));
@@ -1323,6 +1388,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                             chatting_adapter.addItem(item);
                         }
                         else{ //받은 이미지 메시지 일때
+                            item.setMsg_id(cursor.getString(0));// 프라이머리키
                             item.setCarpool_id(cursor.getString(2));
                             item.setSender_name(cursor.getString(4));
                             item.setSender_pic(cursor.getString(5));
@@ -1649,74 +1715,82 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 break;
 
             case PICK_FROM_ALBUM: {
+                if (resultCode == Activity.RESULT_OK) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        checkPermissions2();
+                    }
+                    picOk = true;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    checkPermissions2();
-                }
-                picOk = true;
-                mImageCaptureUri = data.getData();
-                Intent intent = new Intent("com.android.camera.action.CROP");
-                intent.setDataAndType(mImageCaptureUri, "image/*");
+
+                    if(data.getData()!=null){//이미지 선택을 안했을 경우
+                        mImageCaptureUri = data.getData();
+                        Intent intent = new Intent("com.android.camera.action.CROP");
+                        intent.setDataAndType(mImageCaptureUri, "image/*");
 
                 /*추가추가*/
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-                Cursor cursor = getContentResolver().query(mImageCaptureUri, filePathColumn, null, null, null);
+                        Cursor cursor = getContentResolver().query(mImageCaptureUri, filePathColumn, null, null, null);
 
-                if (cursor != null) {
-                    cursor.moveToFirst();
+                        if (cursor != null) {
+                            cursor.moveToFirst();
 
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    imagePath = cursor.getString(columnIndex);
+                            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                            imagePath = cursor.getString(columnIndex);
 
 
             /*        Picasso.with(mContext).load(new File(imagePath))
                             .transform(PicassoTransformations.resizeTransformation)
                             .into(imageView);*/
-                    cursor.close();
+                            cursor.close();
 
-                }
+                        }
 
-                file_lastthree = imagePath.substring(imagePath.lastIndexOf("."));//확장자 // 나중에 파일명 만들때 사용할꺼
+                        file_lastthree = imagePath.substring(imagePath.lastIndexOf("."));//확장자 // 나중에 파일명 만들때 사용할꺼
 
                 /*추가추가*/
-                intent.putExtra("outputX", 200);
-                intent.putExtra("outputY", 200);
-                intent.putExtra("aspectX", 1);
-                intent.putExtra("aspectY", 1);
-                intent.putExtra("scale", true);
-                intent.putExtra("return-data", true);
-                //intent.putExtra("file_lastthree", file_lastthree);
+                        intent.putExtra("outputX", 200);
+                        intent.putExtra("outputY", 200);
+                        intent.putExtra("aspectX", 1);
+                        intent.putExtra("aspectY", 1);
+                        intent.putExtra("scale", true);
+                        intent.putExtra("return-data", true);
+                        //intent.putExtra("file_lastthree", file_lastthree);
 
 
-                startActivityForResult(intent, AFTER_FROM_ALBUM);
+                        startActivityForResult(intent, AFTER_FROM_ALBUM);
+                    }
+                    else{
 
-                try {
-                    //이미지 데이터를 비트맵으로 받아온다.
+                    }
+
+                    try {
+                        //이미지 데이터를 비트맵으로 받아온다.
                /*     Bitmap image_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                     ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
                     roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(image_bitmap, 1024);
                     image.setImageBitmap(roundimage_bitmap);
                     PIC_OK=true;*/
-                    roundimage_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-                    //iv_view.setImageBitmap(roundimage_bitmap);
-                    //ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
-                  //  iv_view.setImageBitmap(roundimage_bitmap);
+                        roundimage_bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                        //iv_view.setImageBitmap(roundimage_bitmap);
+                        //ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                        //  iv_view.setImageBitmap(roundimage_bitmap);
 
-                    //Bitmap image_bitmap2 = MRRoundedImageView.getCroppedBitmap(roundimage_bitmap, 1024);
-                   //image.setImageBitmap(roundimage_bitmap);
-                    //PIC_OK=true;
+                        //Bitmap image_bitmap2 = MRRoundedImageView.getCroppedBitmap(roundimage_bitmap, 1024);
+                        //image.setImageBitmap(roundimage_bitmap);
+                        //PIC_OK=true;
 
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (FileNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 }
-                break;
             }
 
             case REQUEST_IMAGE_CROP:
@@ -1734,10 +1808,11 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 break;
 
             case AFTER_FROM_ALBUM :
-                // 크롭이 된 이후의 이미지를 넘겨 받습니다.
-                // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
-                // 임시 파일을 삭제합니다.
-                final Bundle extras = data.getExtras();
+                if (resultCode == Activity.RESULT_OK) {
+                    // 크롭이 된 이후의 이미지를 넘겨 받습니다.
+                    // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
+                    // 임시 파일을 삭제합니다.
+                    final Bundle extras = data.getExtras();
 
 
                                       /*추가추가*/
@@ -1757,25 +1832,25 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                 Log.e("ddd", cropimagePath);*/
                 /*추가추가*/
 
-                if(extras != null)
-                {
-                    Bitmap photo = extras.getParcelable("data");
-                    iv_view.setImageBitmap(photo);
-                    Intent intent = new Intent(ChattingRoomActivity.this, Image_Preview_Activity.class);
-                    intent.putExtra("imageURI", albumURI);
-                    intent.putExtra("carpool_ID", carpool_ID);
-                    intent.putExtra("imageBitmap", photo);
-                    intent.putExtra("file_lastthree", file_lastthree);
-                    Log.e("ddd file_lastthree", file_lastthree);
-                    //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(intent);
-                 //   ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
-                  //  roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(photo, 1024);
-                  //  image.setImageBitmap(roundimage_bitmap);
-                 //   PIC_OK=true;
-                    //saveBitmaptoJpeg(image_bitmap2, "imagefolder","123");
+                    if(extras != null)
+                    {
+                        Bitmap photo = extras.getParcelable("data");
+                        iv_view.setImageBitmap(photo);
+                        Intent intent = new Intent(ChattingRoomActivity.this, Image_Preview_Activity.class);
+                        intent.putExtra("imageURI", albumURI);
+                        intent.putExtra("carpool_ID", carpool_ID);
+                        intent.putExtra("imageBitmap", photo);
+                        intent.putExtra("file_lastthree", file_lastthree);
+                        Log.e("ddd file_lastthree", file_lastthree);
+                        //   intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(intent);
+                        //   ImageView image = (ImageView) findViewById(R.id.add_driver_iv_car);
+                        //  roundimage_bitmap = MRRoundedImageView.getCroppedBitmap(photo, 1024);
+                        //  image.setImageBitmap(roundimage_bitmap);
+                        //   PIC_OK=true;
+                        //saveBitmaptoJpeg(image_bitmap2, "imagefolder","123");
 
-                }
+                    }
 
         /*        // 임시 파일 삭제
                 File f = new File(mImageCaptureUri.getPath());
@@ -1784,6 +1859,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
                     f.delete();
                 }
 */
+                }
                 break;
         }
     }

@@ -6,6 +6,7 @@ package com.example.jpar4.mitfahren.model;
 
 public class Item_Chatting {
     boolean sent = true; // true = sent or false = receive;
+    String msg_id;// 메시지 아이디(PR)
     String carpool_id;// 카풀아이디
     String sender_pic; //보낸사람 사진
     String sender_name; // 보낸사람 이름
@@ -15,6 +16,14 @@ public class Item_Chatting {
     String sent_content; // 메시지 내용
     String msg_date;// 채팅 날짜
     String img_file_name = null; // 서버의 이미지 주소
+
+    public String getMsg_id() {
+        return msg_id;
+    }
+
+    public void setMsg_id(String msg_id) {
+        this.msg_id = msg_id;
+    }
 
     public String getImg_file_name() {
         return img_file_name;

@@ -219,7 +219,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
          user_car_photo = intent.getStringExtra("user_car_photo");
       //  roundimage_bitmap = (Bitmap)intent.getParcelableExtra("roundimage_bitmap");
 
-        Toast.makeText(mActivity, start_d+" "+start_t+" "+start_p, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(mActivity, start_d+" "+start_t+" "+start_p, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -839,7 +839,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
                 float distanceInMeters= getDistanceInMeter(Start_Marker_InFo.getLat(), Start_Marker_InFo.getLng(), Arrive_Marker_InFo.getLat(), Arrive_Marker_InFo.getLng()); // 거리계산
                 float properZoomLevel=getZoomForMetersWide(distanceInMeters); //줌레벨 계산
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, properZoomLevel));
-                Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
+              //  Toast.makeText(mActivity, Float.toString(distanceInMeters)+" / "+ Float.toString(properZoomLevel) , Toast.LENGTH_SHORT).show();  //테스트
 
             /*경로 보여주기(해야됨)*/
                 GetPathJson getJsonPath = new GetPathJson();
@@ -1182,7 +1182,7 @@ public class NewAddDriverActivity2 extends AppCompatActivity implements
 
             String result_msg = data.getStringExtra("result_msg");
             //et_search_depart.setText(result_msg);
-            Toast.makeText(mActivity, result_msg, Toast.LENGTH_SHORT).show();
+          //  Toast.makeText(mActivity, result_msg, Toast.LENGTH_SHORT).show();
 
             String juso = result_msg;
             String addr = "http://maps.googleapis.com/maps/api/geocode/json?address="

@@ -70,7 +70,7 @@ android:visibility="gone"
                 android:background="#d6ffffff"
                 android:layout_gravity="bottom"
                 android:layout_width="wrap_content"
-                android:layout_height="55dp">
+                android:layout_height="wrap_content">
           <!--      <View
                     android:layout_alignParentTop="true"
                     android:layout_width="match_parent"
@@ -93,11 +93,11 @@ android:visibility="gone"
                     android:layout_marginBottom="12dp"
                     android:layout_centerVertical="true"
                     android:id="@+id/input_text"
-              android:layout_toRightOf="@+id/send_pic"
+                    android:layout_toRightOf="@+id/send_pic"
                     android:layout_toLeftOf="@+id/btn_text_send"
                     android:layout_alignBaseline="@+id/btn_text_send"
                     android:layout_width="wrap_content"
-                    android:layout_height="50dp"
+                    android:layout_height="wrap_content"
                     android:background="#d6ffffff"
                     />
                 <Button

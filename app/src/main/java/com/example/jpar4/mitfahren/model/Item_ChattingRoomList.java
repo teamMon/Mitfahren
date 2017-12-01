@@ -10,6 +10,15 @@ public class Item_ChattingRoomList {
     String car_pic;
     String room_title;
     String room_num;
+    String num_unread_msg;
+
+    public String getNum_unread_msg() {
+        return num_unread_msg;
+    }
+
+    public void setNum_unread_msg(String num_unread_msg) {
+        this.num_unread_msg = num_unread_msg;
+    }
 
     public String getCarpool_id() {
         return carpool_id;

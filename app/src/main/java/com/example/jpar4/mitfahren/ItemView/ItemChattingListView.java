@@ -14,8 +14,6 @@ import com.example.jpar4.mitfahren.app.Myapp;
 import com.example.jpar4.mitfahren.model.Item_ChattingRoomList;
 import com.squareup.picasso.Picasso;
 
-import static com.example.jpar4.mitfahren.R.id.invitable_user_check;
-
 /**
  * Created by jpar4 on 2017-11-01.
  */
@@ -28,6 +26,7 @@ public class ItemChattingListView extends RelativeLayout implements View.OnClick
     ImageView chatting_room_pic;
     TextView chatting_room_title;
     TextView chatting_room_num;
+    TextView tv_unread_msg;// 안읽은 메시지 수
 
     Item_ChattingRoomList item_chattingRoomList;
 
@@ -55,6 +54,7 @@ public class ItemChattingListView extends RelativeLayout implements View.OnClick
         chatting_room_pic = (ImageView) findViewById(R.id.chatting_room_pic);
         chatting_room_title = (TextView) findViewById(R.id.chatting_room_title);
         chatting_room_num = (TextView) findViewById(R.id.chatting_room_num);
+        tv_unread_msg =(TextView) findViewById(R.id.tv_unread_msg);
 
 
 
@@ -64,16 +64,23 @@ public class ItemChattingListView extends RelativeLayout implements View.OnClick
         item_chattingRoomList = item;
         Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_chattingRoomList.getCar_pic()).into(chatting_room_pic);
         chatting_room_title.setText(item_chattingRoomList.getRoom_title());
-        chatting_room_num.setText(item_chattingRoomList.getRoom_num());
+        chatting_room_num.setText(item_chattingRoomList.getRoom_num() + "명");
+        if(item_chattingRoomList.getNum_unread_msg().equals("0")){
+            tv_unread_msg.setVisibility(GONE);
+        }else{
+            tv_unread_msg.setText(item_chattingRoomList.getNum_unread_msg());
+            tv_unread_msg.setVisibility(VISIBLE);
+        }
 
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case invitable_user_check:
+            case R.id.tv_unread_msg:
 
                 break;
+
 
         }
     }

@@ -52,7 +52,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.regex.Pattern;
-
+/*
+*
+*
+* 회원등록하는 화면
+*
+* */
 public class test_join extends AppCompatActivity{
     private static String TAG = "test_join.java";
 
@@ -176,12 +181,12 @@ public class test_join extends AppCompatActivity{
                     InsertData task = new InsertData();
                     task.execute(user_email,user_name,user_pwd,user_age,user_sex);
 
-                /*입력 필드 초기화*/
-                    join_et_input_id.setText("");
+                /*입력 필드 초기화 초기화 해줘야되나??*/
+                  /*  join_et_input_id.setText("");
                     join_et_input_name.setText("");
                     join_et_input_pw.setText("");
                     join_et_input_pwchk.setText("");
-                    join_et_input_age.setText("");
+                    join_et_input_age.setText("");*/
                     //join_spn_sex -> 이거 여성일 때, 남성으로 바뀌게 초기화해야됨.
 
                 /*현재 이미지를 선택하지 않았을 때, nobody.jpg로 값이 저장 안됨. 이미지 삽입시 되게 해라!!!! */
@@ -493,10 +498,11 @@ public class test_join extends AppCompatActivity{
             if (progressDialog != null)
                 progressDialog.dismiss();
 
-            if (aBoolean)
+            /*파일 업로드 성공 토스트 */
+/*            if (aBoolean)
                 Toast.makeText(getApplicationContext(), R.string.string_upload_success, Toast.LENGTH_LONG).show();
             else
-                Toast.makeText(getApplicationContext(), R.string.string_upload_fail, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.string_upload_fail, Toast.LENGTH_LONG).show();*/
 
         }
 
@@ -544,6 +550,7 @@ public class test_join extends AppCompatActivity{
 
             /*로그인 액티비티로 이동*/
             Intent intent = new Intent(test_join.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             finish();
 

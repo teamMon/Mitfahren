@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
+
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
     defaultConfig {
         applicationId "com.example.jpar4.mitfahren"
         minSdkVersion 16
@@ -29,6 +35,10 @@ android {
             path "CMakeLists.txt"
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -42,6 +52,13 @@ dependencies {
         compile('org.apache.httpcomponents:httpmime:4.3') {
             exclude module: "httpclient"
         }*/
+    /*화상4*/
+    compile files('libs/audio_device_java.jar')
+    compile files('libs/autobanh.jar')
+    compile files('libs/base_java.jar')
+    compile files('libs/libjingle_peerconnection.jar')
+
+
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:25.3.1'
