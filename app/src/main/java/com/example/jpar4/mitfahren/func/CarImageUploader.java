@@ -29,7 +29,7 @@ public class CarImageUploader {
      * You will find this file in php_upload folder in this project
      * You can copy that folder and paste in your htdocs folder...
      */
-    private static final String URL_UPLOAD_IMAGE = "http://52.78.6.238/upload/car_image_upload.php";
+    private static final String URL_UPLOAD_IMAGE = "http://13.124.251.123/upload/car_image_upload.php";
 
     /*public static JSONObject uploadImage(String sourceImageFile) {*/
     public static JSONObject uploadCarImage(Bitmap roundImage, String user_car_photo) {// sourceImageFile = imagePath

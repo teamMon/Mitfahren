@@ -133,7 +133,7 @@ public class ItemChattingView extends RelativeLayout implements View.OnClickList
     public void setItem_Chatting(Item_Chatting item, int mPosition) { //img_file_name: chatting_img_20171117/z014615.jpg
         item_chatting = item;
         this.position = mPosition;
-       // Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + Item_Chatting.getUser_pic()).into(invitable_user_pic);
+       // Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + Item_Chatting.getUser_pic()).into(invitable_user_pic);
         if(item_chatting.isSent()){ //보내는거
             if(item_chatting.getImg_file_name() != null){ // 보낸 이미지 주소가 있으면 = 이미지 전송
                 msg_sent_content.setVisibility(GONE);
@@ -148,7 +148,7 @@ public class ItemChattingView extends RelativeLayout implements View.OnClickList
                 img_sent_content.setVisibility(VISIBLE); //보낸 이미지
                 img_sent_time.setVisibility(VISIBLE); //보낸 이미지 시간
 
-                Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name()).into(img_sent_content);
+                Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name()).into(img_sent_content);
                 img_sent_time.setText(item_chatting.getSent_time());
 
             }
@@ -184,11 +184,11 @@ public class ItemChattingView extends RelativeLayout implements View.OnClickList
                 img_sent_content.setVisibility(GONE);
                 img_sent_time.setVisibility(GONE);
 
-                Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name()).into(img_received_content);
+                Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name()).into(img_received_content);
                 img_received_time.setText(item_chatting.getReceived_time());
 
                 msg_sender_name.setText(item_chatting.getSender_name());
-                Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getSender_pic()).into(msg_sender_pic);
+                Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getSender_pic()).into(msg_sender_pic);
             }
             else{// 메시지 받음
                 img_received_content.setVisibility(GONE);
@@ -206,7 +206,7 @@ public class ItemChattingView extends RelativeLayout implements View.OnClickList
                 msg_sender_name.setText(item_chatting.getSender_name());
                 msg_received_content.setText(item_chatting.getReceived_content());
                 msg_received_time.setText(item_chatting.getReceived_time());
-                Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getSender_pic()).into(msg_sender_pic);
+                Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getSender_pic()).into(msg_sender_pic);
             }
         }
 
@@ -301,7 +301,7 @@ public class ItemChattingView extends RelativeLayout implements View.OnClickList
                                 }
                                 else { //이미지 일때
                                     //Toast.makeText(context, "11", Toast.LENGTH_SHORT).show();
-                                    String imgUrl = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name();
+                                    String imgUrl = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + item_chatting.getImg_file_name();
                                     new ImageDownload().execute(imgUrl);
                                 }
 

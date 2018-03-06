@@ -84,7 +84,7 @@ public class TestCarpoolItemView extends LinearLayout implements View.OnClickLis
 
         item_new_driver_info=item;
         //iv_driver_info_main
-       Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_new_driver_info.getUser_car_photo()).into(iv_driver_info_main);
+       Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+item_new_driver_info.getUser_car_photo()).into(iv_driver_info_main);
         tv_driver_list_people.setText("인원 : " + item_new_driver_info.getUser_having_rider()+ " / " +item_new_driver_info.getUser_with_poeple());
         //tv_driver_list_people.setText(item_new_driver_info.getUser_with_poeple()+"명");
         tv_item_driver_list_date.setText(item_new_driver_info.getUser_start_date());

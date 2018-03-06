@@ -569,7 +569,7 @@ public class test_join extends AppCompatActivity{
             String user_sex = (String)params[4];
             String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/join_insert.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/join_insert.php";
             String postParameters = "user_email=" + user_email + "&user_name=" + user_name + "&user_pwd=" + user_pwd + "&user_age=" + user_age + "&user_sex=" + user_sex + "&user_photo=" + user_photo;
             Log.e("ddd", user_photo);
 
@@ -678,7 +678,7 @@ public class test_join extends AppCompatActivity{
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String user_email = (String)params[0];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/join_email_check.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/join_email_check.php";
             String postParameters = "user_email=" + user_email;
 
 
@@ -743,7 +743,6 @@ public class test_join extends AppCompatActivity{
 
     /*----------------------------------------------프로필사진등록------------------------------------------*/
     private void checkPermissions(){
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED||
@@ -759,7 +758,6 @@ public class test_join extends AppCompatActivity{
                     1052);
 
         }
-
     }
 
     @Override

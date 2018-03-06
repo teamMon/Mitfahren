@@ -62,7 +62,7 @@ public class ItemChattingListView extends RelativeLayout implements View.OnClick
 
     public void setItem_ChattingRoomList(Item_ChattingRoomList item){
         item_chattingRoomList = item;
-        Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_chattingRoomList.getCar_pic()).into(chatting_room_pic);
+        Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+item_chattingRoomList.getCar_pic()).into(chatting_room_pic);
         chatting_room_title.setText(item_chattingRoomList.getRoom_title());
         chatting_room_num.setText(item_chattingRoomList.getRoom_num() + "명");
         if(item_chattingRoomList.getNum_unread_msg().equals("0")){

@@ -61,7 +61,7 @@ public class ItemChattingInvitableView extends LinearLayout implements View.OnCl
 
     public void setItem_Invitable(Item_Invitable item){
         item_invitable = item;
-        Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_invitable.getUser_pic()).into(invitable_user_pic);
+        Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+item_invitable.getUser_pic()).into(invitable_user_pic);
         invitable_user_name.setText(item_invitable.getUser_name());
         if(item_invitable.isItem_checked()){
             invitable_user_check.setChecked(true);

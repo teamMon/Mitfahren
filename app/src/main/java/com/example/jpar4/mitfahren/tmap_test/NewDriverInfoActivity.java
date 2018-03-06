@@ -339,7 +339,7 @@ ArrayList<Item_Notification> itemList_rider;
 
             tv_driver_info_time.setText(new_time);
             tv_driver_info_people.setText(user_with_poeple + " 명");
-            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+user_car_photo).into(iv_driver_info_pic);
+            Picasso.with(mContext).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+user_car_photo).into(iv_driver_info_pic);
 
             //getCurrentAddress2(user_start_lat, user_start_lng); // 출발지 주소
             //getCurrentAddress2(user_arrive_lat, user_arrive_lng); // 도착지 주소
@@ -382,7 +382,7 @@ ArrayList<Item_Notification> itemList_rider;
             String user_email = (String)params[0];
             String user_start_date = (String)params[1];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/get_driver_info.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/get_driver_info.php";
             String postParameters = "user_email=" + user_email + "&user_start_date=" + user_start_date;
 
 
@@ -510,7 +510,7 @@ ArrayList<Item_Notification> itemList_rider;
 
             tv_driver_info_time.setText(new_time);
             tv_driver_info_people.setText(user_with_poeple + " 명");
-            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+user_car_photo).into(iv_driver_info_pic);
+            Picasso.with(mContext).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+user_car_photo).into(iv_driver_info_pic);
 
             //getCurrentAddress2(user_start_lat, user_start_lng); // 출발지 주소
             //getCurrentAddress2(user_arrive_lat, user_arrive_lng); // 도착지 주소
@@ -557,7 +557,7 @@ ArrayList<Item_Notification> itemList_rider;
             String carpool_id = (String)params[0];
 Log.e("ddd", "여기1");
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/get_driver_info2.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/get_driver_info2.php";
             String postParameters = "carpool_id=" + carpool_id;// + "&user_start_date=" + user_start_date;
 
 
@@ -1248,7 +1248,7 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
             }
             tv_rider_num.setText("카풀신청자 총 "+itemList_rider.size()+"명");
 
-              //  Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(0).getNoti_profile_pic()).into(iv_driver_info_pic2);
+              //  Picasso.with(mContext).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(0).getNoti_profile_pic()).into(iv_driver_info_pic2);
       /*----------------------------------------------------------------------------------------리사이클러뷰 관련-------------------------------------------------------------------------------------------------------------------------------------------*/
                 horizontal_recycler_view= (RecyclerView) findViewById(R.id.horizontal_recycler_view);
 
@@ -1283,7 +1283,7 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
             /*user_email,user_name,user_pwd,user_age,user_sex*/
         //  String user_email = (String) params[0];
 
-        String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
+        String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
         ///  String postParameters = "user_email=" + user_email;
 
 
@@ -1378,7 +1378,7 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
             String accept_cancel = (String) params[2];
 
             Log.e("ddd", carpool_id+sender_email+accept_cancel);
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
             String postParameters = "carpool_id="+carpool_id+"&sender_email="+sender_email+"&accept_cancel="+accept_cancel;
 
 
@@ -1470,7 +1470,7 @@ class GetNotiInfo extends AsyncTask<String, Void, String> {
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             //  String user_email = (String) params[0];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
             ///  String postParameters = "user_email=" + user_email;
 
 
@@ -1604,7 +1604,7 @@ private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onBindViewHolder(final MyViewHolder holder, final int position) {
-            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(position).getNoti_profile_pic()).into(holder.imageView);
+            Picasso.with(mContext).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+itemList_rider.get(position).getNoti_profile_pic()).into(holder.imageView);
            // holder.imageView.setImageResource(horizontalList.get(position).imageId);
      //       holder.txtview.setText(horizontalList.get(position).txt);
 

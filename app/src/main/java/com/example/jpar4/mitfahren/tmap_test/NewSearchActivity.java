@@ -302,12 +302,12 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
             /*헤더 이미지 변경*/
            // Picasso.with(getActivity()).cache.clear();
-            Picasso.with(this).invalidate("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
-            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
-        //    Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
+            Picasso.with(this).invalidate("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
+            Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+        //    Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
             //nav_header_profile_img
 
-            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
+            Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
 
         }else{
              /*해더 네임 이메일 변경*/
@@ -316,7 +316,7 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
 
             /*헤더 이미지 변경*/
              nav_header_profile_img.setImageResource(R.mipmap.ic_person);
-//            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+//            Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
             //nav_header_profile_img
 
 
@@ -535,14 +535,14 @@ public class NewSearchActivity extends AppCompatActivity implements NavigationVi
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_name)).setText(app.getUser_name());
             ((TextView)nav_Header.findViewById(R.id.nav_header_tv_email)).setText(app.getUser_email());
              /*헤더 이미지 변경*/
-            //Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
             //nav_header_profile_img
-            Picasso.with(this).invalidate("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
-            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
-            //    Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
+            Picasso.with(this).invalidate("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
+            Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).into(nav_header_profile_img);
+            //    Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).networkP‌​olicy(NetworkPolicy.‌​NO_CACHE).into(nav_header_profile_img)
             //nav_header_profile_img
 
-            Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
+            Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo()).skipMemoryCache().into(nav_header_profile_img);
 
         }else{ //로그아웃상태일때
                   /*해더 네임 이메일 변경*/
@@ -1523,7 +1523,7 @@ public float getZoomForMetersWide(double desiredMeters) {
             actv_search_arrive.setTextColor(Color.parseColor("#d4e6213b"));
             actv_search_start.setTextColor(Color.parseColor("#000000"));
             tv_helpingText.setVisibility(View.VISIBLE);
-            tv_helpingText.setText("운전자 검색 버튼을 누르면 연락가능한 운전자를 보여줍니다");
+            tv_helpingText.setText("카풀 정보 검색 버튼을 누르면 연락가능한 카풀 정보를 보여줍니다");
         }
 
         else{// 완료 아닐 때
@@ -1770,8 +1770,8 @@ public float getZoomForMetersWide(double desiredMeters) {
                             mClusterManager.setRenderer(new DriverInfoRenderer(getApplicationContext(), mGoogleMap, mClusterManager));
 
 
-                            SimpleDateFormat old_time_format = new SimpleDateFormat("hh:mm:ss");
-                            SimpleDateFormat new_time_format = new SimpleDateFormat("hhmmss");
+                            SimpleDateFormat old_time_format = new SimpleDateFormat("HH:mm:ss");
+                            SimpleDateFormat new_time_format = new SimpleDateFormat("HHmmss");
                             String new_time="";
                             try{
                                 Date start_time = old_time_format.parse(arr.getJSONObject(i).getString("user_start_time"));
@@ -1845,7 +1845,7 @@ public float getZoomForMetersWide(double desiredMeters) {
             /*user_email,user_name,user_pwd,user_age,user_sex*/
                     //  String user_email = (String) params[0];
 
-                    String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/testgetalldriverinfo.php";
+                    String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/testgetalldriverinfo.php";
                     ///  String postParameters = "user_email=" + user_email;
 
 

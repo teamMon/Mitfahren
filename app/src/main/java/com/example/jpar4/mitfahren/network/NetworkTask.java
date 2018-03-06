@@ -57,7 +57,7 @@ public class NetworkTask extends Thread {
         super.run();
         try {
             //socket = new Socket("127.0.0.1", 7777);
-            socket = new Socket("52.78.6.238", 7777);
+            socket = new Socket("13.124.251.123", 7777);
             //System.out.println("서버 연결됨.");
             Log.e("ddd msg", "서버 연결됨.");
 

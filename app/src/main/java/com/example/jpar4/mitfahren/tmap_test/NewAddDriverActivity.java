@@ -269,7 +269,7 @@ public class NewAddDriverActivity extends AppCompatActivity {
             String user_car_photo = (String)params[8];*/
             //  String user_photo = foloer_name+"/"+foloer_name.substring(0,foloer_name.lastIndexOf("@"))+imagePath.substring(imagePath.lastIndexOf(".")); // 폴더명+ "/" + 파일명+ 확장자
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/add_driver_insert_inspect.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/add_driver_insert_inspect.php";
             String postParameters =
                     "user_email=" + user_email
                             + "&user_start_date=" + user_start_date;

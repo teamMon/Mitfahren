@@ -181,8 +181,8 @@ public class NewUserPageActivity extends AppCompatActivity implements View.OnCli
             tv_user_info_sex.setText(user_sex);
             tv_user_info_total_rider.setText(user_drive_num + " 회");
             tv_user_info_total_riding.setText(user_ride_num + " 회");
-            Picasso.with(mContext).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + user_photo).into(iv_user_info_pic);
-
+            Picasso.with(mContext).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + user_photo).into(iv_user_info_pic);
+//  http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/a@acom/a.jpg
                 /*사용자와 등록한 사람정보가 같을 때만 사용자 변경버튼 보여줌*/
                 if(!app.isLoginOK()){
                     btn_user_info_pic_edit.setVisibility(View.GONE);
@@ -209,7 +209,7 @@ public class NewUserPageActivity extends AppCompatActivity implements View.OnCli
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String user_email = (String) params[0];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/get_user_info.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/get_user_info.php";
             String postParameters = "user_email=" + user_email;
 
 
@@ -454,7 +454,7 @@ public class NewUserPageActivity extends AppCompatActivity implements View.OnCli
 
             if (aBoolean){
                 Toast.makeText(getApplicationContext(), R.string.string_upload_success, Toast.LENGTH_LONG).show();
-                Picasso.with(mContext).invalidate("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
+                Picasso.with(mContext).invalidate("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+app.getUser_photo());
              //   PicassoClear.clearImageDiskCache(mContext);
 
 

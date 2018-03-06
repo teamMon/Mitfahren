@@ -236,7 +236,7 @@ public class NewNotiActivity extends AppCompatActivity {
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             //  String user_email = (String) params[0];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new.php";
             ///  String postParameters = "user_email=" + user_email;
 
 
@@ -330,7 +330,7 @@ public class NewNotiActivity extends AppCompatActivity {
             String accept_cancel = (String) params[2];
 
             Log.e("ddd", carpool_id+sender_email+accept_cancel);
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
             String postParameters = "carpool_id="+carpool_id+"&sender_email="+sender_email+"&accept_cancel="+accept_cancel;
 
 

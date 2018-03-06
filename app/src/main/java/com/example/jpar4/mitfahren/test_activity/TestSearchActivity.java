@@ -52,7 +52,7 @@ public class TestSearchActivity extends AppCompatActivity {
         * */
       /*  webView.loadUrl("http://codeman77.ivyro.net/getAddress.php");*/
 
-        webView.loadUrl("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/getAddress.php");
+        webView.loadUrl("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/getAddress.php");
     }
 
     private class AndroidBridge {

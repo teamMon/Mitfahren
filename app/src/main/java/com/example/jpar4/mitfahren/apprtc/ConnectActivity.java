@@ -212,7 +212,7 @@ public class ConnectActivity extends Activity {
       roomEditText.requestFocus();
       roomEditText.setText(room_ID);
       profile_pic = (ImageView) findViewById(R.id.profile_pic);
-      Picasso.with(this).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/" + profile_pic_string).into(profile_pic);
+      Picasso.with(this).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/" + profile_pic_string).into(profile_pic);
       profile_name = (TextView) findViewById(R.id.profile_name);
       profile_name.setText(prfile_name_string);
        btn_disconnect = (ImageView)findViewById(R.id.disconnect_button);

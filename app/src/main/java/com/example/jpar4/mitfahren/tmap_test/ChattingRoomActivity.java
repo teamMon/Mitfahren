@@ -847,7 +847,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String carpool_id = (String) params[0];
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new_for_chatting.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/carpool_apply_join_user_info_new_for_chatting.php";
             String postParameters = "carpool_id=" + carpool_id;
 
 
@@ -963,7 +963,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
             String chatter_pic = (String) params[3];
             String room_title = (String) params[4];
 
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/invitechatter.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/invitechatter.php";
            // String postParameters = "carpool_id=" + carpool_id;
             String postParameters = "carpool_id="+carpool_id+"&chatter_name="+chatter_name+"&chatter_email="+chatter_email+"&chatter_pic="+chatter_pic+"&room_title="+room_title;
 
@@ -1076,7 +1076,7 @@ public class ChattingRoomActivity extends FragmentActivity implements View.OnCli
 
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String carpool_id = (String) params[0];
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/getcurrentchatter.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/getcurrentchatter.php";
             String postParameters = "carpool_id=" + carpool_id;
 
 

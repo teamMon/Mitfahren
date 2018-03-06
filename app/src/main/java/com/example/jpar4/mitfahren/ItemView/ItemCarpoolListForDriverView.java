@@ -101,7 +101,7 @@ public class ItemCarpoolListForDriverView extends LinearLayout implements View.O
 
         item_new_driver_info=item;
         //iv_driver_info_main
-       Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_new_driver_info.getUser_car_photo()).into(iv_item_carpool_info_main);
+       Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+item_new_driver_info.getUser_car_photo()).into(iv_item_carpool_info_main);
         tv_item_carpool_info_current_people.setText("인원 : " + item_new_driver_info.getUser_having_rider()+ " / " +item_new_driver_info.getUser_with_poeple());
         //TEST CODE
         tv_item_carpool_info_date.setText(item_new_driver_info.getUser_start_date());
@@ -268,7 +268,7 @@ public class ItemCarpoolListForDriverView extends LinearLayout implements View.O
             String accept_cancel = (String) params[2];
 
             Log.e("ddd", carpool_id+sender_email+accept_cancel);
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/update_driver_info.php";
             String postParameters = "carpool_id="+carpool_id+"&sender_email="+sender_email+"&accept_cancel="+accept_cancel;
 
 
@@ -363,7 +363,7 @@ public class ItemCarpoolListForDriverView extends LinearLayout implements View.O
             String car_pic = (String) params[2];
 
             Log.e("ddd", carpool_id+master_email+car_pic);
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/chatting_room_insert.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/chatting_room_insert.php";
             String postParameters = "carpool_id="+carpool_id+"&master_email="+master_email+"&car_pic="+car_pic;
 
 

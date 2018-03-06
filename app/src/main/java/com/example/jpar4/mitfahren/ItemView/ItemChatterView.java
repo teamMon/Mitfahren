@@ -61,7 +61,7 @@ public class ItemChatterView extends LinearLayout implements View.OnClickListene
 
     public void setItem_Invitable(Item_Invitable item){
         item_invitable = item;
-        Picasso.with(context).load("http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/upload/"+item_invitable.getUser_pic()).into(invitable_user_pic);
+        Picasso.with(context).load("http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/upload/"+item_invitable.getUser_pic()).into(invitable_user_pic);
         invitable_user_name.setText(item_invitable.getUser_name());
         invitable_user_check.setVisibility(GONE); // 무조건 안보이게
 

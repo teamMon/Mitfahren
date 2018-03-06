@@ -29,7 +29,7 @@ public class ChattingImageUploader {
      * You will find this file in php_upload folder in this project
      * You can copy that folder and paste in your htdocs folder...
      */
-    private static final String URL_UPLOAD_IMAGE = "http://52.78.6.238/upload/chatting_image_upload.php";
+    private static final String URL_UPLOAD_IMAGE = "http://13.124.251.123/upload/chatting_image_upload.php";
 
     /*public static JSONObject uploadImage(String sourceImageFile) {*/
     public static JSONObject uploadChattingImage(Bitmap imageBitmap, String img_file_name) {// sourceImageFile = imagePath

@@ -267,7 +267,7 @@ public class ChattingRoomLIstActivity extends AppCompatActivity implements Adapt
 
             /*user_email,user_name,user_pwd,user_age,user_sex*/
             String chatter_email = (String) params[0];
-            String serverURL = "http://ec2-52-78-6-238.ap-northeast-2.compute.amazonaws.com/db/getChattingRoomList.php";
+            String serverURL = "http://ec2-13-124-251-123.ap-northeast-2.compute.amazonaws.com/db/getChattingRoomList.php";
             String postParameters = "chatter_email=" + chatter_email;
 
 

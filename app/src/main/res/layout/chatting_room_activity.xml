@@ -82,7 +82,8 @@ android:visibility="gone"
                     android:id="@+id/send_pic"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:src="@mipmap/ic_plus"
+                    android:src="@mipmap/ic_plus2"
+                    android:background="@drawable/blue_border_button"
                     />
                 <!--
                       android:layout_alignParentStart="true"
@@ -107,7 +108,10 @@ android:visibility="gone"
                     android:id="@+id/btn_text_send"
                     android:text="전송"
                     android:layout_width="70dp"
-                    android:layout_height="50dp" />
+                    android:layout_height="50dp"
+                    android:background="@drawable/blue_border_button"
+                    android:textColor="@color/gomalan_bule_bg"
+                    />
 
             </RelativeLayout>
         </FrameLayout>
